@@ -18,4 +18,4 @@
 ### Commit Add OWASP ASVS 5.0.0 directives and checklist
 #### Liam's Agent
 - Claude generated `docs/asvs/` (ASVS 5.0.0 L1/L2 checklist per chapter, from the official CSV; `assignment-mapping.md` mapping ASSIGNMENT.md SR/FR/NFR items to ASVS IDs), and added the security section and routing table to `AGENTS.md` and `.github/copilot-instructions.md`.
-- The ASVS ID mappings are Claude's judgment and have not yet been reviewed by the team.
+- The ASVS ID mappings in `assignment-mapping.md` are Claude's judgment. Liam spot-checked the file and accepted it with no changes. The per-chapter files are unmodified CSV output.
