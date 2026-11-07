@@ -35,19 +35,39 @@ npm test
 
 TODO: decide and record here: database/ORM, test runner, SAST tool, DAST tool.
 
-## Security rules (non-negotiable)
-- Check authentication and RBAC inside every route handler and Server Action; never rely on middleware alone (SR-1, SR-4, SR-5).
-- Users cannot change their own role (SR-6).
-- Validate all input with a schema (SR-7). Use parameterized queries or ORM calls only, never string-built SQL (SR-8).
-- Session cookies: `httpOnly`, `secure`, `sameSite` (SR-3). Hash passwords with bcrypt or argon2 (SR-2).
-- Secrets only in `.env*`, never committed; keep `.env.example` with placeholders (SR-14).
-- Audit log is append-only and records userId, timestamp, action, targetId. It never contains passwords, tokens, or incident descriptions (FR-11, FR-12, SR-9 to SR-11).
-- Generic errors to clients; details to server logs only (NFR-2, SR-12, SR-13).
+## Security (non-negotiable)
+Target: **OWASP ASVS 5.0.0 Level 2**. The assignment's SR/FR/NFR requirements are mandatory and **override ASVS** when stricter or in conflict. Cite both in code comments, commits, and PRs (e.g. `SR-4, ASVS V8.2.1`).
+
+**Before writing security-relevant code**, read `docs/asvs/assignment-mapping.md` plus the chapter file(s) for your area:
+
+| Area | Read |
+|---|---|
+| Login, passwords, credentials | V06, V11 |
+| Sessions, cookies, logout | V07, V03 |
+| Roles, access control | V08 |
+| Forms, input, DB queries, output | V01, V02 |
+| API routes, headers, CORS | V04, V03 |
+| File uploads | V05 |
+| Audit log, errors | V16 |
+| Config, secrets, TLS, data handling | V13, V12, V14 |
+| Dependencies, general coding | V15 |
+
+When a change satisfies a requirement, set it to `Done` with evidence (file path or test name) in the same commit. Never mark `Done` without evidence.
+
+Key rules (full lists in `docs/asvs/`):
+- Check authentication and RBAC inside every route handler and Server Action; never rely on middleware alone (SR-1, SR-4, SR-5; ASVS V8.2.1, V8.3.1).
+- Users cannot change their own role (SR-6; V15.3.3).
+- Validate all input with a schema (SR-7; V2.2.1, V2.2.2). Parameterized queries or ORM calls only, never string-built SQL (SR-8; V1.2.4).
+- Session cookies: `httpOnly`, `secure`, `sameSite` (SR-3; V3.3.1, V3.3.2, V3.3.4). Hash passwords with an approved KDF such as argon2id or bcrypt (SR-2; V11.4.2).
+- Secrets only in `.env*`, never committed; keep `.env.example` with placeholders (SR-14; V13.3.1).
+- Audit log is append-only and records userId, timestamp, action, targetId. It never contains passwords, tokens, or incident descriptions (FR-11, FR-12, SR-9 to SR-11; V16.2.1, V16.2.5, V16.4.2).
+- Generic errors to clients; details to server logs only (NFR-2, SR-12, SR-13; V16.5.1, V16.3.4).
 
 ## Layout
 - `ASSIGNMENT.md`: spec
 - `AI-USAGE-REPORT.md`: AI usage log
 - `docs/`: report deliverables
+- `docs/asvs/`: security requirements checklist (assignment mapping + ASVS chapters)
 - App code: repo root (Next.js `app/`, `src/`) once created
 
 ## Git
