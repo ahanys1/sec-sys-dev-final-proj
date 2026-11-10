@@ -33,7 +33,11 @@ npm run lint
 npm test
 ```
 
-TODO: decide and record here: database/ORM, test runner, SAST tool, DAST tool.
+`make help` lists the same tasks as targets (`make dev`, `make test`, `make check` = lint + test + build + audit). Add new common tasks to the `Makefile`.
+
+Test runner: Vitest (`tests/**/*.test.ts`, `@/*` alias works in tests).
+
+TODO: decide and record here: database/ORM, SAST tool, DAST tool.
 
 ## Security (non-negotiable)
 Target: **OWASP ASVS 5.0.0 Level 2**. The assignment's SR/FR/NFR requirements are mandatory and **override ASVS** when stricter or in conflict. Cite both in code comments, commits, and PRs (e.g. `SR-4, ASVS V8.2.1`).
