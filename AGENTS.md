@@ -38,6 +38,14 @@ npm test
 Test runner: Vitest (`tests/**/*.test.ts`, `@/*` alias works in tests).
 
 TODO: decide and record here: database/ORM, SAST tool, DAST tool.
+Decided (see `docs/threat-model.md` §1.1):
+- Database: PostgreSQL in Docker (local); future target is internet-facing AWS (e.g. RDS).
+- Sessions: server-side sessions stored in the DB; the cookie holds only an opaque random token (`__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`).
+- Writes go through Route Handlers (`app/api/**/route.ts`) only. **Do not use Server Actions** (`"use server"`).
+- Passwords: admin creates/resets accounts with a one-time temporary password; users must change it at next login; users change their own password with their current password.
+- Any new route or page must be added to the entry point inventory in `docs/threat-model.md` §1.4.
+
+TODO: decide and record here: ORM, test runner, SAST tool, DAST tool.
 
 ## Security (non-negotiable)
 Target: **OWASP ASVS 5.0.0 Level 2**. The assignment's SR/FR/NFR requirements are mandatory and **override ASVS** when stricter or in conflict. Cite both in code comments, commits, and PRs (e.g. `SR-4, ASVS V8.2.1`).
