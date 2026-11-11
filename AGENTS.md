@@ -33,6 +33,11 @@ npm run lint
 npm test
 ```
 
+`make help` lists the same tasks as targets (`make dev`, `make test`, `make check` = lint + test + build + audit). Add new common tasks to the `Makefile`.
+
+Test runner: Vitest (`tests/**/*.test.ts`, `@/*` alias works in tests).
+
+TODO: decide and record here: database/ORM, SAST tool, DAST tool.
 Decided (see `docs/threat-model.md` §1.1):
 - Database: PostgreSQL in Docker (local); future target is internet-facing AWS (e.g. RDS).
 - Sessions: server-side sessions stored in the DB; the cookie holds only an opaque random token (`__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`).
