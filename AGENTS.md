@@ -22,6 +22,9 @@ Record every human edit to AI output, especially security fixes. The commit hash
 - Team members' names appear **only** in `docs/cover-page.md`; every other document uses the team number only.
 - Never use real personal data in code, seeds, or tests (ASSUMP-2).
 
+## SDL
+The project follows the Microsoft SDL. `docs/sdl.md` tracks the 17 practices and the current phase. Check it before starting work; don't write feature code for an area until the threat model covers it. When work moves a practice forward, update its row (status and evidence) in the same commit. Follow the banned-functions list there (Practice #9) once the team confirms it.
+
 ## Stack and commands
 Next.js (App Router) + TypeScript.
 
