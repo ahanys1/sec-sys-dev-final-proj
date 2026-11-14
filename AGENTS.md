@@ -46,6 +46,7 @@ Decided (see `docs/threat-model.md` §1.1):
 - Sessions: server-side sessions stored in the DB; the cookie holds only an opaque random token (`__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`).
 - Writes go through Route Handlers (`app/api/**/route.ts`) only. **Do not use Server Actions** (`"use server"`).
 - Passwords: admin creates/resets accounts with a one-time temporary password; users must change it at next login; users change their own password with their current password.
+- Secrets: dotenvx-encrypted env files (threat-model D-4).
 - Any new route or page must be added to the entry point inventory in `docs/threat-model.md` §1.4.
 
 TODO: decide and record here: ORM, test runner, SAST tool, DAST tool.
@@ -74,7 +75,7 @@ Key rules (full lists in `docs/asvs/`):
 - Users cannot change their own role (SR-6; V15.3.3).
 - Validate all input with a schema (SR-7; V2.2.1, V2.2.2). Parameterized queries or ORM calls only, never string-built SQL (SR-8; V1.2.4).
 - Session cookies: `httpOnly`, `secure`, `sameSite` (SR-3; V3.3.1, V3.3.2, V3.3.4). Hash passwords with an approved KDF such as argon2id or bcrypt (SR-2; V11.4.2).
-- Secrets only in `.env*`, never committed; keep `.env.example` with placeholders (SR-14; V13.3.1).
+- Secrets: dotenvx-encrypted `.env` is committed; `.env.keys` and `DOTENV_PRIVATE_KEY` never are (gitignored, `.dockerignore`d, not in images). Keep `.env.example` with placeholders. On AWS use Secrets Manager (SR-14; V13.3.1).
 - Audit log is append-only and records userId, timestamp, action, targetId. It never contains passwords, tokens, or incident descriptions (FR-11, FR-12, SR-9 to SR-11; V16.2.1, V16.2.5, V16.4.2).
 - Generic errors to clients; details to server logs only (NFR-2, SR-12, SR-13; V16.5.1, V16.3.4).
 
