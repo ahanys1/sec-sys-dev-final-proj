@@ -50,3 +50,10 @@
 - Liam resolved D-2 as option B (bounded admin settings plus incident categories) and chose which settings to include from Claude's suggestions. Claude added entry points EP-20 to EP-23, the §1.4.1 settings table (defaults and allowed ranges are Claude's suggestions), the new data stores and audit actions, and updated R-9, D-5, and the §1.9 counts.
 - Claude Cowork, at Liam's request, added the Part 2 (Threat Model, Practice #7) outline to `docs/threat-model.md`: DFD, STRIDE per element, DREAD and bug bar, misuse cases and tests. It is an outline only, to be filled in next.
 - Liam reviewed `docs/threat-model.md` in full.
+
+### Commit Revise OWASP principles for design-phase team review
+#### Jonathan's Agent
+- Codex revised `docs/owasp-design-principles.md` against ASSIGNMENT.md, the current attack-surface design, and Lesson 17 slide 26, preserving the original ten-section structure and requirement/verification format.
+- Corrected SR-14 to prohibit unencrypted secret storage; clarified administrator viewing/commenting, reviewer-only status/classification, and the prohibition on self-role changes for all roles. Distinguished role separation from independent approval and planned controls from verified implementation.
+- Flagged unresolved local secrets/key handling and audit-failure/transaction coverage; corrected error/logging and SR-16 descriptions. Verification activities remain plans, not reported results.
+- Human direction: after an initial expanded AI revision, the developer requested a narrower revision retaining the original format. Team review and any subsequent human/security edits remain pending; no human acceptance or test completion is claimed.
