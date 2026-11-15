@@ -12,7 +12,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 
 ## Current phase
 
-**Design** (as of 2026-11-10). #6 is in review; #7 Threat Modeling is next. #8 (tooling) has started in parallel; feature code waits until #7 covers that area (see [threat-model.md](threat-model.md) Part 2).
+**Design** (as of 2026-11-14). #6 is done; #7 Threat Modeling is in review. #8 (tooling) has started in parallel; feature code waits until #7 covers that area (see [threat-model.md](threat-model.md) Part 2).
 
 ## Practice tracker
 
@@ -23,8 +23,8 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 3 | Requirements | Quality Gates / Bug Bars | Minimum release threshold and which defects block release. | TODO: team to confirm [proposal below](#quality-gates-and-bug-bar-practice-3) | |
 | 4 | Requirements | Security and Privacy Risk Assessment | Answer the Lesson 04 SRA/PRA questions; data sensitivity levels. | In progress: team to confirm [draft below](#security-and-privacy-risk-assessment-practice-4) | `ASSIGNMENT.md` §6.2 |
 | 5 | Design | Design Requirements | Design doc showing how every FR/NFR/SR is met, with a Requirements Traceability Matrix (RTM). Must include the decisions from threat-model §1.1 and the D-2 additions (settings, categories). | TODO | `docs/design.md` (stub); architecture decisions in `docs/threat-model.md` §1.1 |
-| 6 | Design | Attack Surface Reduction | Entry point inventory, trust boundaries, reduction decisions. | In review | `docs/threat-model.md` Part 1 (PR `feature/attack-surface-analysis`) |
-| 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | Next | Checklist in `docs/threat-model.md` Part 2; `docs/stride.md`; `docs/use-misuse-cases.md` |
+| 6 | Design | Attack Surface Reduction | Entry point inventory, trust boundaries, reduction decisions. | Done | `docs/threat-model.md` Part 1 (merged, PR #24) |
+| 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In review: misuse cases and tests are with another engineer | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; `docs/use-misuse-cases.md` pending |
 | 8 | Implementation | Use Approved Tools | Fixed, version-pinned tool list. | In progress | [Approved tools below](#approved-tools-practice-8); scaffold on `feature/nextjs-scaffold` |
 | 9 | Implementation | Deprecate Unsafe Functions | Banned APIs for TypeScript/Next.js, enforced by lint and CI. | TODO: team to confirm [proposal below](#banned-functions-practice-9) | |
 | 10 | Implementation | Static Analysis | SAST in CI on every PR (AC-3). | TODO: pick tool | `docs/security-testing.md` |
@@ -113,7 +113,8 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | Test runner | TODO (the scaffold branch includes a Vitest config) | TODO |
 | SAST | TODO (e.g. Semgrep, GitHub CodeQL, eslint security plugins) | TODO |
 | DAST / fuzzing | TODO (e.g. OWASP ZAP) | TODO |
-| Threat modeling | TODO (e.g. OWASP Threat Dragon) | TODO |
+| Threat modeling | Mermaid DFDs, STRIDE and DREAD in markdown | Chosen |
+| Secrets (SR-14) | dotenvx (encrypted `.env`); AWS Secrets Manager | Chosen |
 
 ## Banned functions (Practice #9)
 
@@ -165,3 +166,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | Date | Change |
 |---|---|
 | 2026-11-10 | Initial SDL tracker (AI-drafted; see AI-USAGE-REPORT.md). |
+| 2026-11-14 | #6 marked Done; #7 in review; secrets and threat modeling tools recorded. |
