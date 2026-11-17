@@ -63,3 +63,11 @@
 - Corrected SR-14 to prohibit unencrypted secret storage; clarified administrator viewing/commenting, reviewer-only status/classification, and the prohibition on self-role changes for all roles. Distinguished role separation from independent approval and planned controls from verified implementation.
 - Flagged unresolved local secrets/key handling and audit-failure/transaction coverage; corrected error/logging and SR-16 descriptions. Verification activities remain plans, not reported results.
 - Human direction: after an initial expanded AI revision, the developer requested a narrower revision retaining the original format. Team review and any subsequent human/security edits remain pending; no human acceptance or test completion is claimed.
+
+### Commit Draft SAST methodology and threat-based testing plan
+### Jonathan's Agent
+- Reviewed the team's `docs/stride.md` and `docs/threat-model.md` to identify security threats relevant to Static Application Security Testing (SAST).
+- Assisted in drafting the SAST methodology for `docs/security-testing.md`, including objectives, tool selection, analysis procedures, findings documentation, and limitations.
+- Mapped proposed source-code inspections to STRIDE threats, including stored XSS (T-29), SQL injection (T-38), privilege escalation (T-19), mass assignment (T-17), audit tampering (T-33), framework authorization bypass (T-43/T-45), secrets exposure (T-53), and AI-generated vulnerabilities (T-60).
+- Suggested Semgrep as the primary SAST tool, with ESLint and TypeScript checks as supplementary analysis. Distinguished SAST from dependency vulnerability scanning (`npm audit`), DAST, and manual security testing.
+- Human direction: the developer requested a threat-based testing methodology aligned with the team's design documents and assignment requirements. The proposed testing activities remain unverified; no SAST scans, vulnerability confirmations, or remediation testing have been completed.
