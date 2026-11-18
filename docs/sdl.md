@@ -104,6 +104,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 
 | Purpose | Tool | Status |
 |---|---|---|
+| Node runtime | Node 24 LTS; patch version pending | Chosen; `package.json`, `.nvmrc` |
 | Framework | Next.js (App Router) + TypeScript, version pinned with a lockfile | Chosen |
 | Database | PostgreSQL in Docker | Chosen |
 | AI assistance | GitHub Copilot (CONST-3); other agents follow `AGENTS.md` | Chosen |
@@ -169,3 +170,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-10 | Initial SDL tracker (AI-drafted; see AI-USAGE-REPORT.md). |
 | 2026-11-14 | #6 marked Done; #7 in review; secrets and threat modeling tools recorded. |
 | 2026-11-17 | Added the use and misuse case test plan as evidence for #7 and preparation for #11. |
+| 2026-11-18 | Addressed PR #30 review with ASVS traceability and Node 24 runtime evidence. |

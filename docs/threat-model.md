@@ -172,13 +172,13 @@ These exist because of Next.js, not because we wrote a route.
 | NH-7 | Container image and host | Runs as non-root; `.dockerignore` excludes `.git`, `.env*`, tests | Same image; no SSH (use SSM Session Manager) | V13.4.1, V15.2.3 |
 | NH-8 | Supply chain: npm packages, GitHub repo, CI, Copilot output | Committed lockfile, `npm ci`, `npm audit` / Dependabot; branch protection and PR review on `main`; every AI change reviewed and logged in AI-USAGE-REPORT.md | Same | CONST-2, CONST-3; V15.1.1, V15.1.2, V15.2.1 |
 | NH-9 | Browser-side state | Only the session cookie; nothing in localStorage/sessionStorage | Same | V14.3.3 |
-| NH-10 | Edge tier (ALB/CloudFront) | n/a (local TLS proxy recommended for DAST, see D-7) | TLS 1.2+ only; HTTP→HTTPS redirect for pages only; app trusts `X-Forwarded-For` only from the ALB (affects rate limiting); optional AWS WAF | V12.1.1, V12.2.1, V4.1.2, V4.1.3, V15.3.4 |
+| NH-10 | Edge tier (ALB/CloudFront) | Caddy local TLS proxy (D-7), certificate and trusted-proxy configuration pending | TLS 1.2+ only; HTTP→HTTPS redirect for pages only; app trusts `X-Forwarded-For` only from the ALB (affects rate limiting); optional AWS WAF | V12.1.1, V12.2.1, V4.1.2, V4.1.3, V15.3.4 |
 
 ### 1.7 Assets and data stores
 
 | Store | Fields | Highest sensitivity | Who can read through the app |
 |---|---|---|---|
-| `users` | id, username, role, active, must_change_password, password_hash (argon2id), temp_password_expires_at, failed_login_count, locked_until | HS (hash) | Admin (never the hash) |
+| `users` | id, username, role, active, must_change_password, password_hash (argon2id), temp_password_expires_at | HS (hash) | Admin (never the hash) |
 | `sessions` | token_hash, user_id, created_at, last_seen_at, expires_at | HS | Nobody through an endpoint |
 | `incidents` | id, title, description, status, category_id, reporter_id, timestamps | Sensitive (description) | Reviewer, Admin; the reporter sees only title, status, and date of their own reports (EP-19) |
 | `comments` | id, incident_id, author_id, body, created_at | Sensitive (classified like descriptions) | Reviewer, Admin |
@@ -232,7 +232,7 @@ At Practice #13, compare the built app's actual routes (`app/**/route.ts` and pa
 | D-3 | Can admins change incident status? FR-8 names only reviewers. | **Resolved 2026-11-10: no.** Only reviewers change status (FR-8); admins can view (FR-10) and comment (FR-9). EP-10 returns 403 to admins. |
 | D-4 | **SR-14 conflict:** AGENTS.md says secrets live in `.env*`, but SR-14 says secrets must not be stored unencrypted. A plaintext `.env` fails SR-14. | **Resolved 2026-11-14: dotenvx** (see Part 2, Step 3). Encrypted `.env` committed, key outside the repo; AWS: Secrets Manager. AGENTS.md rule updated. |
 | D-5 | Session lifetimes and concurrent sessions (V7.1.1, V7.1.2, V7.3.1, V7.3.2) | **Resolved 2026-11-14.** Defaults and ranges are in §1.4.1; the justification and the concurrent-session policy (max 5 per user) are in Part 2, Step 3. |
-| D-6 | ORM / query layer (AGENTS.md TODO) | **Resolved: Prisma ORM.** Exact package versions and adapter remain pending; ban the raw "unsafe" query APIs (e.g. `$queryRawUnsafe`) with a lint or CI grep (SR-8). |
+| D-6 | ORM / query layer (AGENTS.md TODO) | **Resolved: Prisma ORM.** Exact package versions and adapter remain pending; ban the raw "unsafe" query APIs (`$queryRawUnsafe` and `$executeRawUnsafe`) with a lint or CI grep (SR-8). |
 | D-7 | TLS locally. Browsers allow `Secure` cookies on `http://localhost`, but DAST and the demo should mirror production. | **Resolved: Caddy.** Put the local TLS reverse proxy in `docker-compose.yml` so cookies, HSTS, and redirects behave as they will on AWS. |
 
 ---
@@ -336,7 +336,7 @@ flowchart TB
 | DS1 to DS7 | Data store | `users`, `sessions`, `incidents`, `comments`, `categories`, `settings`, `audit_log` | §1.7 |
 | DS8 | Data store | Application logs | NH-6 |
 | DS9 | Data store | Secrets store (dotenvx, Secrets Manager) | NH-3 |
-| DS10 | Data store | `login_attempts` (per-IP rate-limit counters) | EP-02 (DC-4) |
+| DS10 | Data store | `login_attempts` (IP and submitted-username counters and lockout state) | EP-02 (DC-4) |
 
 **Data flows**
 
@@ -450,3 +450,4 @@ Practice #13 re-checks all of this against the built system.
 | 2026-11-10 | #6 Attack Surface Reduction | Resolved D-1 (added EP-19) and D-3 (admins can't change status). |
 | 2026-11-10 | #6 Attack Surface Reduction | Resolved D-2 option B: added EP-20 to EP-23, §1.4.1 settings limits, `settings` and `categories` stores; updated R-9 and counts. |
 | 2026-11-14 | #7 Threat Modeling | Part 2: DFDs, STRIDE analysis (`stride.md`), DREAD and bug bar, D-4 and D-5 resolved. Design changes from the analysis applied to Part 1: C-11, C-4 and C-8 tightened, EP-02, EP-06, FW-1, NH-3, NH-4, and §1.7 (`login_attempts`). |
+| 2026-11-18 | #5 Design review | Aligned login-attempt storage, database grants, and resolved Prisma/Caddy decisions with the design. |

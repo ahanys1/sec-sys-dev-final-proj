@@ -81,3 +81,10 @@
 - Codex addressed reviewer corrections to design and threat-model consistency, scoped database deletion, encrypted-env tracking, middleware, selected tools, and team 13 identification.
 - Reviewer recommendations for unresolved implementation choices remain proposals awaiting developer answers. Copilot usage evidence remains pending and is not claimed.
 - Human direction supplied team number 13. Subsequent human/security edits remain pending.
+
+
+### Commit docs: complete design review and synchronize questions (SR-8, NFR-8)
+#### Alex's Agent
+- Codex added ASVS references to the design traceability matrix, finished framework and database documentation corrections, and set Node 24 in package engines, lockfile metadata, and .nvmrc following review.
+- Updated open questions to remove decided items and request factual Copilot usage evidence. Exact dependency versions and unapproved reviewer recommendations remain pending developer answers.
+- Human direction keeps PR #29 open and PR #30 stacked on it. Team identification remains 13. No Copilot activity is invented.
