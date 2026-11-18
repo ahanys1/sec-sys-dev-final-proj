@@ -20,15 +20,15 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 |---|---|---|---|---|---|
 | 1 | Training | Provide Training | Team: CS 5343 lessons on secure design, threat modeling, ASVS, AI-assisted coding. AI tools are "trained" too: every agent reads the security rules before writing code. | Done | Course Lessons 01 to 21; `AGENTS.md`; `.github/copilot-instructions.md` |
 | 2 | Requirements | Security Requirements | SR-1 to SR-16, plus OWASP ASVS 5.0.0 Level 2 as the target, mapped to the assignment requirements. | Done | `ASSIGNMENT.md` §5; `docs/asvs/assignment-mapping.md`; `docs/asvs/owasp-top10-mapping.md` |
-| 3 | Requirements | Quality Gates / Bug Bars | Minimum release threshold and which defects block release. | TODO: team to confirm [proposal below](#quality-gates-and-bug-bar-practice-3) | |
+| 3 | Requirements | Quality Gates / Bug Bars | Minimum release threshold and which defects block release. | In progress: gates approved, CI enforcement pending | `docs/design.md` §7.1; [Quality gates below](#quality-gates-and-bug-bar-practice-3) |
 | 4 | Requirements | Security and Privacy Risk Assessment | Answer the Lesson 04 SRA/PRA questions; data sensitivity levels. | In progress: team to confirm [draft below](#security-and-privacy-risk-assessment-practice-4) | `ASSIGNMENT.md` §6.2 |
 | 5 | Design | Design Requirements | Design doc showing how every FR/NFR/SR is met, with a Requirements Traceability Matrix (RTM). Must include the decisions from threat-model §1.1 and the D-2 additions (settings, categories). | In review | `docs/design.md`; architecture decisions in `docs/threat-model.md` §1.1 |
 | 6 | Design | Attack Surface Reduction | Entry point inventory, trust boundaries, reduction decisions. | Done | `docs/threat-model.md` Part 1 (merged, PR #24) |
 | 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In review: use and misuse cases drafted, test execution pending | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; [Use and misuse cases](use-misuse-cases.md) |
 | 8 | Implementation | Use Approved Tools | Fixed, version-pinned tool list. | In progress | [Approved tools below](#approved-tools-practice-8); scaffold on `feature/nextjs-scaffold` |
 | 9 | Implementation | Deprecate Unsafe Functions | Banned APIs for TypeScript/Next.js, enforced by lint and CI. | TODO: team to confirm [proposal below](#banned-functions-practice-9) | |
-| 10 | Implementation | Static Analysis | SAST in CI on every PR (AC-3). | TODO: pick tool | `docs/security-testing.md` |
-| 11 | Verification | Dynamic Program Analysis | DAST against the running Docker app over TLS (AC-3; D-7). | TODO: select DAST tool and run verification | [Planned misuse cases](use-misuse-cases.md#misuse-cases), `docs/security-testing.md` |
+| 10 | Implementation | Static Analysis | SAST in CI on every PR (AC-3). | In progress: Semgrep CE and CodeQL selected, execution pending | `docs/design.md` §7.1; `docs/security-testing.md` |
+| 11 | Verification | Dynamic Program Analysis | DAST against the running Docker app over TLS (AC-3; D-7). | In progress: ZAP selected, execution pending | [Planned misuse cases](use-misuse-cases.md#misuse-cases), `docs/security-testing.md` |
 | 12 | Verification | Fuzz Testing | Fuzz the inputs in scope from #4 question 5. | TODO | `docs/security-testing.md` |
 | 13 | Verification | Threat Model and Attack Surface Review | Compare built routes and pages with the threat-model §1.4 inventory; update STRIDE for any change. | TODO | `docs/threat-model.md` revision history |
 | 14 | Release | Incident Response Plan | Short plan for a vulnerability or breach in this app. | TODO | [Outline below](#incident-response-plan-practice-14) |
@@ -66,16 +66,19 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 
 ## Quality gates and bug bar (Practice #3)
 
-**Proposed; team to confirm.**
+**Approved on 2026-11-18 with the reviewer-supplied answers.** Tool execution and CI enforcement remain implementation work.
 
 **Release gate.** All must be true before submission:
 
 1. Every row in `docs/asvs/assignment-mapping.md` is `Done` with evidence (AC-1, AC-2).
-2. No open High or Critical findings from SAST, DAST, or manual testing (AC-3).
+2. No open High or Critical findings from SAST, DAST, or manual testing (AC-3). Fix these before merge. Fix Medium findings by 2026-11-24 or document an accepted risk. Record Low findings.
 3. `npm audit` reports no High or Critical vulnerabilities in production dependencies.
 4. Lint, type check, and tests pass in CI on `main`.
 5. Every threat at or above the bug bar is mitigated and has a passing test.
 6. Every AI-assisted change is in `AI-USAGE-REPORT.md` (AC-4).
+7. Gitleaks is clean, and CI rejects Server Actions and a published database port.
+
+Approved tools are Semgrep CE and CodeQL for SAST, ZAP baseline in CI plus authenticated per-role scans, Dependabot, and gitleaks. `make check` remains a gate. Residual risks AR-1 through AR-8 are approved in `docs/stride.md`.
 
 **Bug bar.** Rate threats and findings with DREAD (average of the five 1 to 10 scores):
 
@@ -110,11 +113,13 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | AI assistance | GitHub Copilot (CONST-3); other agents follow `AGENTS.md` | Chosen |
 | Version control | Git + GitHub, feature branches and PRs (CONST-2) | Chosen |
 | Local TLS proxy | Caddy (D-7) | Chosen |
-| Password hashing | argon2id (or bcrypt) via a maintained library (SR-2) | Library TODO |
-| ORM / query layer | Prisma ORM (D-6); exact version and adapter pending | Chosen; see `docs/design.md` |
-| Test runner | TODO (the scaffold branch includes a Vitest config) | TODO |
-| SAST | TODO (e.g. Semgrep, GitHub CodeQL, eslint security plugins) | TODO |
-| DAST / fuzzing | TODO (e.g. OWASP ZAP) | TODO |
+| Password hashing | node-argon2, argon2id with m=19456 KiB, t=2, p=1 baseline | Chosen, implementation pending |
+| ORM / query layer | Prisma 7.x with @prisma/adapter-pg and pg (D-6), exact pins at implementation | Chosen; see `docs/design.md` |
+| Test runner | Vitest | Chosen |
+| SAST | Semgrep CE and CodeQL | Chosen, execution pending |
+| DAST | ZAP baseline in CI and authenticated per-role scans | Chosen, execution pending |
+| Dependency and secret scans | npm audit --omit=dev, Dependabot, gitleaks | Chosen, execution pending |
+| Load testing | k6, 50 VUs and workload in design §7.2 | Chosen, execution pending |
 | Threat modeling | Mermaid DFDs, STRIDE and DREAD in markdown | Chosen |
 | Secrets (SR-14) | dotenvx (encrypted `.env`); AWS Secrets Manager | Chosen |
 
@@ -171,3 +176,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-14 | #6 marked Done; #7 in review; secrets and threat modeling tools recorded. |
 | 2026-11-17 | Added the use and misuse case test plan as evidence for #7 and preparation for #11. |
 | 2026-11-18 | Addressed PR #30 review with ASVS traceability and Node 24 runtime evidence. |
+| 2026-11-18 | Recorded approved reviewer answers for tooling, gates, accepted risks, and operational design. Implementation and execution evidence remain pending. |

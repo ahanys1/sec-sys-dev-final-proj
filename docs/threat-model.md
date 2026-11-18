@@ -172,7 +172,7 @@ These exist because of Next.js, not because we wrote a route.
 | NH-7 | Container image and host | Runs as non-root; `.dockerignore` excludes `.git`, `.env*`, tests | Same image; no SSH (use SSM Session Manager) | V13.4.1, V15.2.3 |
 | NH-8 | Supply chain: npm packages, GitHub repo, CI, Copilot output | Committed lockfile, `npm ci`, `npm audit` / Dependabot; branch protection and PR review on `main`; every AI change reviewed and logged in AI-USAGE-REPORT.md | Same | CONST-2, CONST-3; V15.1.1, V15.1.2, V15.2.1 |
 | NH-9 | Browser-side state | Only the session cookie; nothing in localStorage/sessionStorage | Same | V14.3.3 |
-| NH-10 | Edge tier (ALB/CloudFront) | Caddy local TLS proxy (D-7), certificate and trusted-proxy configuration pending | TLS 1.2+ only; HTTP→HTTPS redirect for pages only; app trusts `X-Forwarded-For` only from the ALB (affects rate limiting); optional AWS WAF | V12.1.1, V12.2.1, V4.1.2, V4.1.3, V15.3.4 |
+| NH-10 | Edge tier (ALB/CloudFront) | Caddy at https://localhost with tls internal and caddy trust. One trusted proxy hop, app reachable only via Caddy. Internal HTTP hop accepted as AR-8 | TLS 1.2+ only; HTTP→HTTPS redirect for pages only; app trusts `X-Forwarded-For` only from the ALB (affects rate limiting); optional AWS WAF | V12.1.1, V12.2.1, V4.1.2, V4.1.3, V15.3.4 |
 
 ### 1.7 Assets and data stores
 
@@ -232,7 +232,7 @@ At Practice #13, compare the built app's actual routes (`app/**/route.ts` and pa
 | D-3 | Can admins change incident status? FR-8 names only reviewers. | **Resolved 2026-11-10: no.** Only reviewers change status (FR-8); admins can view (FR-10) and comment (FR-9). EP-10 returns 403 to admins. |
 | D-4 | **SR-14 conflict:** AGENTS.md says secrets live in `.env*`, but SR-14 says secrets must not be stored unencrypted. A plaintext `.env` fails SR-14. | **Resolved 2026-11-14: dotenvx** (see Part 2, Step 3). Encrypted `.env` committed, key outside the repo; AWS: Secrets Manager. AGENTS.md rule updated. |
 | D-5 | Session lifetimes and concurrent sessions (V7.1.1, V7.1.2, V7.3.1, V7.3.2) | **Resolved 2026-11-14.** Defaults and ranges are in §1.4.1; the justification and the concurrent-session policy (max 5 per user) are in Part 2, Step 3. |
-| D-6 | ORM / query layer (AGENTS.md TODO) | **Resolved: Prisma ORM.** Exact package versions and adapter remain pending; ban the raw "unsafe" query APIs (`$queryRawUnsafe` and `$executeRawUnsafe`) with a lint or CI grep (SR-8). |
+| D-6 | ORM / query layer (AGENTS.md TODO) | **Resolved: Prisma ORM.** Use Prisma 7.x with @prisma/adapter-pg and pg, pin exact versions at implementation; ban the raw "unsafe" query APIs (`$queryRawUnsafe` and `$executeRawUnsafe`) with a lint or CI grep (SR-8). |
 | D-7 | TLS locally. Browsers allow `Secure` cookies on `http://localhost`, but DAST and the demo should mirror production. | **Resolved: Caddy.** Put the local TLS reverse proxy in `docker-compose.yml` so cookies, HSTS, and redirects behave as they will on AWS. |
 
 ---
@@ -369,7 +369,7 @@ Done in [stride.md](stride.md): 64 threats, **12 High**, 47 Medium, 5 Low. Every
 
 Each threat in [stride.md](stride.md) lists its mitigations (C-x, SR/FR, ASVS) and a DREAD score.
 
-**Bug bar** (SDL Practice #3, [sdl.md](sdl.md)): DREAD average of 7.0 or more is High and must be mitigated and tested before release. Authentication bypass, privilege escalation, SQL injection, and audit tampering are High regardless (`*`). Medium must be mitigated or carry an accepted risk. The team has not yet confirmed the bug bar.
+**Bug bar** (SDL Practice #3, [sdl.md](sdl.md)): DREAD average of 7.0 or more is High and must be mitigated and tested before release. Authentication bypass, privilege escalation, SQL injection, and audit tampering are High regardless (`*`). Medium must be mitigated or carry an accepted risk. The developer approved the review-supplied gates on 2026-11-18. High and Critical findings must be fixed before merge. Medium findings are due 2026-11-24 or require an accepted risk.
 
 **High threats**
 
@@ -388,7 +388,7 @@ Each threat in [stride.md](stride.md) lists its mitigations (C-x, SR/FR, ASVS) a
 | T-43 | Middleware bypass (CVE-2025-29927, `x-middleware-subrequest`) skips authentication or headers. | 6.6* | No auth in middleware (C-2); see [stride.md](stride.md) |
 | T-18 | An admin changes their own role or deactivates themself, or removes or deactivates the last active admin. | 6.0* | Target must differ from the caller (SR-6); see [stride.md](stride.md) |
 
-Medium and Low threats are in [stride.md](stride.md). Accepted residual risks AR-1 to AR-7 are listed there. Six design changes (DC-1 to DC-6) came out of this pass and are applied to Part 1.
+Medium and Low threats are in [stride.md](stride.md). Developer-approved residual risks AR-1 to AR-8 are listed there. Six design changes (DC-1 to DC-6) came out of this pass and are applied to Part 1.
 
 **D-4 resolved (SR-14): dotenvx.** The encrypted `.env` is committed. The private key lives in a gitignored `.env.keys` locally, or is injected as `DOTENV_PRIVATE_KEY` at runtime; it is never in the repo, the image, or a build argument. `.env.example` keeps placeholders. Secret scanning runs in CI. On AWS, credentials come from Secrets Manager through the task's IAM role. Owner and app database credentials are separate. Residual risk: AR-5. The `AGENTS.md` rule is updated.
 
@@ -451,3 +451,4 @@ Practice #13 re-checks all of this against the built system.
 | 2026-11-10 | #6 Attack Surface Reduction | Resolved D-2 option B: added EP-20 to EP-23, §1.4.1 settings limits, `settings` and `categories` stores; updated R-9 and counts. |
 | 2026-11-14 | #7 Threat Modeling | Part 2: DFDs, STRIDE analysis (`stride.md`), DREAD and bug bar, D-4 and D-5 resolved. Design changes from the analysis applied to Part 1: C-11, C-4 and C-8 tightened, EP-02, EP-06, FW-1, NH-3, NH-4, and §1.7 (`login_attempts`). |
 | 2026-11-18 | #5 Design review | Aligned login-attempt storage, database grants, and resolved Prisma/Caddy decisions with the design. |
+| 2026-11-18 | #5, #7, #8 | Recorded approved Prisma adapter, local Caddy trust/transport, security gates, and AR-8. Details in design §§1 and 4–7. |

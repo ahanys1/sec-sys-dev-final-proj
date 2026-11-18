@@ -88,3 +88,10 @@
 - Codex added ASVS references to the design traceability matrix, finished framework and database documentation corrections, and set Node 24 in package engines, lockfile metadata, and .nvmrc following review.
 - Updated open questions to remove decided items and request factual Copilot usage evidence. Exact dependency versions and unapproved reviewer recommendations remain pending developer answers.
 - Human direction keeps PR #29 open and PR #30 stacked on it. Team identification remains 13. No Copilot activity is invented.
+
+
+### Commit docs: record approved design answers (NFR-3, NFR-5, SR-2, SR-14)
+#### Alex's Agent
+- Codex incorporated the reviewer-supplied answers into the design, updated SDL/tool decisions and threat-model consistency, and recorded the Caddy HTTP-hop risk as AR-8.
+- The developer explicitly approved the reviewer answers. Answered questions were removed from the design and PR description. Q-13 remains open because actual Copilot work and human edits require factual evidence.
+- Exact package versions and container digests are deferred to implementation under the approved selection process. No dependency installation, implemented controls, measured performance, or restore results are claimed.
