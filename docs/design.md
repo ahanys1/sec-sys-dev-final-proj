@@ -1,6 +1,6 @@
 # Design Document
 
-Team #__
+Team #13
 
 This document describes the planned secure incident-reporting application and supports SDL Practice #5. The assignment governs functional and security behavior. OWASP ASVS 5.0.0 Level 2 supplements those requirements. Implementation and verification are pending for the application features described here. [Assignment](../ASSIGNMENT.md) · [Security requirement mapping](asvs/assignment-mapping.md)
 
@@ -8,7 +8,7 @@ This document describes the planned secure incident-reporting application and su
 
 The application provides a reporter workflow, a reviewer workflow, and administrator controls for accounts, incident visibility, comments, bounded settings, and categories. It uses Next.js App Router with TypeScript and PostgreSQL. The course deployment runs in Docker. AWS remains a future deployment target. The existing threat model defines the role permissions and entry points used throughout this design. [Architecture decisions and entry points](threat-model.md)
 
-Prisma ORM is selected for database access under the delegated ORM decision. Its typed query interface fits the TypeScript application, and transactions support atomic business changes with audit records. Queries must use parameter binding. Authorization remains explicit in the application, including filters on records and selected response fields. Reviewed migration SQL will be needed for PostgreSQL audit permissions and triggers. The exact Prisma version, adapter, and compatible Node version remain pending package selection. [Prisma query safety](https://www.prisma.io/docs/orm/v7/prisma-client/using-raw-sql/raw-queries) · [Prisma transactions](https://www.prisma.io/docs/orm/v7/prisma-client/queries/transactions)
+Prisma ORM is selected for database access under the delegated ORM decision. Its typed query interface fits the TypeScript application, and transactions support atomic business changes with audit records. Queries must use ORM calls or bound parameters. Ban `$queryRawUnsafe` and `$executeRawUnsafe` through lint or CI checks (SR-8, ASVS V1.2.4). Authorization remains explicit in the application, including filters on records and selected response fields. Reviewed migration SQL will be needed for PostgreSQL audit permissions and triggers. The exact Prisma version, adapter, and compatible Node version remain pending package selection. [Prisma query safety](https://www.prisma.io/docs/orm/v7/prisma-client/using-raw-sql/raw-queries) · [Prisma transactions](https://www.prisma.io/docs/orm/v7/prisma-client/queries/transactions)
 
 Caddy is selected as the local HTTPS reverse proxy, as directed by the team. The certificate setup and internal transport details are recorded as open decisions in §9.
 
@@ -24,7 +24,8 @@ flowchart LR
     Q["Prisma database access"]
     D[("PostgreSQL")]
     O["Operator bootstrap and migrations"]
-    B --> C --> P --> S --> L --> Q --> D
+    M["P1 middleware — headers, CSP nonce, bypass-header rejection"]
+    B --> C --> M --> P --> S --> L --> Q --> D
     O --> D
 ```
 
@@ -57,7 +58,11 @@ The browser, application, database, and operator plane cross the trust boundarie
 
 The role matrix follows D-1 to D-3. A user sees title, status, and submission date for their own reports. Reviewers lose access to closed incidents. Administrators can view and comment across statuses. All accounts are prohibited from changing their own role. Account administration also prevents self-deactivation and removal of the last active administrator. [Entry point contracts](threat-model.md#14-entry-point-inventory)
 
-Public interfaces are login, the minimal health endpoint, and static assets (EP-01 to EP-04). Protected requests require a valid active-account session. Missing or invalid sessions yield 401 at the API. Role-based denials yield 403, and inaccessible incident details use the same 404 response as missing records. Unsupported methods yield 405. Exact response bodies remain an open contract detail.
+Public interfaces are login, the minimal health endpoint, and static assets (EP-01 to EP-04). Protected requests require a valid active-account session. Missing or invalid sessions redirect pages to `/login` and yield 401 at the API. Role-based denials yield 403, and inaccessible incident details use the same 404 response as missing records. Unsupported methods yield 405. Exact response bodies remain an open contract detail.
+
+Server Actions are prohibited. The image optimizer is disabled with `images.unoptimized`. Custom error and not-found pages provide generic feedback. Each route exports only allowed methods, and page/RSC reads run authorization checks (FW-1 to FW-6).
+
+Unknown-username lockout is counted by submitted name even when the account does not exist. Database counters use scope, key, and window start so both IP and username state have persistent storage.
 
 ## 4. Data model
 
@@ -72,15 +77,15 @@ The following logical model preserves the stores already identified by the threa
 | Categories | ID, unique name, active flag | Deactivation preserves existing assignments and prevents new assignments. |
 | Settings | Bounded configuration, update time, updating actor | Validate on write and read. Invalid stored values use fixed defaults. |
 | Audit log | ID, actor, UTC time, action, target | Append-only database permissions and an update/delete rejection trigger. |
-| Login attempts | IP, time window, count | Supports shared rate limits across restarts and application instances. |
+| Login attempts | Scope (ip or username), key, time window, count and lockout expiry | Supports shared rate limits across restarts and application instances. |
 
-Incident identifiers are UUIDs as recorded in the threat model. Passwords, session tokens, and secrets are highly sensitive. Descriptions, comments, and roles require restricted access. Lists select only necessary fields and omit descriptions. The first-admin audit actor representation and settings before/after audit metadata need a physical schema decision. [Assets and data sensitivity](threat-model.md#17-assets-and-data-stores)
+Incident identifiers are UUIDs as recorded in the threat model. Passwords, session tokens, and secrets are highly sensitive. Descriptions, comments, and roles require restricted access. Lists select only necessary fields and omit descriptions. The first-admin audit actor is `system`, represented by `actor_type = system` with no user ID (DC-3, NH-4). Settings before/after audit metadata still needs a physical schema decision. [Assets and data sensitivity](threat-model.md#17-assets-and-data-stores)
 
 ## 5. Main workflows and consistency
 
 Account creation generates a one-time temporary password, displays it once, and records account creation. First login requires a password change. The temporary-password session is restricted to the password flow, logout, and static assets. Self-service password change requires the current password and offers to end other sessions, selected by default. Admin reset and account deactivation end all target sessions.
 
-Login uses a new cryptographically random session token and stores its hash in PostgreSQL. The cookie uses the `__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`, and `Path=/`. The design limits accounts to five sessions and ends the oldest at the limit. Default inactivity and maximum lifetimes are 30 minutes and eight hours. Logout deletes the server session and expires the browser cookie. [Session policy D-5](threat-model.md#step-3-what-can-be-done-about-it-mitigations-and-ranking)
+Login uses a new 256-bit CSPRNG session token whose SHA-256 hash is stored server-side. Login issues the token and stores its hash in PostgreSQL. The cookie uses the `__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`, and `Path=/`. The design limits accounts to five sessions and ends the oldest at the limit. Default inactivity and maximum lifetimes are 30 minutes and eight hours. Logout deletes the server session and expires the browser cookie. [Session policy D-5](threat-model.md#step-3-what-can-be-done-about-it-mitigations-and-ranking)
 
 An incident begins open and is attributed to the authenticated reporter. Reviewers classify it with an active category, comment, and move it through open → under-review → closed. Each mutation checks the current role and record permissions. Status changes use the expected existing status to reject conflicting updates.
 
@@ -98,9 +103,9 @@ Admin settings retain the existing defaults and limits in threat-model §1.4.1. 
 
 ## 7. Deployment and operation
 
-The local deployment uses Caddy, the Next.js application, and PostgreSQL containers. PostgreSQL stays on the private Docker network with no published host port. The application runs with a restricted database account. Migrations use separate owner credentials. The application image runs as a non-root user, and production uses a production build.
+The local deployment uses Caddy, the Next.js application, and PostgreSQL containers. PostgreSQL stays on the private Docker network with no published host port. The application account has SELECT/INSERT/UPDATE on business tables, INSERT/SELECT on audit_log, and DELETE only on sessions and login_attempts. Migrations use separate owner credentials. The application image runs as a non-root user, and production uses a production build.
 
-Local secret configuration is encrypted with dotenvx. The decryption key stays outside the repository and container image. Placeholder configuration remains in `.env.example`. AWS deployment would use Secrets Manager and private database networking. Local key storage and injection details remain an open implementation decision under SR-14. [Deployment surfaces and secrets](threat-model.md#16-non-http-surfaces)
+Local secret configuration is encrypted with dotenvx. The decryption key stays outside the repository and container image. Placeholder configuration remains in `.env.example`. AWS deployment would use Secrets Manager and private database networking. The decided mechanism uses a gitignored and dockerignored `.env.keys` or runtime `DOTENV_PRIVATE_KEY`. Additional local key protection and distribution details remain open under SR-14. [Deployment surfaces and secrets](threat-model.md#16-non-http-surfaces)
 
 The first administrator is created through an operator CLI with a prompted password and an audit event. Seeds use synthetic data and run only through an explicit development operation. Dependency versions and lockfiles are reviewed, and CI performs the selected security checks. Backup, recovery, storage monitoring, and dependency remediation policies remain pending.
 
@@ -130,7 +135,7 @@ All entries describe design coverage. Passing evidence belongs in the security t
 | SR-12, SR-13 | Generic client errors and sanitized diagnostics in §6 | MC-10 |
 | SR-14 | Encrypted secrets and separated credentials in §7 | MC-12 |
 | SR-16 | Restricted data, secure configuration, and logging in §§3–7 | MC-01, MC-07, MC-09, MC-12, MC-13 |
-| CONST-1 to CONST-3, ASSUMP-1, ASSUMP-2 | Secure review, Git/PR workflow, Copilot usage requirement, AI reporting, synthetic fixtures | Source review, AI report, and fixture review |
+| CONST-1 to CONST-3, ASSUMP-1, ASSUMP-2 | Secure review, Git/PR workflow, Copilot usage requirement (evidence pending), AI reporting, synthetic fixtures | Source review, AI report, and fixture review |
 | AC-1 to AC-5 | Requirement mapping, security checks, SDL records, and demo | Acceptance review, SAST/DAST/manual results, and demo evidence |
 
 The use and misuse plan supplies the referenced cases. SAST, DAST, and manual testing must verify the built application before security requirements can be marked complete. [Use and misuse cases](use-misuse-cases.md) · [Security testing report](security-testing.md) · [SDL tracker](sdl.md)
@@ -141,16 +146,16 @@ The use and misuse plan supplies the referenced cases. SAST, DAST, and manual te
 |---|---|---|
 | Q-01 | Which exact Prisma release, PostgreSQL driver/adapter, Node version, and PostgreSQL image should be pinned? | Dependency compatibility and deployment |
 | Q-02 | Which argon2id library and measured hashing parameters should be used? Which offline breached-password list and update process? | SR-2 and login capacity |
-| Q-03 | What are the exact schema types, foreign-key deletion rules, indexes, username normalization rules, audit system-actor representation, and settings-change metadata format? | Migrations and audit integrity |
+| Q-03 | What are the exact schema types, foreign-key deletion rules, indexes, username normalization rules, and settings-change metadata format? | Migrations and audit integrity |
 | Q-04 | Which validation library, text/body limits, pagination limits, and public API error format should be used? | SR-7, NFR-2, resource limits |
 | Q-05 | What local hostname and certificate trust setup should Caddy use? Is TLS required between Caddy and Next.js, and how are trusted proxy addresses configured? | Local HTTPS and client IP integrity |
 | Q-06 | How will dotenvx keys be stored and injected locally, including protection at rest and access controls? | SR-14 |
-| Q-07 | How should rate limits, lockout state for unknown usernames, hash concurrency, and cleanup scheduling be implemented and sized? | Enumeration defense and resource limits |
+| Q-07 | How should rate limits, hash concurrency, and cleanup scheduling be implemented and sized? | Enumeration defense and resource limits |
 | Q-08 | Which shared locking protocol and retry limits protect the last administrator, concurrent session caps, and one-time temporary-password consumption? What happens on a repeated submission after an uncertain response? | NFR-5 and retry consistency |
 | Q-09 | Which SAST/DAST tools, CI gates, vulnerability remediation deadlines, and residual risks does the team approve? | AC-3 and SDL review |
 | Q-10 | What normal-load workload and timing boundaries define the two-second requirement? What connection-pool and deployment resource limits support 50 concurrent users? | NFR-3, NFR-4 |
 | Q-11 | What backup/restore procedure, recovery objectives, log retention, storage alarms, and logging-outage behavior are required? | NFR-6, SR-11, SR-13 |
-| Q-12 | What is the team number for the report? | Deliverable identification |
+| Q-12 | Resolved by the developer. The team number is 13. | Deliverable identification |
 
 ## Revision history
 

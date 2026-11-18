@@ -1,6 +1,6 @@
 # Threat Model and Attack Surface Analysis
 
-Team #__
+Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#submission-requirements)
 
@@ -104,7 +104,7 @@ Pages (the UI for all roles, FR-13) are entry points too: each one renders data 
 | ID | Entry point | Method | Who can reach it | Inputs | Data (sensitivity) | Specific controls | Req |
 |---|---|---|---|---|---|---|---|
 | EP-01 | `/login` page | GET | Anyone | none | Public, including the admin status message (§1.4.1) | Status message rendered as plain text only (V3.2.2); C-7 | FR-4, FR-13 |
-| EP-02 | `/api/auth/login` | POST | Anyone | username, password | Credentials (HS) | Rate limit and lockout backoff per account and IP, with counters in the database (`users.failed_login_count`, `users.locked_until`, `login_attempts`) so they survive restarts and multiple instances; lockout counted by the submitted name even if no such account exists (V6.3.1, V2.4.1); one generic failure message; argon2id verify (SR-2); new session token on login (V7.2.4, V7.2.3); at most 5 sessions per user, oldest ended (V7.1.2); C-4, C-8 | FR-4, SR-2, SR-3 |
+| EP-02 | `/api/auth/login` | POST | Anyone | username, password | Credentials (HS) | Rate limit and lockout backoff per account and IP, with counters in the database (`login_attempts`, keyed by scope, key, and window_start) so they survive restarts and multiple instances; lockout counted by the submitted name even if no such account exists (V6.3.1, V2.4.1); one generic failure message; argon2id verify (SR-2); new session token on login (V7.2.4, V7.2.3); at most 5 sessions per user, oldest ended (V7.1.2); C-4, C-8 | FR-4, SR-2, SR-3 |
 | EP-03 | `/api/health` | GET | Anyone | none | Public (§6.2 "system status") | Returns only `{status:"ok"}`; no version, hostname, or DB details (V13.4.5) | NFR-6 |
 | EP-04 | `/_next/static/*`, favicon | GET | Anyone | none | Public | Build output only; no production source maps (V15.2.3) | n/a |
 | EP-05 | `/api/auth/logout` | POST | Any signed-in role | session cookie | Session token (HS) | Delete the session row, expire the cookie, send `Clear-Site-Data` (V7.4.1, V14.3.1); C-4; link on every page (V7.4.4) | FR-5 |
@@ -164,7 +164,7 @@ These exist because of Next.js, not because we wrote a route.
 | ID | Surface | Local Docker (course demo) | AWS (future, internet-facing) | Req |
 |---|---|---|---|---|
 | NH-1 | PostgreSQL port 5432 | Not published to the host: no `ports:` entry in `docker-compose.yml`; internal Docker network only | RDS in a private subnet, "publicly accessible" off; security group allows only the app's security group; TLS required | V12.3.1, V13.2.1 |
-| NH-2 | Database roles | **Owner role** (DDL) used only by migrations. **App role** has SELECT/INSERT/UPDATE on app tables and **only INSERT + SELECT on `audit_log`**; plus a trigger rejecting UPDATE/DELETE on `audit_log` as a second layer. No superuser, no default passwords. | Same, with credentials in Secrets Manager | FR-12, SR-11; V13.2.2, V13.2.3, V16.4.2 |
+| NH-2 | Database roles | **Owner role** (DDL) used only by migrations. **App role** has SELECT/INSERT/UPDATE on app tables and **only INSERT + SELECT on `audit_log`**; DELETE is granted only on `sessions` and `login_attempts` for logout, eviction, and cleanup. Plus a trigger rejecting UPDATE/DELETE on `audit_log` as a second layer. No superuser, no default passwords. | Same, with credentials in Secrets Manager | FR-12, SR-11; V13.2.2, V13.2.3, V16.4.2 |
 | NH-3 | Secrets (DB passwords for both roles) | Encrypted with dotenvx; private key outside the repo and image (D-4 resolved) | AWS Secrets Manager, read by the task's IAM role only | SR-14; V13.3.1, V13.3.2 |
 | NH-4 | First-admin bootstrap | One-time CLI (`npm run create-admin`) run inside the container; prompts for the password. Writes a `user.create` audit record with actor `system`. No web setup page and no seeded default admin. | Run as a one-off task | V6.3.2 |
 | NH-5 | Migrations and seed data | Seeds contain only fake data and never run in production | Migrations run as a separate job with the owner role | ASSUMP-2 |
@@ -183,7 +183,7 @@ These exist because of Next.js, not because we wrote a route.
 | `incidents` | id, title, description, status, category_id, reporter_id, timestamps | Sensitive (description) | Reviewer, Admin; the reporter sees only title, status, and date of their own reports (EP-19) |
 | `comments` | id, incident_id, author_id, body, created_at | Sensitive (classified like descriptions) | Reviewer, Admin |
 | `audit_log` | id, user_id, action, target_id, created_at (UTC) | Sensitive; **integrity-critical** | Admin (read-only) |
-| `login_attempts` | ip, window_start, count (per-IP rate limiting) | Internal | Nobody through an endpoint |
+| `login_attempts` | scope (ip or username), key, window_start, count, locked_until (unique scope/key/window_start) | Internal | Nobody through an endpoint |
 | `settings` | the §1.4.1 values, updated_at, updated_by | Internal (status message Public) | Admin; status message shown publicly on EP-01 |
 | `categories` | id, name, active | Internal | Reviewer (active only), Admin |
 | DB credentials | owner and app role passwords | HS | Nobody through an endpoint |
@@ -232,8 +232,8 @@ At Practice #13, compare the built app's actual routes (`app/**/route.ts` and pa
 | D-3 | Can admins change incident status? FR-8 names only reviewers. | **Resolved 2026-11-10: no.** Only reviewers change status (FR-8); admins can view (FR-10) and comment (FR-9). EP-10 returns 403 to admins. |
 | D-4 | **SR-14 conflict:** AGENTS.md says secrets live in `.env*`, but SR-14 says secrets must not be stored unencrypted. A plaintext `.env` fails SR-14. | **Resolved 2026-11-14: dotenvx** (see Part 2, Step 3). Encrypted `.env` committed, key outside the repo; AWS: Secrets Manager. AGENTS.md rule updated. |
 | D-5 | Session lifetimes and concurrent sessions (V7.1.1, V7.1.2, V7.3.1, V7.3.2) | **Resolved 2026-11-14.** Defaults and ranges are in §1.4.1; the justification and the concurrent-session policy (max 5 per user) are in Part 2, Step 3. |
-| D-6 | ORM / query layer (AGENTS.md TODO) | **Carried to #8 (Use Approved Tools).** Prisma or Drizzle; ban the raw "unsafe" query APIs (e.g. `$queryRawUnsafe`) with a lint or CI grep (SR-8). |
-| D-7 | TLS locally. Browsers allow `Secure` cookies on `http://localhost`, but DAST and the demo should mirror production. | **Carried to #8 / #11.** Put a local TLS reverse proxy (e.g. Caddy) in `docker-compose.yml` so cookies, HSTS, and redirects behave as they will on AWS. |
+| D-6 | ORM / query layer (AGENTS.md TODO) | **Resolved: Prisma ORM.** Exact package versions and adapter remain pending; ban the raw "unsafe" query APIs (e.g. `$queryRawUnsafe`) with a lint or CI grep (SR-8). |
+| D-7 | TLS locally. Browsers allow `Secure` cookies on `http://localhost`, but DAST and the demo should mirror production. | **Resolved: Caddy.** Put the local TLS reverse proxy in `docker-compose.yml` so cookies, HSTS, and redirects behave as they will on AWS. |
 
 ---
 

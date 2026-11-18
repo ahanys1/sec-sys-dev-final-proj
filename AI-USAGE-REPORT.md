@@ -70,8 +70,14 @@
 - Case grouping, test fixtures, and demo order are Codex's drafting decisions. Human review and security edits are pending. These cases have no execution results yet.
 
 
-### Commit Draft application design (FR-1 to FR-13, NFR-1 to NFR-9, SR-1 to SR-14, SR-16)
+### Commit docs: add design document (FR-1 to FR-13, SR-1 to SR-14, SR-16)
 #### Alex's Agent
 - Codex drafted architecture, roles, data model, workflows, security controls, deployment, requirement traceability, and an unresolved-decision register in docs/design.md. Updated SDL Practice #5 and the ORM selection.
 - The developer delegated the ORM choice, selected Caddy, and requested unresolved details be documented for later answers. Codex selected Prisma after consulting its official transaction and query documentation. Exact package versions remain open.
 - Human review and subsequent security edits are pending. No implementation or passing security tests are claimed.
+
+### Commit docs: address design review (SR-8, SR-14, FR-12)
+#### Alex's Agent
+- Codex addressed reviewer corrections to design and threat-model consistency, scoped database deletion, encrypted-env tracking, middleware, selected tools, and team 13 identification.
+- Reviewer recommendations for unresolved implementation choices remain proposals awaiting developer answers. Copilot usage evidence remains pending and is not claimed.
+- Human direction supplied team number 13. Subsequent human/security edits remain pending.

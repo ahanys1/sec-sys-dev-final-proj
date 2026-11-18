@@ -1,6 +1,6 @@
 # STRIDE Analysis
 
-Team #__
+Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#submission-requirements)
 
@@ -210,7 +210,7 @@ Applied to [threat-model.md](threat-model.md) Part 1 in the same change.
 | DC-1 | New common control **C-11**: while `must_change_password` is set, only EP-05 and EP-06 are reachable. | §1.3 |
 | DC-2 | C-4 extended: a missing `Origin` is rejected, and writes must be `Content-Type: application/json`. | §1.3 |
 | DC-3 | The create-admin CLI writes a `user.create` audit record with actor `system` (FR-11). | NH-4 |
-| DC-4 | Lockout and rate-limit state in the database: `users.failed_login_count`, `users.locked_until`, new `login_attempts` store; sessions capped at 5 per user. | EP-02, §1.7 |
+| DC-4 | Lockout and rate-limit state in the database: `login_attempts` keyed by (scope: ip or username, key, window_start), including lockout expiry; sessions capped at 5 per user. | EP-02, §1.7 |
 | DC-5 | C-8 clarified: failed authentication/authorization attempts go to application logs, not the append-only audit table. | §1.3 |
 | DC-6 | EP-06's breached-password check uses a bundled offline list (A-8: no outbound calls). | EP-06 |
 

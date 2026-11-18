@@ -1,6 +1,6 @@
 # SDL / Secure Software Systems Life Cycle Adherence
 
-Team #__
+Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#9-acceptance-criteria) (AC-4: the final report must document SDL adherence and AI usage)
 
@@ -22,7 +22,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 2 | Requirements | Security Requirements | SR-1 to SR-16, plus OWASP ASVS 5.0.0 Level 2 as the target, mapped to the assignment requirements. | Done | `ASSIGNMENT.md` §5; `docs/asvs/assignment-mapping.md`; `docs/asvs/owasp-top10-mapping.md` |
 | 3 | Requirements | Quality Gates / Bug Bars | Minimum release threshold and which defects block release. | TODO: team to confirm [proposal below](#quality-gates-and-bug-bar-practice-3) | |
 | 4 | Requirements | Security and Privacy Risk Assessment | Answer the Lesson 04 SRA/PRA questions; data sensitivity levels. | In progress: team to confirm [draft below](#security-and-privacy-risk-assessment-practice-4) | `ASSIGNMENT.md` §6.2 |
-| 5 | Design | Design Requirements | Design doc showing how every FR/NFR/SR is met, with a Requirements Traceability Matrix (RTM). Must include the decisions from threat-model §1.1 and the D-2 additions (settings, categories). | In progress: draft complete; open decisions await team review | `docs/design.md`; architecture decisions in `docs/threat-model.md` §1.1 |
+| 5 | Design | Design Requirements | Design doc showing how every FR/NFR/SR is met, with a Requirements Traceability Matrix (RTM). Must include the decisions from threat-model §1.1 and the D-2 additions (settings, categories). | In review | `docs/design.md`; architecture decisions in `docs/threat-model.md` §1.1 |
 | 6 | Design | Attack Surface Reduction | Entry point inventory, trust boundaries, reduction decisions. | Done | `docs/threat-model.md` Part 1 (merged, PR #24) |
 | 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In review: use and misuse cases drafted, test execution pending | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; [Use and misuse cases](use-misuse-cases.md) |
 | 8 | Implementation | Use Approved Tools | Fixed, version-pinned tool list. | In progress | [Approved tools below](#approved-tools-practice-8); scaffold on `feature/nextjs-scaffold` |
@@ -108,6 +108,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | Database | PostgreSQL in Docker | Chosen |
 | AI assistance | GitHub Copilot (CONST-3); other agents follow `AGENTS.md` | Chosen |
 | Version control | Git + GitHub, feature branches and PRs (CONST-2) | Chosen |
+| Local TLS proxy | Caddy (D-7) | Chosen |
 | Password hashing | argon2id (or bcrypt) via a maintained library (SR-2) | Library TODO |
 | ORM / query layer | Prisma ORM (D-6); exact version and adapter pending | Chosen; see `docs/design.md` |
 | Test runner | TODO (the scaffold branch includes a Vitest config) | TODO |
