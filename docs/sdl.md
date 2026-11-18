@@ -24,11 +24,11 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 4 | Requirements | Security and Privacy Risk Assessment | Answer the Lesson 04 SRA/PRA questions; data sensitivity levels. | In progress: team to confirm [draft below](#security-and-privacy-risk-assessment-practice-4) | `ASSIGNMENT.md` §6.2 |
 | 5 | Design | Design Requirements | Design doc showing how every FR/NFR/SR is met, with a Requirements Traceability Matrix (RTM). Must include the decisions from threat-model §1.1 and the D-2 additions (settings, categories). | TODO | `docs/design.md` (stub); architecture decisions in `docs/threat-model.md` §1.1 |
 | 6 | Design | Attack Surface Reduction | Entry point inventory, trust boundaries, reduction decisions. | Done | `docs/threat-model.md` Part 1 (merged, PR #24) |
-| 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In review: misuse cases and tests are with another engineer | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; `docs/use-misuse-cases.md` pending |
+| 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In review: use and misuse cases drafted, test execution pending | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; [Use and misuse cases](use-misuse-cases.md) |
 | 8 | Implementation | Use Approved Tools | Fixed, version-pinned tool list. | In progress | [Approved tools below](#approved-tools-practice-8); scaffold on `feature/nextjs-scaffold` |
 | 9 | Implementation | Deprecate Unsafe Functions | Banned APIs for TypeScript/Next.js, enforced by lint and CI. | TODO: team to confirm [proposal below](#banned-functions-practice-9) | |
 | 10 | Implementation | Static Analysis | SAST in CI on every PR (AC-3). | TODO: pick tool | `docs/security-testing.md` |
-| 11 | Verification | Dynamic Program Analysis | DAST against the running Docker app over TLS (AC-3; D-7). | TODO: pick tool | `docs/security-testing.md` |
+| 11 | Verification | Dynamic Program Analysis | DAST against the running Docker app over TLS (AC-3; D-7). | TODO: select DAST tool and run verification | [Planned misuse cases](use-misuse-cases.md#misuse-cases), `docs/security-testing.md` |
 | 12 | Verification | Fuzz Testing | Fuzz the inputs in scope from #4 question 5. | TODO | `docs/security-testing.md` |
 | 13 | Verification | Threat Model and Attack Surface Review | Compare built routes and pages with the threat-model §1.4 inventory; update STRIDE for any change. | TODO | `docs/threat-model.md` revision history |
 | 14 | Release | Incident Response Plan | Short plan for a vulnerability or breach in this app. | TODO | [Outline below](#incident-response-plan-practice-14) |
@@ -167,3 +167,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 |---|---|
 | 2026-11-10 | Initial SDL tracker (AI-drafted; see AI-USAGE-REPORT.md). |
 | 2026-11-14 | #6 marked Done; #7 in review; secrets and threat modeling tools recorded. |
+| 2026-11-17 | Added the use and misuse case test plan as evidence for #7 and preparation for #11. |
