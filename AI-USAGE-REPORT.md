@@ -68,3 +68,10 @@
 #### Alex's Agent
 - Codex drafted the use and misuse case verification plan, mapped the cases to assignment requirements, ASVS 5.0.0, and STRIDE, and recorded the plan in the SDL tracker for Practices #7 and #11.
 - Case grouping, test fixtures, and demo order are Codex's drafting decisions. Human review and security edits are pending. These cases have no execution results yet.
+
+
+### Commit Draft application design (FR-1 to FR-13, NFR-1 to NFR-9, SR-1 to SR-14, SR-16)
+#### Alex's Agent
+- Codex drafted architecture, roles, data model, workflows, security controls, deployment, requirement traceability, and an unresolved-decision register in docs/design.md. Updated SDL Practice #5 and the ORM selection.
+- The developer delegated the ORM choice, selected Caddy, and requested unresolved details be documented for later answers. Codex selected Prisma after consulting its official transaction and query documentation. Exact package versions remain open.
+- Human review and subsequent security edits are pending. No implementation or passing security tests are claimed.
