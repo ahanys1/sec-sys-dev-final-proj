@@ -71,3 +71,11 @@
 - Mapped proposed source-code inspections to STRIDE threats, including stored XSS (T-29), SQL injection (T-38), privilege escalation (T-19), mass assignment (T-17), audit tampering (T-33), framework authorization bypass (T-43/T-45), secrets exposure (T-53), and AI-generated vulnerabilities (T-60).
 - Suggested Semgrep as the primary SAST tool, with ESLint and TypeScript checks as supplementary analysis. Distinguished SAST from dependency vulnerability scanning (`npm audit`), DAST, and manual security testing.
 - Human direction: the developer requested a threat-based testing methodology aligned with the team's design documents and assignment requirements. The proposed testing activities remain unverified; no SAST scans, vulnerability confirmations, or remediation testing have been completed.
+
+### Commit Draft DAST and manual security testing methodology
+### Jonathan's Agent
+- Assisted in drafting the DAST methodology for `docs/security-testing.md`, proposing OWASP ZAP for baseline, authenticated, and targeted security testing of the running Next.js application.
+- Reviewed the team's STRIDE analysis and threat model to identify DAST priorities, including authentication, session management, CSRF, privilege escalation, IDOR, stored XSS, SQL injection, and middleware authorization bypass.
+- Assisted in drafting the manual security testing methodology, focusing on application-specific authorization, role restrictions, incident ownership, audit integrity, and deployment security.
+- Developed a proposed manual testing matrix (MAN-01 through MAN-13), mapping test scenarios to STRIDE threat identifiers and expected security behavior. Distinguished positive authorization tests from negative tests.
+- Human direction: the developer reviewed the proposed methodologies, incorporated the testing matrix, and requested consistent documentation formatting. Testing procedures remain planned activities; no DAST scans, manual security tests, or vulnerability remediation have been completed.
