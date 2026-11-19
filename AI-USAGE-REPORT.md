@@ -95,3 +95,9 @@
 - Codex incorporated the reviewer-supplied answers into the design, updated SDL/tool decisions and threat-model consistency, and recorded the Caddy HTTP-hop risk as AR-8.
 - The developer explicitly approved the reviewer answers. Answered questions were removed from the design and PR description. Q-13 remains open because actual Copilot work and human edits require factual evidence.
 - Exact package versions and container digests are deferred to implementation under the approved selection process. No dependency installation, implemented controls, measured performance, or restore results are claimed.
+
+
+### Commit docs: track Copilot evidence in AI report (CONST-3, NFR-8)
+#### Alex's Agent
+- Codex removed the remaining Copilot evidence question from the design and PR description and pointed the design traceability entry to this report.
+- The developer directed that Copilot usage evidence be handled in the AI usage report.

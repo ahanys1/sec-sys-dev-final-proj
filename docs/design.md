@@ -165,18 +165,10 @@ All entries describe design coverage. Passing evidence belongs in the security t
 | SR-12, SR-13 | Generic client errors and sanitized diagnostics in §6 | MC-10 | V16.5.1, V16.3.4 |
 | SR-14 | Encrypted secrets and separated credentials in §7 | MC-12 | V13.3.1, V13.3.2 |
 | SR-16 | Restricted data, secure configuration, and logging in §§3–7 | MC-01, MC-07, MC-09, MC-12, MC-13 | V14.2.1, V14.3.2, V12.2.1, V13.4.1, V13.4.2, V3.4.1, V3.4.4, V16.3.1, V16.3.2, V16.3.3 |
-| CONST-1 to CONST-3, ASSUMP-1, ASSUMP-2 | Secure review, Git/PR workflow, Copilot usage requirement (evidence pending), AI reporting, synthetic fixtures | Source review, AI report, and fixture review | Assignment-specific process requirements |
+| CONST-1 to CONST-3, ASSUMP-1, ASSUMP-2 | Secure review, Git/PR workflow, Copilot usage and AI reporting tracked in AI-USAGE-REPORT.md, synthetic fixtures | Source review, AI report, and fixture review | Assignment-specific process requirements |
 | AC-1 to AC-5 | Requirement mapping, security checks, SDL records, and demo | Acceptance review, SAST/DAST/manual results, and demo evidence | Assignment-specific acceptance criteria |
 
 The use and misuse plan supplies the referenced cases. SAST, DAST, and manual testing must verify the built application before security requirements can be marked complete. [Use and misuse cases](use-misuse-cases.md) · [Security testing report](security-testing.md) · [SDL tracker](sdl.md)
-
-## 9. Remaining evidence question
-
-| ID | Unanswered question | Affected area |
-|---|---|---|
-| Q-13 | What Copilot-assisted work has the team performed, and what output, human edits, and commit subjects should be recorded as evidence for CONST-3? | Assignment-required AI usage evidence |
-
-Exact dependency versions and container digests will be recorded during implementation using the approved version-selection process. The approved answers are documented in §§1 and 4–7. [Reviewer-supplied answers](https://github.com/ahanys1/sec-sys-dev-final-proj/pull/30#pullrequestreview-5950158247)
 
 ## Revision history
 
@@ -184,4 +176,5 @@ Exact dependency versions and container digests will be recorded during implemen
 |---|---|
 | 2026-11-17 | Drafted design from the assignment and existing threat model. Selected Prisma under delegated authority, recorded the team's Caddy choice, and collected unresolved details for review. |
 | 2026-11-18 | Addressed design review, added ASVS traceability, recorded Node 24, and synchronized unresolved questions with PR #30. |
-| 2026-11-18 | Recorded the developer-approved reviewer answers, removed answered questions, and retained Q-13 for factual Copilot evidence. |
+| 2026-11-18 | Recorded the developer-approved reviewer answers, removed answered questions, and recorded the approved decisions. |
+| 2026-11-18 | Removed the remaining evidence question at developer direction. Copilot usage is tracked in the AI usage report. |
