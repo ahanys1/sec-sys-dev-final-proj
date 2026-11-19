@@ -110,9 +110,9 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | Version control | Git + GitHub, feature branches and PRs (CONST-2) | Chosen |
 | Password hashing | argon2id (or bcrypt) via a maintained library (SR-2) | Library TODO |
 | ORM / query layer | TODO (D-6: Prisma or Drizzle) | TODO |
-| Test runner | TODO (the scaffold branch includes a Vitest config) | TODO |
-| SAST | TODO (e.g. Semgrep, GitHub CodeQL, eslint security plugins) | TODO |
-| DAST / fuzzing | TODO (e.g. OWASP ZAP) | TODO |
+| Test runner | Vitest (configured in project) | Chosen |
+| SAST | Semgrep (proposed in `docs/security-testing.md`) | Proposed — team review pending |
+| DAST / fuzzing | OWASP ZAP (proposed in `docs/security-testing.md`) | Proposed — team review pending |
 | Threat modeling | Mermaid DFDs, STRIDE and DREAD in markdown | Chosen |
 | Secrets (SR-14) | dotenvx (encrypted `.env`); AWS Secrets Manager | Chosen |
 

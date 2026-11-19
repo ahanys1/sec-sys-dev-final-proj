@@ -87,3 +87,10 @@
 - Identified refinements to the manual testing matrix, including HTTP 404 responses for unauthorized incident access, audit-failure rollback verification, origin/CSRF protections, and session revocation.
 - Helped establish test result classifications and evidence requirements, including tested commits, expected and observed behavior, remediation references, and retesting.
 - Human direction: the developer requested alignment with the team's finalized use/misuse cases while preserving the existing SAST, DAST, and manual testing structure. All verification activities remain planned; no security scans or manual test executions are claimed.
+
+### Commit Align SDL approved tools with security testing plan
+### Jonathan's Agent
+- Reviewed the SDL Practice #8 approved-tools table against the proposed SAST, DAST, and manual security testing methodology.
+- Suggested updating the test runner to Vitest and listing Semgrep and OWASP ZAP as proposed security-testing tools pending team approval.
+- Distinguished tool selection and configuration from completed security testing.
+- Human direction: the developer identified outdated TODO entries in `docs/sdl.md` and requested alignment with `docs/security-testing.md`. No security scans or test execution are claimed.
