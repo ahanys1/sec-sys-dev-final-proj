@@ -4,7 +4,7 @@ Team #__
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#9-acceptance-criteria)
 
-Status: Draft - SAST execution and results pending.
+Status: Draft — SAST, DAST, manual testing, and verification results pending.
 
 ## 1. Static Application Security Testing (SAST)
 
@@ -178,3 +178,42 @@ The `MAN` identifiers are proposed test IDs for this document and will be mapped
 | MAN-11 | T-52 | Check database reachability from outside its trusted network | Database connection unavailable |
 | MAN-12 | T-53 | Inspect container/image for plaintext private keys | No unintended secrets exposed |
 | MAN-13 | T-26 | Reviewer performs an authorized incident status change | Status updated successfully |
+
+## 4. Security Testing Traceability Matrix
+
+### 4.1 Misuse Case Coverage
+
+The following matrix maps the misuse cases documented in `docs/use-misuse-cases.md` to their associated STRIDE threats and proposed verification methods. This mapping provides traceability between identified threats, expected security controls, and planned testing activities.
+
+Testing methods may overlap because individual threats can require multiple forms of verification. SAST and DAST will supplement, rather than replace, automated integration and manual security testing.
+
+| Misuse Case | STRIDE Threats | Proposed Verification Methods | Status |
+|---|---|---|---|
+| MC-01 — Failed sign-ins and enumeration | T-01–T-04 | DAST, automated authentication tests | Planned |
+| MC-02 — Invalid or replayed sessions | T-05, T-08, T-10–T-12 | DAST, automated session tests, manual verification | Planned |
+| MC-03 — Untrusted-origin protected write | T-09 | DAST, automated origin/CSRF tests | Planned |
+| MC-04 — Temporary password and password change | T-13–T-16 | Automated authentication tests, manual verification | Planned |
+| MC-05 — Restricted function access | T-19, T-26, T-43 | DAST, automated role matrix, manual authorization tests | Planned |
+| MC-06 — Unauthorized role changes | T-17, T-18, T-27 | Automated validation and authorization tests, manual verification | Planned |
+| MC-07 — Out-of-scope incident access | T-24, T-25, T-28 | DAST, automated object-level authorization tests, manual IDOR tests | Planned |
+| MC-08 — Invalid or competing incident updates | T-26, T-27 | Automated workflow/concurrency tests, manual verification | Planned |
+| MC-09 — Unsafe stored text and settings | T-21–T-23, T-29, T-30 | SAST, DAST, automated validation tests, manual rendering tests | Planned |
+| MC-10 — Unsafe queries and error handling | T-38, T-55 | SAST, DAST, automated validation tests, manual verification | Planned |
+| MC-11 — Audit integrity | T-33–T-35 | Automated database/integration tests, manual database verification | Planned |
+| MC-12 — Database and secrets exposure | T-52, T-53 | Deployment configuration review, network verification, secret scanning | Planned |
+| MC-13 — Vulnerable dependencies and untrusted metadata | T-44, T-50 | Dependency scanning (SCA), automated configuration tests | Planned |
+
+### 4.2 Test Execution and Results
+
+Testing results will be recorded as the application reaches a functional and testable state. Each completed test will reference the applicable misuse case, STRIDE threat, security requirement, and supporting evidence.
+
+Results will be classified as:
+
+- **Pass:** The implemented security control behaved as expected.
+- **Fail:** Observed behavior violated the expected security requirement.
+- **Blocked:** Testing could not proceed because of an implementation or environment dependency.
+- **Not Tested:** The test has not been executed.
+
+The team will record the tested application version or commit, environment, test procedure, expected result, observed result, and evidence location. Confirmed vulnerabilities will include remediation references and subsequent retest results.
+
+The traceability matrix will be reviewed against the finalized STRIDE analysis, use/misuse cases, and implemented application before submission. All High-risk threats must have an appropriate verification activity, including threats addressed through dependency scanning or deployment configuration checks rather than application-level SAST or DAST.

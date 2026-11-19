@@ -79,3 +79,11 @@
 - Assisted in drafting the manual security testing methodology, focusing on application-specific authorization, role restrictions, incident ownership, audit integrity, and deployment security.
 - Developed a proposed manual testing matrix (MAN-01 through MAN-13), mapping test scenarios to STRIDE threat identifiers and expected security behavior. Distinguished positive authorization tests from negative tests.
 - Human direction: the developer reviewed the proposed methodologies, incorporated the testing matrix, and requested consistent documentation formatting. Testing procedures remain planned activities; no DAST scans, manual security tests, or vulnerability remediation have been completed.
+
+### Commit Refine security testing plan with use/misuse case traceability
+### Jonathan's Agent
+- Reviewed the team's `docs/use-misuse-cases.md` and compared its intended use cases (UC-01 through UC-10) and misuse cases (MC-01 through MC-13) against the existing security-testing methodology.
+- Assisted in developing Section 4 of `docs/security-testing.md`, mapping misuse cases to their associated STRIDE threats and proposed verification methods, including SAST, DAST, automated integration tests, manual security testing, dependency scanning, and deployment configuration checks.
+- Identified refinements to the manual testing matrix, including HTTP 404 responses for unauthorized incident access, audit-failure rollback verification, origin/CSRF protections, and session revocation.
+- Helped establish test result classifications and evidence requirements, including tested commits, expected and observed behavior, remediation references, and retesting.
+- Human direction: the developer requested alignment with the team's finalized use/misuse cases while preserving the existing SAST, DAST, and manual testing structure. All verification activities remain planned; no security scans or manual test executions are claimed.
