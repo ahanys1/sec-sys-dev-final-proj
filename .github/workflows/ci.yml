@@ -9,20 +9,49 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
       # lint + test + guards + build + npm audit --omit=dev (SDL #3 gates 2-4, 7)
       - run: make check
+  db-tests:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: bootstrap_admin
+      POSTGRES_PASSWORD: ci-bootstrap
+      APP_OWNER_PASSWORD: ci-owner
+      APP_USER_PASSWORD: ci-app
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Same image and init script as docker-compose.yml, so the roles match production (T-42).
+      - run: |
+          docker run -d --name pg -p 5432:5432 \
+            -e POSTGRES_USER -e POSTGRES_PASSWORD -e APP_OWNER_PASSWORD -e APP_USER_PASSWORD \
+            -v "$PWD/docker/postgres/init:/docker-entrypoint-initdb.d:ro" \
+            "$(grep -oE 'postgres:18-alpine@sha256:[0-9a-f]+' docker-compose.yml)"
+          # Poll over TCP: the init-phase server only listens on the socket.
+          until docker exec -e PGPASSWORD=ci-owner pg psql -h 127.0.0.1 -U app_owner -d incidents -c 'select 1' >/dev/null 2>&1; do sleep 2; done
+      - run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://app_owner:ci-owner@127.0.0.1:5432/incidents
+      - run: npx vitest run tests/db
+        env:
+          TEST_DATABASE_OWNER_URL: postgresql://app_owner:ci-owner@127.0.0.1:5432/incidents
+          TEST_DATABASE_APP_URL: postgresql://app_user:ci-app@127.0.0.1:5432/incidents
   gitleaks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v2
+      - uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

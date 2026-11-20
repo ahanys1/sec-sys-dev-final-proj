@@ -1,0 +1,13 @@
+# Local: SITE_ADDRESS=localhost, CADDY_TLS=internal (run `caddy trust` once; D-7).
+# Live: SITE_ADDRESS=<domain>, CADDY_TLS=<ACME email> for a public certificate.
+{$SITE_ADDRESS:localhost} {
+	tls {$CADDY_TLS:internal}
+	encode zstd gzip
+	request_body {
+		max_size 128KB
+	}
+	reverse_proxy app:3000 {
+		# Overwrite any client-supplied value so the app trusts exactly one hop (T-50, TRUSTED_PROXY_HOPS=1).
+		header_up X-Forwarded-For {remote_host}
+	}
+}

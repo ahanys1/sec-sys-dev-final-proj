@@ -148,3 +148,29 @@
 - Caught in testing: the MD5/SHA-1 selector initially missed an imported `createHash` call, so it was fixed to match both forms. Plain SHA-256 for passwords can't be detected by lint and stays a code-review item.
 - Not yet verified: the workflows haven't run in CI. Actions are pinned to major tags, not SHAs, and the Semgrep image is `latest`; pin both before release.
 - Human direction: the developer confirmed SDL #4 and the banned-functions list, and I updated #4, #5, #7, #9, and #10 in `docs/sdl.md` to match.
+
+### Commit feat: add Docker stack, Prisma schema, and audit-safe migrations (SR-8, SR-11, FR-12, T-33, T-42, T-52)
+#### Liam's Agent
+- Added `docker-compose.yml` (Postgres with no published port, Caddy, app, migrate job), `Dockerfile`, `Caddyfile`, role init script, `.env.example`, the Prisma schema from design §4, two migrations, a Prisma client module, and database tests.
+- Security changes found during the work: `npm audit` flagged a high ReDoS in `effect` through the Prisma CLI, so it is overridden to a patched 3.22.5; the app and owner roles are separate and the app role has no DDL or audit UPDATE/DELETE, and the trigger also blocks TRUNCATE.
+- Verified locally against Postgres 18: all 7 database tests pass, and the audit trigger rejects UPDATE/DELETE/TRUNCATE even for the owner.
+- Not verified: the Docker image build, because local builds fail at Prisma's engine download behind this network's TLS inspection. CI will be the first real image build. No encrypted `.env` was created; the team must generate the dotenvx keys and share them through the password manager.
+
+### Commit docs: rewrite README with local setup and run guide
+#### Liam's Agent
+- Rewrote `README.md` as a start-to-finish local guide (app only, full HTTPS stack, daily commands, DB changes, troubleshooting). Added `make env-local`, `make test-db`, `make reset`, `make logs`, and an `ENV_FILE` option to `make up/down/migrate`.
+- Fixed in testing: the `.env.local` generator reused one `awk` pipe, which would have given every secret the same value; it now closes the pipe each time. The CI database wait now polls over TCP, because `pg_isready` can pass during the init phase before the roles exist.
+- Replaced the author names in the README with the team number (AGENTS.md: names only on the cover page) and corrected the Node requirement from 20.9+ to 24.
+- Verified: `make test-db` passes and removes its container, and the password generator yields distinct values on sample input. Not verified: `make env-local` on the real `.env.example`, `make up`, `make migrate`, and the optional certificate-trust commands (macOS), because the sandbox blocked `.env.local` access and the image build fails behind this network's TLS inspection.
+
+### Commit chore: npm audit fix (dev tooling)
+#### Liam's Agent
+- The lockfile update came from the developer running `npm audit fix`, not from the AI. The AI reviewed the diff (transitive dev-tooling bumps only, `package.json` unchanged), confirmed `make check` passes, and committed it.
+
+### Commit build: allow a corporate CA bundle for the image build
+#### Liam's Agent
+- The developer's `make up` failed at Prisma's engine download with `self-signed certificate in certificate chain`, a TLS-inspecting network. Added an optional BuildKit secret (`EXTRA_CA_CERT`) that sets `NODE_EXTRA_CA_CERTS` for that one build step, plus a portable `make ca-bundle` target (macOS, Linux, WSL2) that exports the system trust store, and README steps for it.
+- Security choice: the build trusts the network's CA instead of disabling certificate verification (`NODE_TLS_REJECT_UNAUTHORIZED=0`), which an automated check also blocked. With the secret unset the build is unchanged.
+- Verified: the compose file validates, and a throwaway Dockerfile showed the secret mount is empty for `/dev/null` and an unset secret and present for a real file. Not verified: a full image build on the inspected network with a real CA bundle; the developer needs to run that.
+- Also fixed a CI failure Semgrep reported on the workflows (10 findings, all mutable action tags): every action is now pinned to a commit SHA and the Semgrep image to a digest. Keep them current when updating actions.
+- Portability review: the developer noted other people will use the environment, so macOS-only commands were replaced and the pinned image digests were confirmed multi-arch (amd64 and arm64).

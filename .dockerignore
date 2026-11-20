@@ -4,3 +4,7 @@
 .git
 node_modules
 .next
+tests
+docs
+*.md
+docker
