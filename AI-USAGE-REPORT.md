@@ -189,3 +189,7 @@
 - Security finding from the new check: the runtime image shipped four server-side `.js.map` files from Turbopack, contrary to the threat model's no-source-maps control. The Docker build now deletes them, and `next.config.ts` states `productionBrowserSourceMaps: false` explicitly, with a test.
 - Fixed while testing: `find` exits non-zero when it can't read a path, which silently aborted the script under `set -e`.
 - Verified: the script built both images with the CA-bundle secret and passed, and the same assertion failed before the source-map deletion. Not verified: the CI `image` job on GitHub's runners, and the Dependabot schedule. Dependabot does not cover the Semgrep image referenced in `sast.yml`.
+
+### Commit ci: add a 7-day Dependabot cooldown
+#### Liam's Agent
+- Semgrep (`dependabot-missing-cooldown`) blocked PR #37 because the Dependabot config proposed brand-new releases immediately. Added `cooldown: default-days: 7` to all four ecosystems, which delays proposals for newly published versions (a supply-chain safeguard, T-59) without delaying security updates.
