@@ -13,10 +13,10 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V3.3.1 | 1 | Verify that cookies have the 'Secure' attribute set, and if the '\__Host-' prefix is not used for the cookie name, the '__Secure-' prefix must be used for the cookie name. | TODO | |
-| V3.3.2 | 2 | Verify that each cookie's 'SameSite' attribute value is set according to the purpose of the cookie, to limit exposure to user interface redress attacks and browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF). | TODO | |
-| V3.3.3 | 2 | Verify that cookies have the '__Host-' prefix for the cookie name unless they are explicitly designed to be shared with other hosts. | TODO | |
-| V3.3.4 | 2 | Verify that if the value of a cookie is not meant to be accessible to client-side scripts (such as a session token), the cookie must have the 'HttpOnly' attribute set and the same value (e. g. session token) must only be transferred to the client via the 'Set-Cookie' header field. | TODO | |
+| V3.3.1 | 1 | Verify that cookies have the 'Secure' attribute set, and if the '\__Host-' prefix is not used for the cookie name, the '__Secure-' prefix must be used for the cookie name. | Done | `src/lib/auth/session.ts` (`sessionCookie`); `tests/auth/session-helpers.test.ts` |
+| V3.3.2 | 2 | Verify that each cookie's 'SameSite' attribute value is set according to the purpose of the cookie, to limit exposure to user interface redress attacks and browser-based request forgery attacks, commonly known as cross-site request forgery (CSRF). | Done | `src/lib/auth/session.ts` (`sessionCookie`); `tests/auth/session-helpers.test.ts` |
+| V3.3.3 | 2 | Verify that cookies have the '__Host-' prefix for the cookie name unless they are explicitly designed to be shared with other hosts. | Done | `src/lib/auth/session.ts` (`sessionCookie`); `tests/auth/session-helpers.test.ts` |
+| V3.3.4 | 2 | Verify that if the value of a cookie is not meant to be accessible to client-side scripts (such as a session token), the cookie must have the 'HttpOnly' attribute set and the same value (e. g. session token) must only be transferred to the client via the 'Set-Cookie' header field. | Done | `src/lib/auth/session.ts` (`sessionCookie`); `tests/auth/session-helpers.test.ts` |
 
 ## V3.4 Browser Security Mechanism Headers
 

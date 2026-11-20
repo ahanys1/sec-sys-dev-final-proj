@@ -7,8 +7,8 @@ Text below is quoted from ASSIGNMENT.md (sub-bullets joined with `;`). SR-15 doe
 | Req | Text | ASVS IDs | Status | Evidence |
 |---|---|---|---|---|
 | SR-1 | The system shall require authentication for all non-public endpoints. | V8.2.1, V8.3.1, V7.2.1 | TODO | |
-| SR-2 | Passwords shall be stored using an established and secure algorithm. | V11.4.2 | TODO | |
-| SR-3 | If web-based, authentication tokens (e.g. session cookies) shall be protected using secure flags (HttpOnly, Secure, SameSite). | V3.3.1, V3.3.2, V3.3.4 | TODO | |
+| SR-2 | Passwords shall be stored using an established and secure algorithm. | V11.4.2 | Done | `src/lib/auth/password.ts` (argon2id); `tests/auth/password.test.ts` |
+| SR-3 | If web-based, authentication tokens (e.g. session cookies) shall be protected using secure flags (HttpOnly, Secure, SameSite). | V3.3.1, V3.3.2, V3.3.4 | Done | `src/lib/auth/session.ts`; `tests/auth/session-helpers.test.ts`; `tests/db/auth.test.ts` |
 | SR-4 | The system shall enforce RBAC for user, reviewer, and admin roles. | V8.1.1, V8.2.1, V8.2.2 | TODO | |
 | SR-5 | Authorization checks shall be performed for every request. | V8.2.1, V8.2.2, V8.3.1 | TODO | |
 | SR-6 | Users shall not be able to modify their own roles. | V8.2.1, V8.2.3, V15.3.3 | TODO | |

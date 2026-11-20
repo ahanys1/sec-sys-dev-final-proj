@@ -113,7 +113,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | AI assistance | GitHub Copilot (CONST-3); other agents follow `AGENTS.md` | Chosen |
 | Version control | Git + GitHub, feature branches and PRs (CONST-2) | Chosen |
 | Local TLS proxy | Caddy (D-7) | Chosen |
-| Password hashing | node-argon2, argon2id with m=19456 KiB, t=2, p=1 baseline | Chosen, implementation pending |
+| Password hashing | node-argon2 0.45.2, argon2id with m=19456 KiB, t=2, p=1 | Chosen; `src/lib/auth/password.ts` |
 | ORM / query layer | Prisma 7.10.1 with @prisma/adapter-pg 7.10.1 and pg 8.23.1 (D-6), exact pins; `effect` overridden to 3.22.5 (ReDoS in the Prisma CLI chain) | Chosen; `package.json`, `prisma/schema.prisma` |
 | Input validation | Zod 4.6.7 strict schemas (SR-7) | Chosen; `src/lib/request.ts` |
 | Test runner | Vitest | Chosen |
@@ -183,3 +183,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-19 | Added Docker Compose stack, Prisma schema and migrations (audit append-only trigger, least-privilege app role), and database tests. |
 | 2026-11-20 | Added the Next 16 proxy (headers, CSP nonce), shared error, request, logger and audit libraries, and the health endpoint. |
 | 2026-11-20 | Added the image-build CI job and Dependabot; the runtime image no longer ships server source maps. |
+| 2026-11-20 | Auth and sessions implemented: login, logout, password change, session policy, lockout, first-admin CLI. ASVS rows for V3.3, V6.2, V6.3, V7, and V11 marked Done with evidence. |

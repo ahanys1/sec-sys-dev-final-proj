@@ -5,7 +5,7 @@ Spec: [ASSIGNMENT.md](ASSIGNMENT.md) · Design: [docs/design.md](docs/design.md)
 
 > **Every AI-assisted change must add an entry to [AI-USAGE-REPORT.md](AI-USAGE-REPORT.md) in the same commit.**
 
-Status: foundation only. `/` is still the scaffold page. Login and incident features land in follow-up PRs.
+Status: sign-in, sign-out, password change, and sessions work. Incident and admin features land in follow-up PRs.
 
 ## Prerequisites
 
@@ -34,9 +34,10 @@ Runs Caddy (HTTPS) → Next.js app → PostgreSQL in Docker. Only Caddy is reach
 make env-local                       # once: creates .env.local with random passwords (git-ignored)
 make up      ENV_FILE=.env.local     # build and start
 make migrate ENV_FILE=.env.local     # first time, and after any schema change
+make create-admin ENV_FILE=.env.local # once: prompts for the first administrator's username and password
 ```
 
-Open **https://localhost**. Your browser will warn about the certificate: it is Caddy's local CA, so continue past it.
+Open **https://localhost** and sign in with the administrator you created. Your browser will warn about the certificate: it is Caddy's local CA, so continue past it.
 To remove the warning (optional), copy the root certificate out and add it to your OS or browser trust store:
 
 ```

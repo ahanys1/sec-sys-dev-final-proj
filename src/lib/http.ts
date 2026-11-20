@@ -6,7 +6,9 @@ import { logger, scrubError } from "./logger";
 const STATUS = {
   invalid_request: { status: 400, message: "The request is not valid." },
   unauthenticated: { status: 401, message: "Authentication is required." },
+  invalid_credentials: { status: 401, message: "Invalid username or password." },
   forbidden: { status: 403, message: "You do not have access to this." },
+  password_change_required: { status: 403, message: "You must change your password first." },
   origin_forbidden: { status: 403, message: "The request origin is not allowed." },
   not_found: { status: 404, message: "Not found." },
   method_not_allowed: { status: 405, message: "Method not allowed." },
