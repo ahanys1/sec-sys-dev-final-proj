@@ -6,7 +6,10 @@ FROM base AS deps
 RUN apk add --no-cache openssl
 COPY package.json package-lock.json prisma.config.ts ./
 COPY prisma ./prisma
-RUN npm ci && npx prisma --version
+# Optional: on a network that inspects TLS, EXTRA_CA_CERT (a PEM file) lets Prisma download its engine.
+RUN --mount=type=secret,id=extra_ca \
+    if [ -s /run/secrets/extra_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/extra_ca; fi; \
+    npm ci && npx prisma --version
 
 FROM deps AS build
 COPY . .

@@ -166,3 +166,11 @@
 ### Commit chore: npm audit fix (dev tooling)
 #### Liam's Agent
 - The lockfile update came from the developer running `npm audit fix`, not from the AI. The AI reviewed the diff (transitive dev-tooling bumps only, `package.json` unchanged), confirmed `make check` passes, and committed it.
+
+### Commit build: allow a corporate CA bundle for the image build
+#### Liam's Agent
+- The developer's `make up` failed at Prisma's engine download with `self-signed certificate in certificate chain`, a TLS-inspecting network. Added an optional BuildKit secret (`EXTRA_CA_CERT`) that sets `NODE_EXTRA_CA_CERTS` for that one build step, plus a portable `make ca-bundle` target (macOS, Linux, WSL2) that exports the system trust store, and README steps for it.
+- Security choice: the build trusts the network's CA instead of disabling certificate verification (`NODE_TLS_REJECT_UNAUTHORIZED=0`), which an automated check also blocked. With the secret unset the build is unchanged.
+- Verified: the compose file validates, and a throwaway Dockerfile showed the secret mount is empty for `/dev/null` and an unset secret and present for a real file. Not verified: a full image build on the inspected network with a real CA bundle; the developer needs to run that.
+- Also fixed a CI failure Semgrep reported on the workflows (10 findings, all mutable action tags): every action is now pinned to a commit SHA and the Semgrep image to a digest. Keep them current when updating actions.
+- Portability review: the developer noted other people will use the environment, so macOS-only commands were replaced and the pinned image digests were confirmed multi-arch (amd64 and arm64).

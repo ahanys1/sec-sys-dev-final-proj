@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test test-db guards audit check env-local up down reset logs migrate clean
+.PHONY: help install dev build start lint test test-db guards audit check env-local ca-bundle up down reset logs migrate clean
 
 ENV_FILE ?= .env
 
@@ -38,6 +38,16 @@ test-db: ## Database tests against a throwaway Postgres in Docker
 env-local: ## Create .env.local with random passwords (git-ignored)
 	@test ! -f .env.local || { echo ".env.local already exists"; exit 0; }; \
 	awk '/change-me/ { c = "openssl rand -hex 24"; c | getline r; close(c); sub(/change-me/, r) } { print }' .env.example > .env.local && echo "Created .env.local"
+
+ca-bundle: env-local ## Trust your network's TLS inspection for image builds (macOS/Linux/WSL2)
+	@case "$$(uname -s)" in \
+	  Darwin) security find-certificate -a -p /Library/Keychains/System.keychain /System/Library/Keychains/SystemRootCertificates.keychain > ca-bundle.pem ;; \
+	  Linux) for f in /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt; do [ -f "$$f" ] && cp "$$f" ca-bundle.pem && break; done ;; \
+	  *) echo "Unsupported OS: use WSL2, or set EXTRA_CA_CERT to a PEM file yourself"; exit 1 ;; \
+	esac; \
+	[ -s ca-bundle.pem ] || { echo "Could not export certificates; set EXTRA_CA_CERT to a PEM file yourself"; exit 1; }; \
+	grep -q '^EXTRA_CA_CERT=' .env.local || echo 'EXTRA_CA_CERT=./ca-bundle.pem' >> .env.local; \
+	echo "Wrote ca-bundle.pem and set EXTRA_CA_CERT in .env.local"
 
 up: ## Start the full stack at https://localhost (ENV_FILE=.env.local for a local env)
 	npx dotenvx run -f $(ENV_FILE) -- docker compose up --build -d

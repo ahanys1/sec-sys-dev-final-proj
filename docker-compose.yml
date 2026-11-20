@@ -21,7 +21,7 @@ services:
 
   # One-off job: docker compose run --rm migrate (owner role; the app never gets these credentials).
   migrate:
-    build: { context: ., target: migrate }
+    build: { context: ., target: migrate, secrets: [extra_ca] }
     profiles: [ops]
     environment:
       DATABASE_URL: postgresql://app_owner:${APP_OWNER_PASSWORD:?}@db:5432/incidents
@@ -30,7 +30,7 @@ services:
     networks: [internal]
 
   app:
-    build: { context: ., target: runner }
+    build: { context: ., target: runner, secrets: [extra_ca] }
     restart: unless-stopped
     environment:
       DATABASE_URL: postgresql://app_user:${APP_USER_PASSWORD:?}@db:5432/incidents
@@ -51,6 +51,10 @@ services:
       - caddy_data:/data
     depends_on: [app]
     networks: [edge, public]
+
+secrets:
+  extra_ca: # optional corporate CA bundle for the image build; empty by default
+    file: ${EXTRA_CA_CERT:-/dev/null}
 
 networks:
   internal: { internal: true } # no route to the internet; holds the database

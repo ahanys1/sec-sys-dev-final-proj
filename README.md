@@ -14,6 +14,7 @@ Status: foundation only. `/` is still the scaffold page. Login and incident feat
 | Node 24 (see `.nvmrc`; `nvm use`) | everything | `node -v` |
 | Docker (Docker Desktop or Rancher Desktop) | full stack, DB tests | `docker ps` |
 | `openssl`, `make` | helper targets | `make -v` |
+| Windows: use WSL2 | the Makefile needs a Unix shell | |
 | Ports 80 and 443 free | full stack | |
 
 ## 1. App only (fastest)
@@ -36,11 +37,10 @@ make migrate ENV_FILE=.env.local     # first time, and after any schema change
 ```
 
 Open **https://localhost**. Your browser will warn about the certificate: it is Caddy's local CA, so continue past it.
-To remove the warning (optional, macOS):
+To remove the warning (optional), copy the root certificate out and add it to your OS or browser trust store:
 
 ```
 docker cp "$(docker ps -qf name=caddy)":/data/caddy/pki/authorities/local/root.crt caddy-root.crt
-security add-trusted-cert -r trustRoot -k ~/Library/Keychains/login.keychain-db caddy-root.crt
 ```
 
 Day to day:
@@ -84,4 +84,15 @@ Passwords are baked into the database on its **first start**. If you regenerate 
 | `required variable ... is missing a value` | Add `ENV_FILE=.env.local` to the command, and run `make env-local` once |
 | Port 80 or 443 already in use | Stop the other service (or a previous stack: `make down`) |
 | Database password rejected after editing `.env.local` | `make reset` (passwords are set on first start) |
-| Docker build fails at `binaries.prisma.sh` with a certificate error | Your network inspects TLS. Add its CA to Docker, or build on another network |
+| Docker build fails at `binaries.prisma.sh` with `self-signed certificate` | Your network inspects TLS. Export your CA bundle and point the build at it (below) |
+
+### Build fails with `self-signed certificate` (corporate network)
+
+Your network inspects TLS, so the image build can't verify Prisma's download. Export your machine's trusted certificates and rebuild:
+
+```
+make ca-bundle                     # macOS, Linux, or WSL2; writes ca-bundle.pem and sets EXTRA_CA_CERT in .env.local
+make up ENV_FILE=.env.local
+```
+
+This adds trust for your network's CA; it does not disable certificate checking. `ca-bundle.pem` is git-ignored. On other setups, point `EXTRA_CA_CERT` in `.env.local` at any PEM file.
