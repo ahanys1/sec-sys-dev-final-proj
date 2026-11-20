@@ -215,3 +215,8 @@
 - Added `docs/plan.md` (how to pick up work, remaining slices with entry points and must-haves, reusable helpers, traps already hit), a pull request template, and a "Start here" section in `AGENTS.md` and `.github/copilot-instructions.md`.
 - Design choice: status and ownership stay in the existing GitHub issues (#1 to #22) and master tracker, so the repo file holds only stable guidance and doesn't go stale or conflict between branches. The plan file is free of personal names, per the cover-page rule.
 - Not verified: that a fresh agent session picks the right next slice from these files.
+
+### Commit docs: make docs/plan.md the ordered slice tracker
+#### Liam's Agent
+- Reworked `docs/plan.md` into the tracker: slices in build order with dependencies and status, a claim-by-draft-PR rule, and per-slice must-haves, and updated `AGENTS.md`, the Copilot instructions, and the PR template to match.
+- Human direction: the developer judged the GitHub issues unreliable for tracking (written Nov 7, never updated, horizontal layers) and said ordered, representative slices are enough, so the issues are now only acceptance criteria. This reverses the earlier choice to keep status in the issues. Added fuzz testing, the incident response plan, `SECURITY.md`, and the final review to the slices, which no issue covered.

@@ -6,7 +6,7 @@ Instructions for any AI agent (Claude, Copilot, ChatGPT/Codex, Cursor, etc.) wor
 Secure incident-reporting web app (CS 5343 final project). **`ASSIGNMENT.md` is the spec.** Cite requirement IDs (FR-x, NFR-x, SR-x) in commits, PRs, and non-obvious code comments.
 
 ## Start here
-Read `docs/plan.md` before starting: it says how to pick up work, what each remaining slice must contain, which helpers to reuse, and the traps we already hit. Status and ownership live in GitHub issues, so run `gh issue list` and `gh pr list` first, and take or create an issue before you write code. Open PRs with `Closes #N` or `Refs #N`.
+Read `docs/plan.md`: it lists the slices in build order with their status, what each must contain, which helpers to reuse, and the traps we already hit. Run `gh pr list` to see what is in progress, claim the next slice with an early draft PR, and keep its status in `docs/plan.md` current. The GitHub issues only describe acceptance criteria and are not kept current.
 
 ## Mandatory: log all AI usage
 Every AI-assisted change must add an entry to `AI-USAGE-REPORT.md` **in the same commit**, using the existing template:
