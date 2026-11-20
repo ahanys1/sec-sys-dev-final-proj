@@ -99,3 +99,45 @@
 #### Alex's Agent
 - Codex drafted the use and misuse case verification plan, mapped the cases to assignment requirements, ASVS 5.0.0, and STRIDE, and recorded the plan in the SDL tracker for Practices #7 and #11.
 - Case grouping, test fixtures, and demo order are Codex's drafting decisions. Human review and security edits are pending. These cases have no execution results yet.
+
+
+### Commit docs: add design document (FR-1 to FR-13, SR-1 to SR-14, SR-16)
+#### Alex's Agent
+- Codex drafted architecture, roles, data model, workflows, security controls, deployment, requirement traceability, and an unresolved-decision register in docs/design.md. Updated SDL Practice #5 and the ORM selection.
+- The developer delegated the ORM choice, selected Caddy, and requested unresolved details be documented for later answers. Codex selected Prisma after consulting its official transaction and query documentation. Exact package versions remain open.
+- Human review and subsequent security edits are pending. No implementation or passing security tests are claimed.
+
+### Commit docs: address design review (SR-8, SR-14, FR-12)
+#### Alex's Agent
+- Codex addressed reviewer corrections to design and threat-model consistency, scoped database deletion, encrypted-env tracking, middleware, selected tools, and team 13 identification.
+- Reviewer recommendations for unresolved implementation choices remain proposals awaiting developer answers. Copilot usage evidence remains pending and is not claimed.
+- Human direction supplied team number 13. Subsequent human/security edits remain pending.
+
+
+### Commit docs: complete design review and synchronize questions (SR-8, NFR-8)
+#### Alex's Agent
+- Codex added ASVS references to the design traceability matrix, finished framework and database documentation corrections, and set Node 24 in package engines, lockfile metadata, and .nvmrc following review.
+- Updated open questions to remove decided items and request factual Copilot usage evidence. Exact dependency versions and unapproved reviewer recommendations remain pending developer answers.
+- Human direction keeps PR #29 open and PR #30 stacked on it. Team identification remains 13. No Copilot activity is invented.
+
+
+### Commit docs: record approved design answers (NFR-3, NFR-5, SR-2, SR-14)
+#### Alex's Agent
+- Codex incorporated the reviewer-supplied answers into the design, updated SDL/tool decisions and threat-model consistency, and recorded the Caddy HTTP-hop risk as AR-8.
+- The developer explicitly approved the reviewer answers. Answered questions were removed from the design and PR description. Q-13 remains open because actual Copilot work and human edits require factual evidence.
+- Exact package versions and container digests are deferred to implementation under the approved selection process. No dependency installation, implemented controls, measured performance, or restore results are claimed.
+
+
+### Commit docs: track Copilot evidence in AI report (CONST-3, NFR-8)
+#### Alex's Agent
+- Codex removed the remaining Copilot evidence question from the design and PR description and pointed the design traceability entry to this report.
+- The developer directed that Copilot usage evidence be handled in the AI usage report.
+
+### Commit Merge main into fix/design-doc (resolve SDL tools conflict)
+#### Liam's Agent
+- Resolved the `docs/sdl.md` Approved tools conflict between #31 (Semgrep and ZAP "proposed") and the team-approved design decisions (Semgrep CE and CodeQL, ZAP baseline plus authenticated scans, Prisma, argon2, k6). Kept the approved decisions; dropped the superseded "proposed" rows.
+
+### Commit docs: move SDL to implementation, confirm banned functions (Practice #9)
+#### Liam's Agent
+- Updated `docs/sdl.md` (current phase, #9 row, banned-functions heading, revision history) and `AGENTS.md` (Zod, node-argon2, banned-functions rule).
+- Human direction: the developer reported team confirmation of the banned-functions list. #9 stays "In progress" because lint and CI enforcement are not yet implemented; #4 is left unconfirmed because the team did not confirm it.

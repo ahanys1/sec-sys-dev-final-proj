@@ -23,7 +23,7 @@ Record every human edit to AI output, especially security fixes. The commit hash
 - Never use real personal data in code, seeds, or tests (ASSUMP-2).
 
 ## SDL
-The project follows the Microsoft SDL. `docs/sdl.md` tracks the 17 practices and the current phase. Check it before starting work; don't write feature code for an area until the threat model covers it. When work moves a practice forward, update its row (status and evidence) in the same commit. Follow the banned-functions list there (Practice #9) once the team confirms it.
+The project follows the Microsoft SDL. `docs/sdl.md` tracks the 17 practices and the current phase. Check it before starting work; don't write feature code for an area until the threat model covers it. When work moves a practice forward, update its row (status and evidence) in the same commit. Follow the team-confirmed banned-functions list there (Practice #9).
 
 ## Stack and commands
 Next.js (App Router) + TypeScript.
@@ -40,7 +40,7 @@ npm test
 
 Test runner: Vitest (`tests/**/*.test.ts`, `@/*` alias works in tests).
 
-TODO: decide and record here: database/ORM, SAST tool, DAST tool.
+Decided: SAST uses Semgrep CE and CodeQL. DAST uses ZAP baseline in CI and authenticated per-role scans.
 Decided (see `docs/threat-model.md` §1.1):
 - Database: PostgreSQL in Docker (local); future target is internet-facing AWS (e.g. RDS).
 - Sessions: server-side sessions stored in the DB; the cookie holds only an opaque random token (`__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`).
@@ -49,7 +49,6 @@ Decided (see `docs/threat-model.md` §1.1):
 - Secrets: dotenvx-encrypted env files (threat-model D-4).
 - Any new route or page must be added to the entry point inventory in `docs/threat-model.md` §1.4.
 
-TODO: decide and record here: ORM, test runner, SAST tool, DAST tool.
 
 ## Security (non-negotiable)
 Target: **OWASP ASVS 5.0.0 Level 2**. The assignment's SR/FR/NFR requirements are mandatory and **override ASVS** when stricter or in conflict. Cite both in code comments, commits, and PRs (e.g. `SR-4, ASVS V8.2.1`).
@@ -88,3 +87,5 @@ Key rules (full lists in `docs/asvs/`):
 
 ## Git
 Work on feature branches and merge via PR; never push directly to `main`.
+
+Decided: Prisma ORM for PostgreSQL (D-6), Caddy for local HTTPS (D-7), and Vitest for tests. Use Prisma 7.x with @prisma/adapter-pg and pg. Validate input with Zod strict schemas and hash passwords with node-argon2 (argon2id). Pin exact dependency versions and image digests during implementation.

@@ -1,6 +1,6 @@
 # SAST, DAST, and Manual Security Testing
 
-Team #__
+Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#9-acceptance-criteria)
 
