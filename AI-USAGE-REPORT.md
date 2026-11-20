@@ -94,3 +94,8 @@
 - Suggested updating the test runner to Vitest and listing Semgrep and OWASP ZAP as proposed security-testing tools pending team approval.
 - Distinguished tool selection and configuration from completed security testing.
 - Human direction: the developer identified outdated TODO entries in `docs/sdl.md` and requested alignment with `docs/security-testing.md`. No security scans or test execution are claimed.
+
+### Commit Document use and misuse verification cases (FR-1 to FR-13, SR-1 to SR-14, SR-16)
+#### Alex's Agent
+- Codex drafted the use and misuse case verification plan, mapped the cases to assignment requirements, ASVS 5.0.0, and STRIDE, and recorded the plan in the SDL tracker for Practices #7 and #11.
+- Case grouping, test fixtures, and demo order are Codex's drafting decisions. Human review and security edits are pending. These cases have no execution results yet.
