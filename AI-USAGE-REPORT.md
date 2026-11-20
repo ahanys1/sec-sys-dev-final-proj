@@ -208,3 +208,19 @@
 - Gitleaks (`generic-api-key`) blocked PR #38 on a fake password constant in `tests/db/auth.test.ts`. The test passwords are now generated per run with `randomUUID()`, so no password-like literal is in the repo.
 - Because gitleaks scans every commit in a PR, the finding in the earlier commit would still fail, so `.gitleaksignore` records that one fingerprint with a comment. Reproduced and verified locally with the gitleaks image: the PR commit range and the whole history report no leaks, and the tracked files scan clean.
 - After rebasing the stack onto `main` (to drop squash-merged commits), the auth commit hash changed, so the `.gitleaksignore` fingerprint was updated to the new hash. Fingerprints are tied to the commit hash and must be refreshed on any rebase.
+
+
+### Commit docs: add the delivery plan, PR template, and agent start-here guidance
+#### Liam's Agent
+- Added `docs/plan.md` (how to pick up work, remaining slices with entry points and must-haves, reusable helpers, traps already hit), a pull request template, and a "Start here" section in `AGENTS.md` and `.github/copilot-instructions.md`.
+- Design choice: status and ownership stay in the existing GitHub issues (#1 to #22) and master tracker, so the repo file holds only stable guidance and doesn't go stale or conflict between branches. The plan file is free of personal names, per the cover-page rule.
+- Not verified: that a fresh agent session picks the right next slice from these files.
+
+### Commit docs: make docs/plan.md the ordered slice tracker
+#### Liam's Agent
+- Reworked `docs/plan.md` into the tracker: slices in build order with dependencies and status, a claim-by-draft-PR rule, and per-slice must-haves, and updated `AGENTS.md`, the Copilot instructions, and the PR template to match.
+- Human direction: the developer judged the GitHub issues unreliable for tracking (written Nov 7, never updated, horizontal layers) and said ordered, representative slices are enough, so the issues are now only acceptance criteria. This reverses the earlier choice to keep status in the issues. Added fuzz testing, the incident response plan, `SECURITY.md`, and the final review to the slices, which no issue covered.
+
+### Commit docs: mark slices 1 and 2 done in plan.md
+#### Liam's Agent
+- Set slices 1 and 2 to Done in `docs/plan.md` now that #34 to #38 are merged. Human catch: the developer noticed the table still said "In review"; the table is only useful if it is updated when PRs merge.

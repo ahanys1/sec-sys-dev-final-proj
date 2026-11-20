@@ -184,3 +184,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-20 | Added the Next 16 proxy (headers, CSP nonce), shared error, request, logger and audit libraries, and the health endpoint. |
 | 2026-11-20 | Added the image-build CI job and Dependabot; the runtime image no longer ships server source maps. |
 | 2026-11-20 | Auth and sessions implemented: login, logout, password change, session policy, lockout, first-admin CLI. ASVS rows for V3.3, V6.2, V6.3, V7, and V11 marked Done with evidence. |
+| 2026-11-20 | Added `docs/plan.md`, the PR template, and an AGENTS.md start-here section so any developer's agent can find the next slice and its status in the repo. |
