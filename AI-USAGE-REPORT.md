@@ -148,3 +148,10 @@
 - Caught in testing: the MD5/SHA-1 selector initially missed an imported `createHash` call, so it was fixed to match both forms. Plain SHA-256 for passwords can't be detected by lint and stays a code-review item.
 - Not yet verified: the workflows haven't run in CI. Actions are pinned to major tags, not SHAs, and the Semgrep image is `latest`; pin both before release.
 - Human direction: the developer confirmed SDL #4 and the banned-functions list, and I updated #4, #5, #7, #9, and #10 in `docs/sdl.md` to match.
+
+### Commit feat: add Docker stack, Prisma schema, and audit-safe migrations (SR-8, SR-11, FR-12, T-33, T-42, T-52)
+#### Liam's Agent
+- Added `docker-compose.yml` (Postgres with no published port, Caddy, app, migrate job), `Dockerfile`, `Caddyfile`, role init script, `.env.example`, the Prisma schema from design §4, two migrations, a Prisma client module, and database tests.
+- Security changes found during the work: `npm audit` flagged a high ReDoS in `effect` through the Prisma CLI, so it is overridden to a patched 3.22.5; the app and owner roles are separate and the app role has no DDL or audit UPDATE/DELETE, and the trigger also blocks TRUNCATE.
+- Verified locally against Postgres 18: all 7 database tests pass, and the audit trigger rejects UPDATE/DELETE/TRUNCATE even for the owner.
+- Not verified: the Docker image build, because local builds fail at Prisma's engine download behind this network's TLS inspection. CI will be the first real image build. No encrypted `.env` was created; the team must generate the dotenvx keys and share them through the password manager.

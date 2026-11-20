@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test guards audit check clean
+.PHONY: help install dev build start lint test guards audit check up down migrate clean
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -29,6 +29,15 @@ audit: ## Audit production dependencies (V15.1.1)
 	npm audit --omit=dev
 
 check: lint test guards build audit ## Everything CI should run
+
+up: ## Start the stack (secrets via dotenvx; Caddy serves https://localhost)
+	npx dotenvx run -- docker compose up --build -d
+
+down: ## Stop the stack (keeps the database volume)
+	docker compose down
+
+migrate: ## Apply database migrations with the owner role (one-off job)
+	npx dotenvx run -- docker compose --profile ops run --build --rm migrate
 
 clean: ## Remove build output and coverage
 	rm -rf .next out coverage

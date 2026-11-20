@@ -1,0 +1,62 @@
+# Local and live stack (docs/design.md §7). Start with `make up` so dotenvx supplies the env.
+# PostgreSQL has no `ports:` (T-52); only Caddy publishes 80/443 (checked by scripts/ci-guards.mjs).
+services:
+  db:
+    image: postgres:18-alpine@sha256:ff64c9e3bdf8e2120107d3559de8db314e8305f7e38c5105903c6295876738ff
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      APP_OWNER_PASSWORD: ${APP_OWNER_PASSWORD:?}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD:?}
+    volumes:
+      - pgdata:/var/lib/postgresql
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d incidents"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [internal]
+
+  # One-off job: docker compose run --rm migrate (owner role; the app never gets these credentials).
+  migrate:
+    build: { context: ., target: migrate }
+    profiles: [ops]
+    environment:
+      DATABASE_URL: postgresql://app_owner:${APP_OWNER_PASSWORD:?}@db:5432/incidents
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [internal]
+
+  app:
+    build: { context: ., target: runner }
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://app_user:${APP_USER_PASSWORD:?}@db:5432/incidents
+      TRUSTED_PROXY_HOPS: "1"
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [internal, edge]
+
+  caddy:
+    image: caddy:2-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+      CADDY_TLS: ${CADDY_TLS:-internal}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on: [app]
+    networks: [edge, public]
+
+networks:
+  internal: { internal: true } # no route to the internet; holds the database
+  edge: { internal: true } # Caddy to app only
+  public: {}
+
+volumes:
+  pgdata:
+  caddy_data:

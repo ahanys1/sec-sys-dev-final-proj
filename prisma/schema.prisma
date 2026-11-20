@@ -1,0 +1,158 @@
+// Logical model: docs/design.md §4. Audit append-only rules, role grants, and
+// case-insensitive unique indexes live in the migration SQL (SR-8, FR-12, SR-11, T-33).
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  user
+  reviewer
+  admin
+}
+
+enum IncidentStatus {
+  open
+  under_review
+  closed
+}
+
+enum ActorType {
+  user
+  system
+}
+
+enum AttemptScope {
+  ip
+  username
+}
+
+model User {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username              String    @unique // normalized (NFKC, lowercase) before lookup; ^[a-z0-9._-]{3,32}$
+  role                  Role
+  active                Boolean   @default(true)
+  passwordHash          String    @map("password_hash")
+  mustChangePassword    Boolean   @default(true) @map("must_change_password")
+  tempPasswordExpiresAt DateTime? @map("temp_password_expires_at") @db.Timestamptz(3)
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  sessions  Session[]
+  incidents Incident[]
+  comments  Comment[]
+  audit     AuditLog[]
+  settings  Settings[]
+
+  @@map("users")
+}
+
+model Session {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tokenHash      String   @unique @map("token_hash") // SHA-256 of the opaque cookie token (V7.2.3)
+  userId         String   @map("user_id") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastActivityAt DateTime @default(now()) @map("last_activity_at") @db.Timestamptz(3)
+  expiresAt      DateTime @map("expires_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Category {
+  id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String // unique on lower(name) in the migration
+  active Boolean @default(true)
+
+  incidents Incident[]
+
+  @@map("categories")
+}
+
+model Incident {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reporterId  String         @map("reporter_id") @db.Uuid
+  title       String
+  description String
+  status      IncidentStatus @default(open)
+  categoryId  String?        @map("category_id") @db.Uuid
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  reporter User      @relation(fields: [reporterId], references: [id], onDelete: Restrict)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  comments Comment[]
+
+  @@index([status, createdAt])
+  @@index([reporterId, createdAt])
+  @@map("incidents")
+}
+
+model Comment {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  incidentId String   @map("incident_id") @db.Uuid
+  authorId   String   @map("author_id") @db.Uuid
+  body       String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Restrict)
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([incidentId, createdAt])
+  @@map("comments")
+}
+
+// Singleton row (id = 1, enforced in the migration). Missing or invalid values fall back to
+// code defaults on read (threat-model §1.4.1, V16.5.3); ranges are validated by the app.
+model Settings {
+  id                   Int      @id @default(1)
+  statusMessage        String   @default("") @map("status_message")
+  sessionIdleMinutes   Int      @default(30) @map("session_idle_minutes")
+  sessionMaxHours      Int      @default(8) @map("session_max_hours")
+  lockoutThreshold     Int      @default(5) @map("lockout_threshold")
+  lockoutMinutes       Int      @default(15) @map("lockout_minutes")
+  tempPasswordHours    Int      @default(24) @map("temp_password_hours")
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  updatedById          String?  @map("updated_by_id") @db.Uuid
+
+  updatedBy User? @relation(fields: [updatedById], references: [id], onDelete: Restrict)
+
+  @@map("settings")
+}
+
+// Append-only (FR-12, SR-11): the app role has INSERT and SELECT only, and a trigger rejects
+// UPDATE and DELETE. Never store passwords, tokens, or incident descriptions here (SR-9).
+model AuditLog {
+  id        BigInt    @id @default(autoincrement())
+  actorType ActorType @map("actor_type")
+  userId    String?   @map("user_id") @db.Uuid // null only when actorType = system (DC-3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  action    String
+  targetId  String?   @map("target_id")
+  details   Json? // settings.update only: {key:{old,new}}
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([createdAt])
+  @@index([userId])
+  @@map("audit_log")
+}
+
+model LoginAttempt {
+  id           BigInt       @id @default(autoincrement())
+  scope        AttemptScope
+  key          String // client IP or submitted (normalized) username, even if no such account (T-02)
+  windowStart  DateTime     @map("window_start") @db.Timestamptz(3)
+  count        Int          @default(0)
+  lockoutUntil DateTime?    @map("lockout_until") @db.Timestamptz(3)
+
+  @@unique([scope, key, windowStart])
+  @@map("login_attempts")
+}
