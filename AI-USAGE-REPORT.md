@@ -182,3 +182,10 @@
 - Tooling issue fixed: a ` ` escape in the logger was converted to raw line separators and broke parsing, so the regex is built from char codes.
 - Verified: 52 unit tests and 9 database tests pass (audit commits with the change and rolls back when the audit insert fails). Against a production build, `curl` showed the CSP with a fresh nonce on pages, API, and 404 responses and on the scripts, static headers on build output, 405 for POST and OPTIONS on `/api/health`, and 400 for the subrequest header.
 - Not verified: browser behavior of the CSP (inline styles), and the Caddy rule, which needs the running stack. ASVS rows stay TODO until handlers use these libraries.
+
+### Commit ci: add image-build check and Dependabot (T-61, T-47, T-44, T-59)
+#### Liam's Agent
+- Added `scripts/check-image.sh` (builds the runtime and migrate images; asserts the runtime image is non-root and has no env files, `.git`, or source maps), a CI `image` job and `make check-image` that run it, and `.github/dependabot.yml` for npm, GitHub Actions, Dockerfile, and compose updates.
+- Security finding from the new check: the runtime image shipped four server-side `.js.map` files from Turbopack, contrary to the threat model's no-source-maps control. The Docker build now deletes them, and `next.config.ts` states `productionBrowserSourceMaps: false` explicitly, with a test.
+- Fixed while testing: `find` exits non-zero when it can't read a path, which silently aborted the script under `set -e`.
+- Verified: the script built both images with the CA-bundle secret and passed, and the same assertion failed before the source-map deletion. Not verified: the CI `image` job on GitHub's runners, and the Dependabot schedule. Dependabot does not cover the Semgrep image referenced in `sast.yml`.

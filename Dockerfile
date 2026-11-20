@@ -13,7 +13,8 @@ RUN --mount=type=secret,id=extra_ca \
 
 FROM deps AS build
 COPY . .
-RUN npm run build
+# T-47, V15.2.3: Turbopack writes server-side source maps; none belong in the image.
+RUN npm run build && find .next -name '*.map' -type f -delete
 
 # Migration job image: Prisma CLI, owner credentials supplied at run time only.
 FROM deps AS migrate

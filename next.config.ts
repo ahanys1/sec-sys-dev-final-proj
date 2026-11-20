@@ -4,6 +4,8 @@ import { STATIC_HEADERS } from "./src/lib/security-headers";
 const nextConfig: NextConfig = {
   // FW-5, NFR-2, ASVS V13.4.2: don't disclose the framework via X-Powered-By.
   poweredByHeader: false,
+  // V15.2.3: never serve browser source maps (also the default; explicit so a change is a visible diff).
+  productionBrowserSourceMaps: false,
   // Smaller runtime image: only the traced files are copied (see Dockerfile).
   output: "standalone",
   // FW-4, ASVS V15.2.2: disable the image optimizer; no remotePatterns, so no SSRF surface.

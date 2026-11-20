@@ -119,7 +119,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | Test runner | Vitest | Chosen |
 | SAST | Semgrep CE and CodeQL | Chosen, execution pending |
 | DAST | ZAP baseline in CI and authenticated per-role scans | Chosen, execution pending |
-| Dependency and secret scans | npm audit --omit=dev, Dependabot, gitleaks | Chosen, execution pending |
+| Dependency and secret scans | npm audit --omit=dev, Dependabot (`.github/dependabot.yml`), gitleaks | Chosen; running in CI |
 | Load testing | k6, 50 VUs and workload in design §7.2 | Chosen, execution pending |
 | Threat modeling | Mermaid DFDs, STRIDE and DREAD in markdown | Chosen |
 | Secrets (SR-14) | dotenvx (encrypted `.env`); AWS Secrets Manager | Chosen |
@@ -182,3 +182,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-19 | #4, #5, #9 marked Done; #7 and #10 statuses updated. Lint bans, CI guards, and CI/SAST workflows added. |
 | 2026-11-19 | Added Docker Compose stack, Prisma schema and migrations (audit append-only trigger, least-privilege app role), and database tests. |
 | 2026-11-20 | Added the Next 16 proxy (headers, CSP nonce), shared error, request, logger and audit libraries, and the health endpoint. |
+| 2026-11-20 | Added the image-build CI job and Dependabot; the runtime image no longer ships server source maps. |
