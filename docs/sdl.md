@@ -115,6 +115,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | Local TLS proxy | Caddy (D-7) | Chosen |
 | Password hashing | node-argon2, argon2id with m=19456 KiB, t=2, p=1 baseline | Chosen, implementation pending |
 | ORM / query layer | Prisma 7.10.1 with @prisma/adapter-pg 7.10.1 and pg 8.23.1 (D-6), exact pins; `effect` overridden to 3.22.5 (ReDoS in the Prisma CLI chain) | Chosen; `package.json`, `prisma/schema.prisma` |
+| Input validation | Zod 4.6.7 strict schemas (SR-7) | Chosen; `src/lib/request.ts` |
 | Test runner | Vitest | Chosen |
 | SAST | Semgrep CE and CodeQL | Chosen, execution pending |
 | DAST | ZAP baseline in CI and authenticated per-role scans | Chosen, execution pending |
@@ -180,3 +181,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-19 | Phase moved to Implementation; banned-functions list (#9) confirmed by the team, enforcement pending. |
 | 2026-11-19 | #4, #5, #9 marked Done; #7 and #10 statuses updated. Lint bans, CI guards, and CI/SAST workflows added. |
 | 2026-11-19 | Added Docker Compose stack, Prisma schema and migrations (audit append-only trigger, least-privilege app role), and database tests. |
+| 2026-11-20 | Added the Next 16 proxy (headers, CSP nonce), shared error, request, logger and audit libraries, and the health endpoint. |

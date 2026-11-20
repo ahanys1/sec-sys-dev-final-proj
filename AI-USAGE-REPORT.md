@@ -174,3 +174,11 @@
 - Verified: the compose file validates, and a throwaway Dockerfile showed the secret mount is empty for `/dev/null` and an unset secret and present for a real file. Not verified: a full image build on the inspected network with a real CA bundle; the developer needs to run that.
 - Also fixed a CI failure Semgrep reported on the workflows (10 findings, all mutable action tags): every action is now pinned to a commit SHA and the Semgrep image to a digest. Keep them current when updating actions.
 - Portability review: the developer noted other people will use the environment, so macOS-only commands were replaced and the pinned image digests were confirmed multi-arch (amd64 and arm64).
+
+### Commit feat: add proxy, shared request/error/logger/audit libraries (C-4, C-7, SR-7, SR-9, SR-12, SR-13, FR-11, T-43)
+#### Liam's Agent
+- Added `proxy.ts` (CSP nonce, security headers, rejection of `x-middleware-subrequest`), `src/lib/` modules for security headers, JSON/origin checks, error responses, a field-allowlist logger, and a transactional audit writer, plus `/api/health`, generic error pages, and a Caddy rule for the subrequest header. Next 16 renamed middleware to `proxy`, so the file is `proxy.ts`; the design table now says so.
+- Security fix found by a test: `scrubError` first kept error messages unless the error name started with "Prisma", which would still log query arguments from errors with another name and Postgres input values. It now drops the message for any error with a string `code`.
+- Tooling issue fixed: a ` ` escape in the logger was converted to raw line separators and broke parsing, so the regex is built from char codes.
+- Verified: 52 unit tests and 9 database tests pass (audit commits with the change and rolls back when the audit insert fails). Against a production build, `curl` showed the CSP with a fresh nonce on pages, API, and 404 responses and on the scripts, static headers on build output, 405 for POST and OPTIONS on `/api/health`, and 400 for the subrequest header.
+- Not verified: browser behavior of the CSP (inline styles), and the Caddy rule, which needs the running stack. ASVS rows stay TODO until handlers use these libraries.
