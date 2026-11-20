@@ -155,3 +155,10 @@
 - Security changes found during the work: `npm audit` flagged a high ReDoS in `effect` through the Prisma CLI, so it is overridden to a patched 3.22.5; the app and owner roles are separate and the app role has no DDL or audit UPDATE/DELETE, and the trigger also blocks TRUNCATE.
 - Verified locally against Postgres 18: all 7 database tests pass, and the audit trigger rejects UPDATE/DELETE/TRUNCATE even for the owner.
 - Not verified: the Docker image build, because local builds fail at Prisma's engine download behind this network's TLS inspection. CI will be the first real image build. No encrypted `.env` was created; the team must generate the dotenvx keys and share them through the password manager.
+
+### Commit docs: rewrite README with local setup and run guide
+#### Liam's Agent
+- Rewrote `README.md` as a start-to-finish local guide (app only, full HTTPS stack, daily commands, DB changes, troubleshooting). Added `make env-local`, `make test-db`, `make reset`, `make logs`, and an `ENV_FILE` option to `make up/down/migrate`.
+- Fixed in testing: the `.env.local` generator reused one `awk` pipe, which would have given every secret the same value; it now closes the pipe each time. The CI database wait now polls over TCP, because `pg_isready` can pass during the init phase before the roles exist.
+- Replaced the author names in the README with the team number (AGENTS.md: names only on the cover page) and corrected the Node requirement from 20.9+ to 24.
+- Verified: `make test-db` passes and removes its container, and the password generator yields distinct values on sample input. Not verified: `make env-local` on the real `.env.example`, `make up`, `make migrate`, and the optional certificate-trust commands (macOS), because the sandbox blocked `.env.local` access and the image build fails behind this network's TLS inspection.

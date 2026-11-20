@@ -37,7 +37,8 @@ jobs:
             -e POSTGRES_USER -e POSTGRES_PASSWORD -e APP_OWNER_PASSWORD -e APP_USER_PASSWORD \
             -v "$PWD/docker/postgres/init:/docker-entrypoint-initdb.d:ro" \
             "$(grep -oE 'postgres:18-alpine@sha256:[0-9a-f]+' docker-compose.yml)"
-          until docker exec pg pg_isready -U bootstrap_admin -d incidents; do sleep 2; done
+          # Poll over TCP: the init-phase server only listens on the socket.
+          until docker exec -e PGPASSWORD=ci-owner pg psql -h 127.0.0.1 -U app_owner -d incidents -c 'select 1' >/dev/null 2>&1; do sleep 2; done
       - run: npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://app_owner:ci-owner@127.0.0.1:5432/incidents
