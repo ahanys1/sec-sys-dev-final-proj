@@ -30,7 +30,7 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
 | V11.4.1 | 1 | Verify that only approved hash functions are used for general cryptographic use cases, including digital signatures, HMAC, KDF, and random bit generation. Disallowed hash functions, such as MD5, must not be used for any cryptographic purpose. | TODO | |
-| V11.4.2 | 2 | Verify that passwords are stored using an approved, computationally intensive, key derivation function (also known as a "password hashing function"), with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force attacks sufficiently challenging for the required level of security. | TODO | |
+| V11.4.2 | 2 | Verify that passwords are stored using an approved, computationally intensive, key derivation function (also known as a "password hashing function"), with parameter settings configured based on current guidance. The settings should balance security and performance to make brute-force attacks sufficiently challenging for the required level of security. | Done | `src/lib/auth/password.ts`; `tests/auth/password.test.ts` (argon2id, m=19456, t=2, p=1) |
 | V11.4.3 | 2 | Verify that hash functions used in digital signatures, as part of data authentication or data integrity are collision resistant and have appropriate bit-lengths. If collision resistance is required, the output length must be at least 256 bits. If only resistance to second pre-image attacks is required, the output length must be at least 128 bits. | TODO | |
 | V11.4.4 | 2 | Verify that the application uses approved key derivation functions with key stretching parameters when deriving secret keys from passwords. The parameters in use must balance security and performance to prevent brute-force attacks from compromising the resulting cryptographic key. | TODO | |
 
@@ -38,7 +38,7 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V11.5.1 | 2 | Verify that all random numbers and strings which are intended to be non-guessable must be generated using a cryptographically secure pseudo-random number generator (CSPRNG) and have at least 128 bits of entropy. Note that UUIDs do not respect this condition. | TODO | |
+| V11.5.1 | 2 | Verify that all random numbers and strings which are intended to be non-guessable must be generated using a cryptographically secure pseudo-random number generator (CSPRNG) and have at least 128 bits of entropy. Note that UUIDs do not respect this condition. | Done | `src/lib/auth/session.ts` (CSPRNG tokens); `Math.random` banned by `eslint.config.mjs`; `tests/lint-bans.test.ts` |
 
 ## V11.6 Public Key Cryptography
 

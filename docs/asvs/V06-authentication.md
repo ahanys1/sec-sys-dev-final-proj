@@ -14,25 +14,25 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V6.2.1 | 1 | Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended. | TODO | |
-| V6.2.2 | 1 | Verify that users can change their password. | TODO | |
-| V6.2.3 | 1 | Verify that password change functionality requires the user's current and new password. | TODO | |
-| V6.2.4 | 1 | Verify that passwords submitted during account registration or password change are checked against an available set of, at least, the top 3000 passwords which match the application's password policy, e.g. minimum length. | TODO | |
-| V6.2.5 | 1 | Verify that passwords of any composition can be used, without rules limiting the type of characters permitted. There must be no requirement for a minimum number of upper or lower case characters, numbers, or special characters. | TODO | |
-| V6.2.6 | 1 | Verify that password input fields use type=password to mask the entry. Applications may allow the user to temporarily view the entire masked password, or the last typed character of the password. | TODO | |
-| V6.2.7 | 1 | Verify that "paste" functionality, browser password helpers, and external password managers are permitted. | TODO | |
-| V6.2.8 | 1 | Verify that the application verifies the user's password exactly as received from the user, without any modifications such as truncation or case transformation. | TODO | |
-| V6.2.9 | 2 | Verify that passwords of at least 64 characters are permitted. | TODO | |
+| V6.2.1 | 1 | Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended. | Done | `src/lib/auth/password.ts`; `tests/auth/password.test.ts` |
+| V6.2.2 | 1 | Verify that users can change their password. | Done | `app/api/account/password/route.ts`; `tests/db/auth.test.ts` (password change) |
+| V6.2.3 | 1 | Verify that password change functionality requires the user's current and new password. | Done | `app/api/account/password/route.ts`; `tests/db/auth.test.ts` (requires the current password) |
+| V6.2.4 | 1 | Verify that passwords submitted during account registration or password change are checked against an available set of, at least, the top 3000 passwords which match the application's password policy, e.g. minimum length. | Done | `src/data/common-passwords.txt` (top 1M, policy-length); `tests/auth/password.test.ts` |
+| V6.2.5 | 1 | Verify that passwords of any composition can be used, without rules limiting the type of characters permitted. There must be no requirement for a minimum number of upper or lower case characters, numbers, or special characters. | Done | `checkNewPassword` has no composition rules; `tests/auth/password.test.ts` |
+| V6.2.6 | 1 | Verify that password input fields use type=password to mask the entry. Applications may allow the user to temporarily view the entire masked password, or the last typed character of the password. | Done | `app/login/LoginForm.tsx`, `app/account/password/PasswordForm.tsx` use `type="password"` |
+| V6.2.7 | 1 | Verify that "paste" functionality, browser password helpers, and external password managers are permitted. | Done | No paste blocking; `autoComplete` set in `app/login/LoginForm.tsx` |
+| V6.2.8 | 1 | Verify that the application verifies the user's password exactly as received from the user, without any modifications such as truncation or case transformation. | Done | `src/lib/auth/password.ts` hashes and verifies the exact string; `tests/auth/password.test.ts` |
+| V6.2.9 | 2 | Verify that passwords of at least 64 characters are permitted. | Done | 128-character maximum; `tests/auth/password.test.ts` |
 | V6.2.10 | 2 | Verify that a user's password stays valid until it is discovered to be compromised or the user rotates it. The application must not require periodic credential rotation. | TODO | |
 | V6.2.11 | 2 | Verify that the documented list of context specific words is used to prevent easy to guess passwords being created. | TODO | |
-| V6.2.12 | 2 | Verify that passwords submitted during account registration or password changes are checked against a set of breached passwords. | TODO | |
+| V6.2.12 | 2 | Verify that passwords submitted during account registration or password changes are checked against a set of breached passwords. | Done | `src/data/common-passwords.txt`; `tests/auth/password.test.ts` |
 
 ## V6.3 General Authentication Security
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V6.3.1 | 1 | Verify that controls to prevent attacks such as credential stuffing and password brute force are implemented according to the application's security documentation. | TODO | |
-| V6.3.2 | 1 | Verify that default user accounts (e.g., "root", "admin", or "sa") are not present in the application or are disabled. | TODO | |
+| V6.3.1 | 1 | Verify that controls to prevent attacks such as credential stuffing and password brute force are implemented according to the application's security documentation. | Done | `app/api/auth/login/route.ts`, `src/lib/auth/rate-limit.ts`; `tests/db/auth.test.ts` (lockout, IP limit) |
+| V6.3.2 | 1 | Verify that default user accounts (e.g., "root", "admin", or "sa") are not present in the application or are disabled. | Done | No default or seeded account; `scripts/create-admin.ts`; `tests/db/auth.test.ts` (first administrator) |
 | V6.3.3 | 2 | Verify that either a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms, must be used in order to access the application. For L3, one of the factors must be a hardware-based authentication mechanism which provides compromise and impersonation resistance against phishing attacks while verifying the intent to authenticate by requiring a user-initiated action (such as a button press on a FIDO hardware key or a mobile phone). Relaxing any of the considerations in this requirement requires a fully documented rationale and a comprehensive set of mitigating controls. | TODO | |
 | V6.3.4 | 2 | Verify that, if the application includes multiple authentication pathways, there are no undocumented pathways and that security controls and authentication strength are enforced consistently. | TODO | |
 

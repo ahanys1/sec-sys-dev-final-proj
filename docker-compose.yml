@@ -29,6 +29,18 @@ services:
       db: { condition: service_healthy }
     networks: [internal]
 
+  # One-off: make create-admin (prompts for the first administrator; NH-4). Uses the restricted app role.
+  create-admin:
+    build: { context: ., target: ops, secrets: [extra_ca] }
+    profiles: [ops]
+    stdin_open: true
+    tty: true
+    environment:
+      DATABASE_URL: postgresql://app_user:${APP_USER_PASSWORD:?}@db:5432/incidents
+    depends_on:
+      db: { condition: service_healthy }
+    networks: [internal]
+
   app:
     build: { context: ., target: runner, secrets: [extra_ca] }
     restart: unless-stopped

@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle up down reset logs migrate clean
+.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate clean
 
 ENV_FILE ?= .env
 
@@ -60,6 +60,9 @@ down: ## Stop the stack (keeps the database volume)
 
 reset: ## Stop the stack and DELETE the database volume
 	npx dotenvx run -f $(ENV_FILE) -- docker compose down -v
+
+create-admin: ## Create the first administrator (prompts; one-off)
+	npx dotenvx run -f $(ENV_FILE) -- docker compose --profile ops run --build --rm create-admin
 
 logs: ## Follow the stack logs
 	npx dotenvx run -f $(ENV_FILE) -- docker compose logs -f

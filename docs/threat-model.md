@@ -126,6 +126,7 @@ Pages (the UI for all roles, FR-13) are entry points too: each one renders data 
 | EP-21 | `/api/incidents/[id]/category` | PATCH | Reviewer | categoryId (UUID) | Category (Internal) | Category must exist and be active; **admins get 403**, same as status (D-3); active categories are listed on the EP-09 page for the dropdown; C-4, C-8, C-10 | §1.2 "classify" (D-2) |
 | EP-22 | `/admin/categories` page + `/api/admin/categories` | GET, POST | Admin | name | Category names (Internal) | Unique name, length cap, plain-text rendering (V3.2.2); C-3, C-4, C-8 | D-2 |
 | EP-23 | `/api/admin/categories/[id]` | PATCH | Admin | name, active | Category (Internal) | Categories are deactivated, never deleted (R-8); deactivated categories stay on existing incidents but can't be newly assigned; C-3, C-4, C-8 | D-2 |
+| EP-24 | `/` home page | GET | Any signed-in role (anonymous visitors are redirected to `/login`; a session that must change its password is redirected to EP-06) | none | Username and role (Internal) | Session and role checked in the page (C-1, C-2, C-11); `no-store` (C-9); later slices add the role's links | FR-4, FR-13 |
 
 #### 1.4.1 Admin-configurable settings (EP-20)
 
@@ -452,3 +453,4 @@ Practice #13 re-checks all of this against the built system.
 | 2026-11-14 | #7 Threat Modeling | Part 2: DFDs, STRIDE analysis (`stride.md`), DREAD and bug bar, D-4 and D-5 resolved. Design changes from the analysis applied to Part 1: C-11, C-4 and C-8 tightened, EP-02, EP-06, FW-1, NH-3, NH-4, and §1.7 (`login_attempts`). |
 | 2026-11-18 | #5 Design review | Aligned login-attempt storage, database grants, and resolved Prisma/Caddy decisions with the design. |
 | 2026-11-18 | #5, #7, #8 | Recorded approved Prisma adapter, local Caddy trust/transport, security gates, and AR-8. Details in design §§1 and 4–7. |
+| 2026-11-20 | #5, #8 | Added EP-24 (`/` home page) to the inventory for the auth slice; EP-01, EP-02, EP-05, and EP-06 are now implemented. |

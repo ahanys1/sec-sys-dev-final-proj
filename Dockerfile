@@ -16,6 +16,11 @@ COPY . .
 # T-47, V15.2.3: Turbopack writes server-side source maps; none belong in the image.
 RUN npm run build && find .next -name '*.map' -type f -delete
 
+# One-off operator tools (create-admin): source and dev dependencies, never run as a service (NH-4).
+FROM build AS ops
+USER node
+CMD ["npx", "tsx", "scripts/create-admin.ts"]
+
 # Migration job image: Prisma CLI, owner credentials supplied at run time only.
 FROM deps AS migrate
 RUN chown -R node:node /app

@@ -14,25 +14,25 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V7.2.1 | 1 | Verify that the application performs all session token verification using a trusted, backend service. | TODO | |
-| V7.2.2 | 1 | Verify that the application uses either self-contained or reference tokens that are dynamically generated for session management, i.e. not using static API secrets and keys. | TODO | |
-| V7.2.3 | 1 | Verify that if reference tokens are used to represent user sessions, they are unique and generated using a cryptographically secure pseudo-random number generator (CSPRNG) and possess at least 128 bits of entropy. | TODO | |
-| V7.2.4 | 1 | Verify that the application generates a new session token on user authentication, including re-authentication, and terminates the current session token. | TODO | |
+| V7.2.1 | 1 | Verify that the application performs all session token verification using a trusted, backend service. | Done | `src/lib/auth/session.ts`; `tests/db/auth.test.ts` |
+| V7.2.2 | 1 | Verify that the application uses either self-contained or reference tokens that are dynamically generated for session management, i.e. not using static API secrets and keys. | Done | `src/lib/auth/session.ts`; `tests/db/auth.test.ts` |
+| V7.2.3 | 1 | Verify that if reference tokens are used to represent user sessions, they are unique and generated using a cryptographically secure pseudo-random number generator (CSPRNG) and possess at least 128 bits of entropy. | Done | `src/lib/auth/session.ts` (`newToken`); `tests/auth/session-helpers.test.ts` |
+| V7.2.4 | 1 | Verify that the application generates a new session token on user authentication, including re-authentication, and terminates the current session token. | Done | `app/api/auth/login/route.ts`; `tests/db/auth.test.ts` (re-login issues a new token) |
 
 ## V7.3 Session Timeout
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V7.3.1 | 2 | Verify that there is an inactivity timeout such that re-authentication is enforced according to risk analysis and documented security decisions. | TODO | |
-| V7.3.2 | 2 | Verify that there is an absolute maximum session lifetime such that re-authentication is enforced according to risk analysis and documented security decisions. | TODO | |
+| V7.3.1 | 2 | Verify that there is an inactivity timeout such that re-authentication is enforced according to risk analysis and documented security decisions. | Done | `src/lib/auth/session.ts`; `tests/db/auth.test.ts` (inactivity timeout) |
+| V7.3.2 | 2 | Verify that there is an absolute maximum session lifetime such that re-authentication is enforced according to risk analysis and documented security decisions. | Done | `src/lib/auth/session.ts`; `tests/db/auth.test.ts` (absolute lifetime) |
 
 ## V7.4 Session Termination
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V7.4.1 | 1 | Verify that when session termination is triggered (such as logout or expiration), the application disallows any further use of the session. For reference tokens or stateful sessions, this means invalidating the session data at the application backend. Applications using self-contained tokens will need a solution such as maintaining a list of terminated tokens, disallowing tokens produced before a per-user date and time or rotating a per-user signing key. | TODO | |
+| V7.4.1 | 1 | Verify that when session termination is triggered (such as logout or expiration), the application disallows any further use of the session. For reference tokens or stateful sessions, this means invalidating the session data at the application backend. Applications using self-contained tokens will need a solution such as maintaining a list of terminated tokens, disallowing tokens produced before a per-user date and time or rotating a per-user signing key. | Done | `app/api/auth/logout/route.ts`; `tests/db/auth.test.ts` (logout) |
 | V7.4.2 | 1 | Verify that the application terminates all active sessions when a user account is disabled or deleted (such as an employee leaving the company). | TODO | |
-| V7.4.3 | 2 | Verify that the application gives the option to terminate all other active sessions after a successful change or removal of any authentication factor (including password change via reset or recovery and, if present, an MFA settings update). | TODO | |
+| V7.4.3 | 2 | Verify that the application gives the option to terminate all other active sessions after a successful change or removal of any authentication factor (including password change via reset or recovery and, if present, an MFA settings update). | Done | `app/api/account/password/route.ts` (`endOtherSessions`); `tests/db/auth.test.ts` |
 | V7.4.4 | 2 | Verify that all pages that require authentication have easy and visible access to logout functionality. | TODO | |
 | V7.4.5 | 2 | Verify that application administrators are able to terminate active sessions for an individual user or for all users. | TODO | |
 

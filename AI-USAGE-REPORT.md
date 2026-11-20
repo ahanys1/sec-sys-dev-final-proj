@@ -193,3 +193,12 @@
 ### Commit ci: add a 7-day Dependabot cooldown
 #### Liam's Agent
 - Semgrep (`dependabot-missing-cooldown`) blocked PR #37 because the Dependabot config proposed brand-new releases immediately. Added `cooldown: default-days: 7` to all four ecosystems, which delays proposals for newly published versions (a supply-chain safeguard, T-59) without delaying security updates.
+
+### Commit feat: add authentication, sessions, password change, and first-admin CLI (SR-1 to SR-3, FR-4, FR-5, T-01 to T-16)
+#### Liam's Agent
+- Added `/api/auth/login`, `/api/auth/logout`, `/api/account/password`, the login, home, and change-password pages, server-side sessions (hashed 256-bit tokens, idle and absolute timeouts, five-session cap, role read from the database), database-backed lockout and IP limits, argon2id hashing with a four-hash concurrency cap, a bundled offline common-password list (SecLists, MIT), the temporary-password gate, and `scripts/create-admin.ts` run through an `ops` container.
+- Marked 28 ASVS and assignment rows Done with test evidence (V3.3, V6.2, V6.3.1, V6.3.2, V7.2 to V7.4.1, V7.4.3, V11.4.2, V11.5.1, SR-2, SR-3). Left V6.4.1, V7.4.2, V7.4.4, V2.4.1, and SR-1 as TODO until temporary passwords, the deactivate endpoint, every authenticated page, and the remaining endpoints exist.
+- Caught by lint, then fixed: the retry jitter used `Math.random`, which the SDL #9 ban rejected; it now uses `crypto.randomInt`. A test spawning the CLI hit the `child_process` ban, so the logic moved into `src/lib/auth/create-admin.ts` and is tested directly instead of weakening the ban.
+- Cleaned the downloaded password list of `$HEX[...]` and test entries, and committed its SHA-256, which a test checks.
+- Verified: 72 unit and 32 database tests pass. Against the real runtime image, `curl` showed the expected 307 redirect, identical 401 bodies for unknown user and wrong password, a hardened cookie, logout with `Clear-Site-Data`, a redirect afterwards, no passwords or submitted usernames in the logs, and a hash plus a system-actor audit record in the database. The CLI refused a short password in its container.
+- Not verified: the pages in a real browser, including the CSP with the form scripts, and the Caddy path. Login throttling by IP uses the `X-Forwarded-For` value Caddy sets, which only the full stack exercises.
