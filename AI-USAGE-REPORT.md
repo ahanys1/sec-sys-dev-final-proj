@@ -101,3 +101,8 @@
 #### Alex's Agent
 - Codex removed the remaining Copilot evidence question from the design and PR description and pointed the design traceability entry to this report.
 - The developer directed that Copilot usage evidence be handled in the AI usage report.
+
+### Commit docs: move SDL to implementation, confirm banned functions (Practice #9)
+#### Liam's Agent
+- Updated `docs/sdl.md` (current phase, #9 row, banned-functions heading, revision history) and `AGENTS.md` (Zod, node-argon2, banned-functions rule).
+- Human direction: the developer reported team confirmation of the banned-functions list. #9 stays "In progress" because lint and CI enforcement are not yet implemented; #4 is left unconfirmed because the team did not confirm it.
