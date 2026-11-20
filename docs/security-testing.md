@@ -196,7 +196,7 @@ Testing methods may overlap because individual threats can require multiple form
 | MC-05 — Restricted function access | T-19, T-26, T-43 | DAST, automated role matrix, manual authorization tests | Planned |
 | MC-06 — Unauthorized role changes | T-17, T-18, T-27 | Automated validation and authorization tests, manual verification | Planned |
 | MC-07 — Out-of-scope incident access | T-24, T-25, T-28 | DAST, automated object-level authorization tests, manual IDOR tests | Planned |
-| MC-08 — Invalid or competing incident updates | T-26, T-27 | Automated workflow/concurrency tests, manual verification | Planned |
+| MC-08 — Invalid or competing incident updates | T-26, T-27, T-31 | Automated workflow/concurrency tests, manual verification | Planned |
 | MC-09 — Unsafe stored text and settings | T-21–T-23, T-29, T-30 | SAST, DAST, automated validation tests, manual rendering tests | Planned |
 | MC-10 — Unsafe queries and error handling | T-38, T-55 | SAST, DAST, automated validation tests, manual verification | Planned |
 | MC-11 — Audit integrity | T-33–T-35 | Automated database/integration tests, manual database verification | Planned |
