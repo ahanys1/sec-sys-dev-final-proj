@@ -141,3 +141,10 @@
 #### Liam's Agent
 - Updated `docs/sdl.md` (current phase, #9 row, banned-functions heading, revision history) and `AGENTS.md` (Zod, node-argon2, banned-functions rule).
 - Human direction: the developer reported team confirmation of the banned-functions list. #9 stays "In progress" because lint and CI enforcement are not yet implemented; #4 is left unconfirmed because the team did not confirm it.
+
+### Commit feat: enforce banned functions in lint and CI (SDL #9, SR-2, SR-7, SR-8, SR-9, FW-3)
+#### Liam's Agent
+- Added ESLint bans for the Practice #9 list, a test per banned API (`tests/lint-bans.test.ts`), a Node guard for Server Actions and a published PostgreSQL port (`scripts/ci-guards.mjs`), and CI workflows for `make check`, gitleaks, Semgrep CE, and CodeQL.
+- Caught in testing: the MD5/SHA-1 selector initially missed an imported `createHash` call, so it was fixed to match both forms. Plain SHA-256 for passwords can't be detected by lint and stays a code-review item.
+- Not yet verified: the workflows haven't run in CI. Actions are pinned to major tags, not SHAs, and the Semgrep image is `latest`; pin both before release.
+- Human direction: the developer confirmed SDL #4 and the banned-functions list, and I updated #4, #5, #7, #9, and #10 in `docs/sdl.md` to match.

@@ -12,7 +12,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 
 ## Current phase
 
-**Implementation** (as of 2026-11-19). Design is complete (#5 and #7 in review). Banned functions (#9) are team-confirmed. Feature code may start for any area the threat model covers; enforcement of #9 in lint and CI lands with the foundation work.
+**Implementation** (as of 2026-11-19). Design is complete (#5 Done; #7 merged, misuse-test execution pending). Banned functions (#9) are enforced in lint and CI. Feature code may start for any area the threat model covers.
 
 ## Practice tracker
 
@@ -21,13 +21,13 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 1 | Training | Provide Training | Team: CS 5343 lessons on secure design, threat modeling, ASVS, AI-assisted coding. AI tools are "trained" too: every agent reads the security rules before writing code. | Done | Course Lessons 01 to 21; `AGENTS.md`; `.github/copilot-instructions.md` |
 | 2 | Requirements | Security Requirements | SR-1 to SR-16, plus OWASP ASVS 5.0.0 Level 2 as the target, mapped to the assignment requirements. | Done | `ASSIGNMENT.md` §5; `docs/asvs/assignment-mapping.md`; `docs/asvs/owasp-top10-mapping.md` |
 | 3 | Requirements | Quality Gates / Bug Bars | Minimum release threshold and which defects block release. | In progress: gates approved, CI enforcement pending | `docs/design.md` §7.1; [Quality gates below](#quality-gates-and-bug-bar-practice-3) |
-| 4 | Requirements | Security and Privacy Risk Assessment | Answer the Lesson 04 SRA/PRA questions; data sensitivity levels. | In progress: team to confirm [draft below](#security-and-privacy-risk-assessment-practice-4) | `ASSIGNMENT.md` §6.2 |
-| 5 | Design | Design Requirements | Design doc showing how every FR/NFR/SR is met, with a Requirements Traceability Matrix (RTM). Must include the decisions from threat-model §1.1 and the D-2 additions (settings, categories). | In review | `docs/design.md`; architecture decisions in `docs/threat-model.md` §1.1 |
+| 4 | Requirements | Security and Privacy Risk Assessment | Answer the Lesson 04 SRA/PRA questions; data sensitivity levels. | Done (team confirmed 2026-11-19) | [Assessment below](#security-and-privacy-risk-assessment-practice-4); `ASSIGNMENT.md` §6.2 |
+| 5 | Design | Design Requirements | Design doc showing how every FR/NFR/SR is met, with a Requirements Traceability Matrix (RTM). Must include the decisions from threat-model §1.1 and the D-2 additions (settings, categories). | Done | `docs/design.md` (PR #32); architecture decisions in `docs/threat-model.md` §1.1 |
 | 6 | Design | Attack Surface Reduction | Entry point inventory, trust boundaries, reduction decisions. | Done | `docs/threat-model.md` Part 1 (merged, PR #24) |
-| 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In review: use and misuse cases drafted, test execution pending | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; [Use and misuse cases](use-misuse-cases.md) |
+| 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In progress: model and misuse cases merged (PRs #28, #29); test execution pending | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; [Use and misuse cases](use-misuse-cases.md) |
 | 8 | Implementation | Use Approved Tools | Fixed, version-pinned tool list. | In progress | [Approved tools below](#approved-tools-practice-8); scaffold on `feature/nextjs-scaffold` |
-| 9 | Implementation | Deprecate Unsafe Functions | Banned APIs for TypeScript/Next.js, enforced by lint and CI. | In progress: list confirmed by the team 2026-11-19; lint and CI enforcement pending | [Banned functions below](#banned-functions-practice-9) |
-| 10 | Implementation | Static Analysis | SAST in CI on every PR (AC-3). | In progress: Semgrep CE and CodeQL selected, execution pending | `docs/design.md` §7.1; `docs/security-testing.md` |
+| 9 | Implementation | Deprecate Unsafe Functions | Banned APIs for TypeScript/Next.js, enforced by lint and CI. | Done | `eslint.config.mjs`; `tests/lint-bans.test.ts`; `scripts/ci-guards.mjs`; `.github/workflows/ci.yml`. Plain SHA-256 for passwords can't be linted; code review only. |
+| 10 | Implementation | Static Analysis | SAST in CI on every PR (AC-3). | In progress: `.github/workflows/sast.yml` added; first results pending | `docs/design.md` §7.1; `docs/security-testing.md` |
 | 11 | Verification | Dynamic Program Analysis | DAST against the running Docker app over TLS (AC-3; D-7). | In progress: ZAP selected, execution pending | [Planned misuse cases](use-misuse-cases.md#misuse-cases), `docs/security-testing.md` |
 | 12 | Verification | Fuzz Testing | Fuzz the inputs in scope from #4 question 5. | TODO | `docs/security-testing.md` |
 | 13 | Verification | Threat Model and Attack Surface Review | Compare built routes and pages with the threat-model §1.4 inventory; update STRIDE for any change. | TODO | `docs/threat-model.md` revision history |
@@ -92,7 +92,7 @@ Regardless of score, any authentication bypass, privilege escalation (SR-4 to SR
 
 ## Security and privacy risk assessment (Practice #4)
 
-**Draft; team to confirm.** Answers to the Lesson 04 questions:
+**Confirmed by the team on 2026-11-19.** Answers to the Lesson 04 questions:
 
 1. **Which portions need threat models before release?** All entry points in `docs/threat-model.md` §1.4, prioritizing the high-risk ones in §1.9 (login, password change, admin user and settings changes, incident access).
 2. **Which portions need security design reviews?** Authentication and sessions, RBAC, audit logging, the admin settings page (EP-20), and secrets handling.
@@ -178,3 +178,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-18 | Addressed PR #30 review with ASVS traceability and Node 24 runtime evidence. |
 | 2026-11-18 | Recorded approved reviewer answers for tooling, gates, accepted risks, and operational design. Implementation and execution evidence remain pending. |
 | 2026-11-19 | Phase moved to Implementation; banned-functions list (#9) confirmed by the team, enforcement pending. |
+| 2026-11-19 | #4, #5, #9 marked Done; #7 and #10 statuses updated. Lint bans, CI guards, and CI/SAST workflows added. |
