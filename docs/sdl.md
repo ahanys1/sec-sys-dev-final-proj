@@ -12,7 +12,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 
 ## Current phase
 
-**Design** (as of 2026-11-14). #6 is done; #7 Threat Modeling is in review. #8 (tooling) has started in parallel; feature code waits until #7 covers that area (see [threat-model.md](threat-model.md) Part 2).
+**Implementation** (as of 2026-11-19). Design is complete (#5 and #7 in review). Banned functions (#9) are team-confirmed. Feature code may start for any area the threat model covers; enforcement of #9 in lint and CI lands with the foundation work.
 
 ## Practice tracker
 
@@ -26,7 +26,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 6 | Design | Attack Surface Reduction | Entry point inventory, trust boundaries, reduction decisions. | Done | `docs/threat-model.md` Part 1 (merged, PR #24) |
 | 7 | Design | Threat Modeling | DFD, STRIDE per element, DREAD ranking, mitigations, misuse cases. Also resolves D-4 (SR-14 secrets) and D-5 (session policy). | In review: use and misuse cases drafted, test execution pending | `docs/threat-model.md` Part 2; `docs/stride.md`; D-4 and D-5 resolved; [Use and misuse cases](use-misuse-cases.md) |
 | 8 | Implementation | Use Approved Tools | Fixed, version-pinned tool list. | In progress | [Approved tools below](#approved-tools-practice-8); scaffold on `feature/nextjs-scaffold` |
-| 9 | Implementation | Deprecate Unsafe Functions | Banned APIs for TypeScript/Next.js, enforced by lint and CI. | TODO: team to confirm [proposal below](#banned-functions-practice-9) | |
+| 9 | Implementation | Deprecate Unsafe Functions | Banned APIs for TypeScript/Next.js, enforced by lint and CI. | In progress: list confirmed by the team 2026-11-19; lint and CI enforcement pending | [Banned functions below](#banned-functions-practice-9) |
 | 10 | Implementation | Static Analysis | SAST in CI on every PR (AC-3). | In progress: Semgrep CE and CodeQL selected, execution pending | `docs/design.md` §7.1; `docs/security-testing.md` |
 | 11 | Verification | Dynamic Program Analysis | DAST against the running Docker app over TLS (AC-3; D-7). | In progress: ZAP selected, execution pending | [Planned misuse cases](use-misuse-cases.md#misuse-cases), `docs/security-testing.md` |
 | 12 | Verification | Fuzz Testing | Fuzz the inputs in scope from #4 question 5. | TODO | `docs/security-testing.md` |
@@ -125,7 +125,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 
 ## Banned functions (Practice #9)
 
-**Proposed; team to confirm.** Enforce with ESLint rules and a CI grep where ESLint can't.
+**Confirmed by the team on 2026-11-19.** Enforce with ESLint rules and a CI grep where ESLint can't.
 
 | Banned | Why | Use instead | Req |
 |---|---|---|---|
@@ -177,3 +177,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-17 | Added the use and misuse case test plan as evidence for #7 and preparation for #11. |
 | 2026-11-18 | Addressed PR #30 review with ASVS traceability and Node 24 runtime evidence. |
 | 2026-11-18 | Recorded approved reviewer answers for tooling, gates, accepted risks, and operational design. Implementation and execution evidence remain pending. |
+| 2026-11-19 | Phase moved to Implementation; banned-functions list (#9) confirmed by the team, enforcement pending. |

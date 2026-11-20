@@ -23,7 +23,7 @@ Record every human edit to AI output, especially security fixes. The commit hash
 - Never use real personal data in code, seeds, or tests (ASSUMP-2).
 
 ## SDL
-The project follows the Microsoft SDL. `docs/sdl.md` tracks the 17 practices and the current phase. Check it before starting work; don't write feature code for an area until the threat model covers it. When work moves a practice forward, update its row (status and evidence) in the same commit. Follow the banned-functions list there (Practice #9) once the team confirms it.
+The project follows the Microsoft SDL. `docs/sdl.md` tracks the 17 practices and the current phase. Check it before starting work; don't write feature code for an area until the threat model covers it. When work moves a practice forward, update its row (status and evidence) in the same commit. Follow the team-confirmed banned-functions list there (Practice #9).
 
 ## Stack and commands
 Next.js (App Router) + TypeScript.
@@ -88,4 +88,4 @@ Key rules (full lists in `docs/asvs/`):
 ## Git
 Work on feature branches and merge via PR; never push directly to `main`.
 
-Decided: Prisma ORM for PostgreSQL (D-6), Caddy for local HTTPS (D-7), and Vitest for tests. Use Prisma 7.x with @prisma/adapter-pg and pg. Pin exact dependency versions and image digests during implementation.
+Decided: Prisma ORM for PostgreSQL (D-6), Caddy for local HTTPS (D-7), and Vitest for tests. Use Prisma 7.x with @prisma/adapter-pg and pg. Validate input with Zod strict schemas and hash passwords with node-argon2 (argon2id). Pin exact dependency versions and image digests during implementation.
