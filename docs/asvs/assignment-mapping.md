@@ -11,7 +11,7 @@ Text below is quoted from ASSIGNMENT.md (sub-bullets joined with `;`). SR-15 doe
 | SR-3 | If web-based, authentication tokens (e.g. session cookies) shall be protected using secure flags (HttpOnly, Secure, SameSite). | V3.3.1, V3.3.2, V3.3.4 | Done | `src/lib/auth/session.ts`; `tests/auth/session-helpers.test.ts`; `tests/db/auth.test.ts` |
 | SR-4 | The system shall enforce RBAC for user, reviewer, and admin roles. | V8.1.1, V8.2.1, V8.2.2 | TODO | |
 | SR-5 | Authorization checks shall be performed for every request. | V8.2.1, V8.2.2, V8.3.1 | TODO | |
-| SR-6 | Users shall not be able to modify their own roles. | V8.2.1, V8.2.3, V15.3.3 | TODO | |
+| SR-6 | Users shall not be able to modify their own roles. | V8.2.1, V8.2.3, V15.3.3 | Done | `src/lib/admin/users.ts` (target must differ from the caller; `assertNotSelf`); strict schemas reject `role` on profile and password routes; `tests/db/admin-users.test.ts` (own role, status, and reset refused), `tests/db/auth.test.ts` (role ignored on password change) |
 | SR-7 | All user input shall be validated and sanitized. | V2.2.1, V2.2.2, V1.2.1, V3.2.2, V15.3.5 | TODO | |
 | SR-8 | The system shall use parameterized queries for all database operations. | V1.2.4 | TODO | |
 | SR-9 | Logs shall not contain sensitive data (passwords, tokens, full incident descriptions). | V16.2.5, V14.1.2 | TODO | |

@@ -27,4 +27,4 @@ done
 DATABASE_URL="postgresql://app_owner:$OWNER_PW@127.0.0.1:$PORT/incidents" npx prisma migrate deploy
 TEST_DATABASE_OWNER_URL="postgresql://app_owner:$OWNER_PW@127.0.0.1:$PORT/incidents" \
 TEST_DATABASE_APP_URL="postgresql://app_user:$APP_PW@127.0.0.1:$PORT/incidents" \
-  npx vitest run tests/db
+  npx vitest run tests/db --no-file-parallelism
