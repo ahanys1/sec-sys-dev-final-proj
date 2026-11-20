@@ -12,8 +12,9 @@ import { hashToken, tokenFromCookieHeader } from "@/src/lib/auth/session";
 const ownerUrl = process.env.TEST_DATABASE_OWNER_URL;
 const appUrl = process.env.TEST_DATABASE_APP_URL;
 
-const PASSWORD = "correct-horse-battery-staple-9";
-const NEW_PASSWORD = "a-different-long-passphrase-42";
+// Generated per run so no password-like literal lives in the repo (ASSUMP-2, SR-14; keeps gitleaks clean).
+const PASSWORD = `pw-${randomUUID()}-fixture`;
+const NEW_PASSWORD = `pw-${randomUUID()}-changed`;
 
 describe.skipIf(!ownerUrl || !appUrl)("authentication and sessions", () => {
   const owner = new pg.Pool({ connectionString: ownerUrl, max: 1 });

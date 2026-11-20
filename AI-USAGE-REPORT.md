@@ -202,3 +202,9 @@
 - Cleaned the downloaded password list of `$HEX[...]` and test entries, and committed its SHA-256, which a test checks.
 - Verified: 72 unit and 32 database tests pass. Against the real runtime image, `curl` showed the expected 307 redirect, identical 401 bodies for unknown user and wrong password, a hardened cookie, logout with `Clear-Site-Data`, a redirect afterwards, no passwords or submitted usernames in the logs, and a hash plus a system-actor audit record in the database. The CLI refused a short password in its container.
 - Not verified: the pages in a real browser, including the CSP with the form scripts, and the Caddy path. Login throttling by IP uses the `X-Forwarded-For` value Caddy sets, which only the full stack exercises.
+
+### Commit fix: clear gitleaks false positive in auth tests
+#### Liam's Agent
+- Gitleaks (`generic-api-key`) blocked PR #38 on a fake password constant in `tests/db/auth.test.ts`. The test passwords are now generated per run with `randomUUID()`, so no password-like literal is in the repo.
+- Because gitleaks scans every commit in a PR, the finding in the earlier commit would still fail, so `.gitleaksignore` records that one fingerprint with a comment. Reproduced and verified locally with the gitleaks image: the PR commit range and the whole history report no leaks, and the tracked files scan clean.
+- After rebasing the stack onto `main` (to drop squash-merged commits), the auth commit hash changed, so the `.gitleaksignore` fingerprint was updated to the new hash. Fingerprints are tied to the commit hash and must be refreshed on any rebase.
