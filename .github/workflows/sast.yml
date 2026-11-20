@@ -1,0 +1,25 @@
+name: SAST
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    container: semgrep/semgrep:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: semgrep scan --config p/typescript --config p/nextjs --config p/owasp-top-ten --error
+  codeql:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+      - uses: github/codeql-action/analyze@v3

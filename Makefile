@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test audit check clean
+.PHONY: help install dev build start lint test guards audit check clean
 
 help: ## List targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  %-10s %s\n", $$1, $$2}'
@@ -22,10 +22,13 @@ lint: ## ESLint (also bans "use server")
 test: ## Unit tests
 	npm test
 
+guards: ## CI guards: no Server Actions, no published DB port
+	node scripts/ci-guards.mjs
+
 audit: ## Audit production dependencies (V15.1.1)
 	npm audit --omit=dev
 
-check: lint test build audit ## Everything CI should run
+check: lint test guards build audit ## Everything CI should run
 
 clean: ## Remove build output and coverage
 	rm -rf .next out coverage
