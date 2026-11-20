@@ -64,6 +64,37 @@
 - Flagged unresolved local secrets/key handling and audit-failure/transaction coverage; corrected error/logging and SR-16 descriptions. Verification activities remain plans, not reported results.
 - Human direction: after an initial expanded AI revision, the developer requested a narrower revision retaining the original format. Team review and any subsequent human/security edits remain pending; no human acceptance or test completion is claimed.
 
+### Commit Draft SAST methodology and threat-based testing plan
+### Jonathan's Agent
+- Reviewed the team's `docs/stride.md` and `docs/threat-model.md` to identify security threats relevant to Static Application Security Testing (SAST).
+- Assisted in drafting the SAST methodology for `docs/security-testing.md`, including objectives, tool selection, analysis procedures, findings documentation, and limitations.
+- Mapped proposed source-code inspections to STRIDE threats, including stored XSS (T-29), SQL injection (T-38), privilege escalation (T-19), mass assignment (T-17), audit tampering (T-33), framework authorization bypass (T-43/T-45), secrets exposure (T-53), and AI-generated vulnerabilities (T-60).
+- Suggested Semgrep as the primary SAST tool, with ESLint and TypeScript checks as supplementary analysis. Distinguished SAST from dependency vulnerability scanning (`npm audit`), DAST, and manual security testing.
+- Human direction: the developer requested a threat-based testing methodology aligned with the team's design documents and assignment requirements. The proposed testing activities remain unverified; no SAST scans, vulnerability confirmations, or remediation testing have been completed.
+
+### Commit Draft DAST and manual security testing methodology
+### Jonathan's Agent
+- Assisted in drafting the DAST methodology for `docs/security-testing.md`, proposing OWASP ZAP for baseline, authenticated, and targeted security testing of the running Next.js application.
+- Reviewed the team's STRIDE analysis and threat model to identify DAST priorities, including authentication, session management, CSRF, privilege escalation, IDOR, stored XSS, SQL injection, and middleware authorization bypass.
+- Assisted in drafting the manual security testing methodology, focusing on application-specific authorization, role restrictions, incident ownership, audit integrity, and deployment security.
+- Developed a proposed manual testing matrix (MAN-01 through MAN-13), mapping test scenarios to STRIDE threat identifiers and expected security behavior. Distinguished positive authorization tests from negative tests.
+- Human direction: the developer reviewed the proposed methodologies, incorporated the testing matrix, and requested consistent documentation formatting. Testing procedures remain planned activities; no DAST scans, manual security tests, or vulnerability remediation have been completed.
+
+### Commit Refine security testing plan with use/misuse case traceability
+### Jonathan's Agent
+- Reviewed the team's `docs/use-misuse-cases.md` and compared its intended use cases (UC-01 through UC-10) and misuse cases (MC-01 through MC-13) against the existing security-testing methodology.
+- Assisted in developing Section 4 of `docs/security-testing.md`, mapping misuse cases to their associated STRIDE threats and proposed verification methods, including SAST, DAST, automated integration tests, manual security testing, dependency scanning, and deployment configuration checks.
+- Identified refinements to the manual testing matrix, including HTTP 404 responses for unauthorized incident access, audit-failure rollback verification, origin/CSRF protections, and session revocation.
+- Helped establish test result classifications and evidence requirements, including tested commits, expected and observed behavior, remediation references, and retesting.
+- Human direction: the developer requested alignment with the team's finalized use/misuse cases while preserving the existing SAST, DAST, and manual testing structure. All verification activities remain planned; no security scans or manual test executions are claimed.
+
+### Commit Align SDL approved tools with security testing plan
+### Jonathan's Agent
+- Reviewed the SDL Practice #8 approved-tools table against the proposed SAST, DAST, and manual security testing methodology.
+- Suggested updating the test runner to Vitest and listing Semgrep and OWASP ZAP as proposed security-testing tools pending team approval.
+- Distinguished tool selection and configuration from completed security testing.
+- Human direction: the developer identified outdated TODO entries in `docs/sdl.md` and requested alignment with `docs/security-testing.md`. No security scans or test execution are claimed.
+
 ### Commit Document use and misuse verification cases (FR-1 to FR-13, SR-1 to SR-14, SR-16)
 #### Alex's Agent
 - Codex drafted the use and misuse case verification plan, mapped the cases to assignment requirements, ASVS 5.0.0, and STRIDE, and recorded the plan in the SDL tracker for Practices #7 and #11.
