@@ -1,6 +1,6 @@
 # STRIDE Analysis
 
-Team #__
+Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#submission-requirements)
 
@@ -33,13 +33,13 @@ SDL mapping: **Practice #7, Threat Modeling.** The data flow diagrams and elemen
 | T-03 | P3, DS1 | D | Attacker repeatedly fails logins for a victim (or the only admin) to lock them out (§1.4.1 note). | EP-02 | Lockout is temporary with fixed bounds (5 to 60 min); per-IP limiter caps one source; lockouts logged; no hard lock (V6.1.1). | 5·9·8·4·7 | 6.6 | Medium | Mitigated by design + AR-2 |
 | T-04 | P3, P4 | D | Flood of login requests exhausts CPU through argon2id verification. | EP-02, EP-06 | Rate limit runs before hashing; password max 128 chars; request body cap; bounded hash concurrency (NFR-4; V2.4.1, V6.3.1). | 5·8·7·7·6 | 6.6 | Medium | Mitigated by design |
 | T-05 | P4 | S | Session fixation: attacker plants a known token before the victim logs in. | EP-02 | No pre-login session; new random token at login, old one ended (V7.2.4); `__Host-` cookie can't be set by a subdomain. | 7·3·4·3·4 | 4.2 | Medium | Mitigated by design |
-| T-06 | P6, DF-1, DF-2 | T,I | Credentials or session tokens intercepted or altered in transit; TLS downgrade or a plain-HTTP hop. | NH-10, TB-1, TB-5 | TLS 1.2+ only; HSTS; `Secure` cookie; HTTP to HTTPS redirect; TLS to the app where the platform allows; local Caddy proxy (D-7) (SR-3; V12.1.1, V12.2.1, V3.3.1). | 9·6·5·7·7 | 6.8 | Medium | Mitigated by design |
+| T-06 | P6, DF-1, DF-2 | T,I | Credentials or session tokens intercepted or altered in transit; TLS downgrade or a plain-HTTP hop. | NH-10, TB-1, TB-5 | TLS 1.2+ only; HSTS; `Secure` cookie; HTTP to HTTPS redirect; TLS to the app where the platform allows; local Caddy proxy with an approved private-network HTTP hop (D-7, AR-8) (SR-3; V12.1.1, V12.2.1, V3.3.1). | 9·6·5·7·7 | 6.8 | Medium | Mitigated by design |
 | T-07 | DS8 | I | A failed-login log line captures a password typed into the username field. | EP-02, NH-6 | Log the username only if it matches an account, otherwise a short hash; never log request bodies (SR-9; V16.2.5). | 6·7·6·3·4 | 5.2 | Medium | Mitigated by design |
 | T-08 | P2, P4 | S | Session token stolen (XSS, network, logs, DB read) and replayed. | EP-05 | HttpOnly, `__Host-`, Secure, SameSite=Strict; token stored hashed; 256-bit CSPRNG; idle and absolute timeouts (D-5); CSP nonce; logout and deactivation delete the row (SR-3; V7.2.1, V3.3.1, V3.3.4, V7.4.1). | 9·5·5·5·6 | 6.0 | Medium | Mitigated by design |
 | T-09 | P3 | S | CSRF: a malicious site makes the victim's browser send a state-changing request (Route Handlers have no built-in Origin check). | C-4, EP-05 to EP-23 | SameSite=Strict; same-origin `Origin` required (missing = reject); JSON-only content type; POST/PATCH only (V3.5.1, V3.5.3, V3.3.2). | 7·6·5·7·6 | 6.2 | Medium | Design change (DC-2) |
 | T-10 | P4 | S | A session token still works after logout, deactivation, or password reset. | EP-05, EP-15, EP-17 | Session rows deleted server-side; every request re-reads the session and the `active` flag (A-4, A-7; V7.4.1, V7.4.2, V7.4.5). | 5·3·4·3·4 | 3.8 | Low | Mitigated by design |
 | T-11 | P4 | T | A forged or guessed session token, or a client-supplied role, is accepted. | A-4, A-7 | 256-bit CSPRNG token looked up by hash; role read from the DB on every request, never from the cookie (V7.2.3, V8.3.1). | 9·2·2·8·3 | 4.8 | Medium | Mitigated by design |
-| T-12 | DS2, DS10 | D | Repeated logins or random-username attempts flood the sessions and rate-limit tables. | EP-02 | Rate limit; at most 5 sessions per user (oldest ended); scheduled cleanup of expired rows (V7.1.2). | 4·6·5·5·4 | 4.8 | Medium | Design change (DC-4) |
+| T-12 | DS2, DS10 | D | Repeated logins or random-username attempts flood the sessions and rate-limit tables. | EP-02 | Rate limit; at most 5 sessions per user (oldest ended); cleanup of expired rows on startup and login (V7.1.2). | 4·6·5·5·4 | 4.8 | Medium | Design change (DC-4) |
 
 ### B. Password change (EP-06)
 
@@ -55,7 +55,7 @@ SDL mapping: **Practice #7, Threat Modeling.** The data flow diagrams and elemen
 | T-15 | P3, DS1 | I | A temporary password is disclosed: screen, browser history or cache, screenshot, or logs. | EP-13, EP-17 | CSPRNG; shown once with `no-store`; never logged or audited (SR-9); expires (default 24 h) or on first use; must change at first login (V6.4.1, V11.5.1). | 8·5·4·2·4 | 4.6 | Medium | Mitigated by design |
 | T-16 | P3, P4 | E | An account with a temporary password reaches other endpoints before changing it. | EP-06, EP-13 | C-11 gate: only EP-05 and EP-06 are reachable while `must_change_password` is set (V6.4.1). | 7·6·5·3·5 | 5.2 | Medium | Design change (DC-1) |
 | T-17 | P3, DS1 | T,E | Mass assignment: the client sends `role`, `active`, or hash fields to a profile, password, or incident endpoint. | EP-06, EP-07, EP-14, EP-16 | Strict schema rejecting unknown fields (C-3); role changes only on EP-14 (SR-6, SR-7; V15.3.3, V8.2.3). | 9·6·6·8·5 | 6.8 | High* | Mitigated by design |
-| T-18 | P3 | E | An admin changes their own role or deactivates themself, or removes or deactivates the last active admin. | EP-14, EP-15 | Target must differ from the caller (SR-6); last-active-admin check in the same transaction with a row lock; audited (V8.2.1). | 7·5·4·9·5 | 6.0 | High* | Mitigated by design |
+| T-18 | P3 | E | An admin changes their own role or deactivates themself, or removes or deactivates the last active admin. | EP-14, EP-15 | Target must differ from the caller (SR-6); last-active-admin check and mutation in the same Serializable transaction, with bounded P2034 retries; audited (V8.2.1). | 7·5·4·9·5 | 6.0 | High* | Mitigated by design |
 | T-19 | P2, P3, P4 | E | Vertical privilege escalation: a user or reviewer calls admin endpoints (or an admin calls reviewer-only ones) by forced browsing. | EP-08 to EP-23, C-2 | Role checked from the DB inside every handler and page, deny by default; role-by-route test matrix; middleware is never the only check (SR-4, SR-5; V8.2.1, V8.3.1). | 9·7·6·9·7 | 7.6 | High | Mitigated by design |
 | T-20 | E1, E2, E3 | R | A user, reviewer, or admin denies an action (submit, close, comment, role change, reset). | EP-07, EP-10, EP-11, EP-13 to EP-17 | Audit record for every FR-11 and D-2 action (userId, UTC time, action, targetId) written in the same transaction; unique named accounts (FR-11, SR-10; V16.2.1). | 6·6·3·6·5 | 5.2 | Medium | Mitigated by design |
 
@@ -74,7 +74,7 @@ SDL mapping: **Practice #7, Threat Modeling.** The data flow diagrams and elemen
 | T-24 | P3, DS3, DS4 | I | IDOR: a reviewer reads a closed incident, or a user reads others' reports, by changing an ID or `reporter_id`. | EP-09, EP-19 | Object-level check inside the query (C-10); `reporter_id` taken from the session only; UUIDs; per-role tests (SR-5; V8.2.2). | 8·7·7·8·7 | 7.4 | High | Mitigated by design |
 | T-25 | P3 | I | Different 403 and 404 responses reveal which incident IDs exist. | EP-09 | The same 404 for missing and forbidden records (V8.2.2). | 3·8·7·3·6 | 5.4 | Medium | Mitigated by design |
 | T-26 | P3, DS3 | T | A reviewer skips or reverses allowed status transitions, or an admin changes status. | EP-10 | Only open, under-review, closed in order; admin gets 403 (D-3); status change and audit record in one transaction (FR-8; V2.3.1, V2.3.3). | 5·6·5·5·5 | 5.2 | Medium | Mitigated by design |
-| T-27 | P3, DS3 | T | Concurrent updates cause lost or conflicting status changes, or let two admin demotions pass the last-admin check (NFR-5). | EP-10, EP-14 | Conditional `UPDATE ... WHERE status = expected`; transactions and row locks (V2.3.4). | 5·4·3·5·3 | 4.0 | Medium | Mitigated by design |
+| T-27 | P3, DS3 | T | Concurrent updates cause lost or conflicting status changes, or let two admin demotions pass the last-admin check (NFR-5). | EP-10, EP-14 | Conditional `UPDATE ... WHERE status = expected`; Serializable account transactions with bounded retries (V2.3.4). | 5·4·3·5·3 | 4.0 | Medium | Mitigated by design |
 | T-28 | P2, P3, DS1, DS3, DS4 | I | List and detail endpoints return extra fields (descriptions in lists, hashes in the admin user list). | EP-08, EP-12, EP-19 | Explicit per-role field allowlists; `password_hash` never selected (C-9; V15.3.1). | 8·5·5·6·5 | 5.8 | Medium | Mitigated by design |
 
 ### F. Other entry points and the audit log (EP-07, EP-11, EP-12, EP-18, EP-21 to EP-23)
@@ -191,6 +191,8 @@ Numbers are threat IDs (`7` = T-07). N/A reasons:
 
 ## Accepted risks
 
+The developer approved AR-1 through AR-8 on 2026-11-18 with the reviewer-supplied design answers.
+
 | ID | Residual risk |
 |---|---|
 | AR-1 | Operators with container, database-owner, or cloud-console access are trusted (TB-4). Controlled by process (SSM, IAM, 2FA), not by the app. |
@@ -200,6 +202,7 @@ Numbers are threat IDs (`7` = T-07). N/A reasons:
 | AR-5 | `DOTENV_PRIVATE_KEY` is visible to anyone who can inspect the running container or task definition. Local use only, with demo credentials; on AWS use Secrets Manager instead. |
 | AR-6 | No MFA (not required by the assignment). Credential theft stays the main account-takeover path; limited by 15-character passwords, lockout, and rate limits. |
 | AR-7 | Malware or a compromised browser on a user's device is out of scope. |
+| AR-8 | In the local Docker deployment, Caddy terminates HTTPS and forwards to Next.js over HTTP on the private network. An operator or attacker controlling that network can inspect internal traffic. Accept this local transport risk with the app reachable only through Caddy, a single trusted proxy hop, and PostgreSQL unpublished. Future AWS transport requires deployment review. |
 
 ## Design changes found by this analysis
 
@@ -210,7 +213,7 @@ Applied to [threat-model.md](threat-model.md) Part 1 in the same change.
 | DC-1 | New common control **C-11**: while `must_change_password` is set, only EP-05 and EP-06 are reachable. | §1.3 |
 | DC-2 | C-4 extended: a missing `Origin` is rejected, and writes must be `Content-Type: application/json`. | §1.3 |
 | DC-3 | The create-admin CLI writes a `user.create` audit record with actor `system` (FR-11). | NH-4 |
-| DC-4 | Lockout and rate-limit state in the database: `users.failed_login_count`, `users.locked_until`, new `login_attempts` store; sessions capped at 5 per user. | EP-02, §1.7 |
+| DC-4 | Lockout and rate-limit state in the database: `login_attempts` keyed by (scope: ip or username, key, window_start), including lockout expiry; sessions capped at 5 per user. | EP-02, §1.7 |
 | DC-5 | C-8 clarified: failed authentication/authorization attempts go to application logs, not the append-only audit table. | §1.3 |
 | DC-6 | EP-06's breached-password check uses a bundled offline list (A-8: no outbound calls). | EP-06 |
 

@@ -4,6 +4,8 @@ out/
 coverage/
 .env*
 !.env.example
+!.env
+.env.keys
 *.log
 .DS_Store
 

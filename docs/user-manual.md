@@ -1,6 +1,6 @@
 # User Manual
 
-Team #__
+Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#submission-requirements)
 
