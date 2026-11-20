@@ -162,3 +162,7 @@
 - Fixed in testing: the `.env.local` generator reused one `awk` pipe, which would have given every secret the same value; it now closes the pipe each time. The CI database wait now polls over TCP, because `pg_isready` can pass during the init phase before the roles exist.
 - Replaced the author names in the README with the team number (AGENTS.md: names only on the cover page) and corrected the Node requirement from 20.9+ to 24.
 - Verified: `make test-db` passes and removes its container, and the password generator yields distinct values on sample input. Not verified: `make env-local` on the real `.env.example`, `make up`, `make migrate`, and the optional certificate-trust commands (macOS), because the sandbox blocked `.env.local` access and the image build fails behind this network's TLS inspection.
+
+### Commit chore: npm audit fix (dev tooling)
+#### Liam's Agent
+- The lockfile update came from the developer running `npm audit fix`, not from the AI. The AI reviewed the diff (transitive dev-tooling bumps only, `package.json` unchanged), confirmed `make check` passes, and committed it.
