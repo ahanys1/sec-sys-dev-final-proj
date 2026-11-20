@@ -220,3 +220,7 @@
 #### Liam's Agent
 - Reworked `docs/plan.md` into the tracker: slices in build order with dependencies and status, a claim-by-draft-PR rule, and per-slice must-haves, and updated `AGENTS.md`, the Copilot instructions, and the PR template to match.
 - Human direction: the developer judged the GitHub issues unreliable for tracking (written Nov 7, never updated, horizontal layers) and said ordered, representative slices are enough, so the issues are now only acceptance criteria. This reverses the earlier choice to keep status in the issues. Added fuzz testing, the incident response plan, `SECURITY.md`, and the final review to the slices, which no issue covered.
+
+### Commit docs: mark slices 1 and 2 done in plan.md
+#### Liam's Agent
+- Set slices 1 and 2 to Done in `docs/plan.md` now that #34 to #38 are merged. Human catch: the developer noticed the table still said "In review"; the table is only useful if it is updated when PRs merge.
