@@ -62,6 +62,7 @@ Passwords are baked into the database on its **first start**. If you regenerate 
 | `make check` | Everything CI runs: lint, tests, guards, build, `npm audit` |
 | `make test` | Unit tests |
 | `make test-db` | Database tests against a throwaway Postgres (starts and removes its own container) |
+| `make check-image` | Builds the Docker images and checks the runtime image is non-root with no env files or source maps (add `EXTRA_CA_CERT=./ca-bundle.pem` on a TLS-inspecting network) |
 | `make lint` | ESLint, including the banned-function rules ([docs/sdl.md](docs/sdl.md#banned-functions-practice-9)) |
 | `make help` | All targets |
 

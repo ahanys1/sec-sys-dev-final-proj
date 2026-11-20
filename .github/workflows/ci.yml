@@ -46,6 +46,12 @@ jobs:
         env:
           TEST_DATABASE_OWNER_URL: postgresql://app_owner:ci-owner@127.0.0.1:5432/incidents
           TEST_DATABASE_APP_URL: postgresql://app_user:ci-app@127.0.0.1:5432/incidents
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # Builds the runtime and migrate images; fails if the runtime image is root or holds env files, .git, or source maps (T-61).
+      - run: scripts/check-image.sh
   gitleaks:
     runs-on: ubuntu-latest
     steps:

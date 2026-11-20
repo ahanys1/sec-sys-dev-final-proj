@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test test-db guards audit check env-local ca-bundle up down reset logs migrate clean
+.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle up down reset logs migrate clean
 
 ENV_FILE ?= .env
 
@@ -23,6 +23,9 @@ lint: ## ESLint (also bans "use server")
 
 test: ## Unit tests
 	npm test
+
+check-image: ## Build the Docker images and assert the runtime image is hardened (needs Docker)
+	scripts/check-image.sh
 
 guards: ## CI guards: no Server Actions, no published DB port
 	node scripts/ci-guards.mjs

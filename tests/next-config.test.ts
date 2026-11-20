@@ -6,6 +6,10 @@ describe("next.config hardening", () => {
     expect(nextConfig.poweredByHeader).toBe(false);
   });
 
+  it("does not publish browser source maps (V15.2.3)", () => {
+    expect(nextConfig.productionBrowserSourceMaps).toBe(false);
+  });
+
   it("disables the image optimizer with no remote patterns (FW-4, V15.2.2)", () => {
     expect(nextConfig.images?.unoptimized).toBe(true);
     expect(nextConfig.images?.remotePatterns).toBeUndefined();
