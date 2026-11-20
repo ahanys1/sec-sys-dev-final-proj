@@ -33,7 +33,7 @@ flowchart LR
 |---|---|
 | Browser UI | Role-specific navigation, forms, readable validation feedback, and logout access. Render incident text as escaped text. |
 | Caddy | Local HTTPS entry point and reverse proxy. Forward client identity only through the trusted proxy path. |
-| Middleware (P1, FW-1) | Set security headers and a CSP nonce. Reject requests carrying `x-middleware-subrequest`. |
+| Proxy (P1, FW-1; Next 16's renamed middleware, `proxy.ts`) | Set security headers and a CSP nonce. Reject requests carrying `x-middleware-subrequest`. |
 | Framework surfaces (FW-3 to FW-5) | Prohibit Server Actions, disable the image optimizer, and provide generic error pages with `poweredByHeader: false`. |
 | Pages and Route Handlers | Authenticate and authorize each request, including page and RSC reads. Route Handlers own all writes. |
 | Session and authorization logic | Resolve the hashed session token, account activity, expiry, current database role, and temporary-password gate. |

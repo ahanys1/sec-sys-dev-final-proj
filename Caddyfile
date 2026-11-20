@@ -2,6 +2,9 @@
 # Live: SITE_ADDRESS=<domain>, CADDY_TLS=<ACME email> for a public certificate.
 {$SITE_ADDRESS:localhost} {
 	tls {$CADDY_TLS:internal}
+	# T-43, CVE-2025-29927: refuse the internal subrequest header at the edge (also checked in the proxy and handlers).
+	@subrequest header x-middleware-subrequest *
+	respond @subrequest 400
 	encode zstd gzip
 	request_body {
 		max_size 128KB
