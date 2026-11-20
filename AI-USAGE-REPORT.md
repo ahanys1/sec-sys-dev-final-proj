@@ -224,3 +224,7 @@
 ### Commit docs: mark slices 1 and 2 done in plan.md
 #### Liam's Agent
 - Set slices 1 and 2 to Done in `docs/plan.md` now that #34 to #38 are merged. Human catch: the developer noticed the table still said "In review"; the table is only useful if it is updated when PRs merge.
+
+### Commit docs: claim slice 3 (admin accounts)
+#### Liam's Agent
+- Set slice 3 to In progress in `docs/plan.md` and opened a draft PR to claim it, per the pick-up rules. No code yet.
