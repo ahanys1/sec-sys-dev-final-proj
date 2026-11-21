@@ -26,7 +26,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 2 | Auth and sessions: login, logout, password change, lockout, first-admin CLI | 1 | Done (#38) | #4, #5 (part) |
 | 3 | Admin accounts | 2 | Done (#51) | #6, #5 |
 | 4 | Incidents and comments | 2 | Next | #7, #8 |
-| 5 | Audit view and settings | 2 | Next | #9, #10 |
+| 5 | Audit view and settings | 2 | In-progress (jgmiller) | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Next; the threat-model PR can start now | #12, #21 |
 | 7 | Verification | 3, 4, 5 | Next | #13, #14, #16, #17 |
 | 8 | Release | 7 | Next | #18 to #20, #22 |
