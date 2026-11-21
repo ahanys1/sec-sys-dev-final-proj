@@ -6,19 +6,35 @@ updates:
     directory: /
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }
+    groups:
+      # init and analyze must run the same version, or the CodeQL job fails.
+      codeql: { patterns: ["github/codeql-action/*"] }
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }
     open-pull-requests-limit: 5
     groups:
+      # react and react-dom must move together.
+      react: { patterns: [react, react-dom] }
       dev-tooling:
         dependency-type: development
         update-types: [minor, patch]
+    ignore:
+      # typescript-eslint (via eslint-config-next) does not support TypeScript 7 yet.
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
+      # eslint-config-next's plugins only support ESLint 9 for now.
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: docker
     directory: /
     schedule: { interval: weekly }
     cooldown: { default-days: 7 }
+    ignore:
+      # The image must match .nvmrc (Node 24), which dev and CI use. Move them together on purpose.
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: docker-compose
     directory: /
     schedule: { interval: weekly }

@@ -236,3 +236,11 @@
 - Test fix: the last-admin concurrency test needs exactly two active admins, so DB test files now run one at a time (`--no-file-parallelism` in `scripts/test-db.sh`) and the test parks other admins and restores them.
 - Left TODO on purpose: V7.4.5 (no explicit "terminate sessions" action), V15.3.3 and V8.2.x (incident routes are not built yet).
 - Not verified: the page in a real browser (CSP with the client component) and the Caddy path.
+
+### Commit chore: apply Dependabot updates in one PR and tune its config
+#### Liam's Agent
+- Combined Dependabot PRs #40, #42, #43, #44, #45, #46, #47, and #49 into one branch (actions to checkout 7.0.1, setup-node 7.1.0, gitleaks-action 3.0.0, codeql-action 4.39.3; React 19.3.1; Tailwind 4.3.5), and pinned TypeScript to 5.9.3 (it was `^5`).
+- Security checks on the AI's work: compared each pinned action SHA with the upstream tag via the GitHub API (all matched); `npm ls` is clean; `make check`, `make test-db`, and `make check-image` pass.
+- Declined, with reasons recorded in `.github/dependabot.yml`: #48 TypeScript 7 (typescript-eslint does not support it, `make lint` fails), #50 ESLint 10 (`eslint-config-next` plugins declare ESLint 9 only, `npm ls` reports invalid peers, and lint bans are an SDL control), #41 Node 26 image (the image must match `.nvmrc`, which dev and CI use). ESLint stays on 9.39.5.
+- Config changes so PRs stop failing: group `react` with `react-dom`, group the CodeQL `init` and `analyze` actions, and ignore the three major bumps above.
+- Also set slice 3 to Done in `docs/plan.md`.
