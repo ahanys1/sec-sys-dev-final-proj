@@ -24,7 +24,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 |---|---|---|---|---|
 | 1 | Foundation: lint bans, CI, Docker stack, database schema, proxy and shared libraries, image checks | none | Done (#34 to #37) | #2, #3, #11 (part), #12 (part) |
 | 2 | Auth and sessions: login, logout, password change, lockout, first-admin CLI | 1 | Done (#38) | #4, #5 (part) |
-| 3 | Admin accounts | 2 | Next | #6, #5 |
+| 3 | Admin accounts | 2 | In review (#51) | #6, #5 |
 | 4 | Incidents and comments | 2 | Next | #7, #8 |
 | 5 | Audit view and settings | 2 | Next | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Next; the threat-model PR can start now | #12, #21 |

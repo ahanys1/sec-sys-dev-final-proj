@@ -224,3 +224,15 @@
 ### Commit docs: mark slices 1 and 2 done in plan.md
 #### Liam's Agent
 - Set slices 1 and 2 to Done in `docs/plan.md` now that #34 to #38 are merged. Human catch: the developer noticed the table still said "In review"; the table is only useful if it is updated when PRs merge.
+
+### Commit docs: claim slice 3 (admin accounts)
+#### Liam's Agent
+- Set slice 3 to In progress in `docs/plan.md` and opened a draft PR to claim it, per the pick-up rules. No code yet.
+
+### Commit feat: add admin account management (EP-12 to EP-17; FR-1 to FR-3, FR-11, SR-6)
+#### Liam's Agent
+- Added `src/lib/admin/` (strict schemas, temporary-password generator, list, create, rename, role, status, and reset operations, admin guard), the six admin Route Handlers, the `/admin/users` page and client component, an admin "Users" link, 15 unit and database tests, and Done rows for V6.4.1, V7.4.2, and SR-6.
+- Security decisions made while building it: admin handlers check the origin, then authenticate and require the admin role, before reading any body; role, status, and reset all refuse the caller as the target (this extends EP-17, so the threat model row now says so); role and status changes run Serializable with the audit insert in the same transaction, and a last-active-admin check inside it; the temporary password is returned only in a `no-store` response and never logged, audited, or listed; the list uses an explicit field allowlist so the hash is never selected; a no-op role or status request writes no audit record.
+- Test fix: the last-admin concurrency test needs exactly two active admins, so DB test files now run one at a time (`--no-file-parallelism` in `scripts/test-db.sh`) and the test parks other admins and restores them.
+- Left TODO on purpose: V7.4.5 (no explicit "terminate sessions" action), V15.3.3 and V8.2.x (incident routes are not built yet).
+- Not verified: the page in a real browser (CSP with the client component) and the Caddy path.

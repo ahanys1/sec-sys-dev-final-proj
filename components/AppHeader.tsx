@@ -11,6 +11,11 @@ export function AppHeader({ username, role }: { username: string; role: string }
         <span>
           {username} ({role})
         </span>
+        {role === "admin" ? (
+          <Link href="/admin/users" className="underline">
+            Users
+          </Link>
+        ) : null}
         <Link href="/account/password" className="underline">
           Change password
         </Link>
