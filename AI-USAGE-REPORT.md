@@ -251,3 +251,12 @@
 - Helped troubleshoot Windows/WSL dependency conflicts and GitHub CLI authentication.
 - Reviewed the delivery-plan workflow and recommended claiming Slice #5 through an early draft pull request.
 - Human direction: the developer selected Slice #5 and established a working local environment before beginning implementation. No application functionality or security testing is claimed as completed.
+
+### Commit feat(admin): add read-only audit history API with filtering and tests
+#### Jonathan's Agent
+- Assisted with implementing the admin-only `GET /api/admin/audit` endpoint, including action filtering, date-range filtering, pagination, and strict query validation.
+- Helped diagnose and resolve a Prisma `BigInt` JSON serialization error encountered during manual API testing.
+- Guided manual security testing of authentication (401), authorization (403), unsupported HTTP methods (405), invalid parameters, filtering, and pagination.
+- Assisted with creating Vitest unit tests and PostgreSQL-backed integration tests for audit retrieval, ordering, pagination, and date boundaries.
+- Helped verify that direct audit-log writes are centralized in `src/lib/audit.ts`, preserving the existing transactional audit mechanism.
+- Human validation: reviewed the implementation, executed browser-based API tests, ran automated tests and ESLint, and verified the changes before committing. The database-backed suite passed 50 tests, and the non-database suite passed 83 tests with 50 skipped.
