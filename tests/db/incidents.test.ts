@@ -20,6 +20,7 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
   let detail: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
   let reviewerQueue: (request: Request) => Promise<Response>;
   let createComment: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
+  let updateStatus: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
 
   let reporterId: string;
   let reporterUsername: string;
@@ -37,6 +38,10 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
     detail = (await import("@/app/api/incidents/[id]/route")).GET;
     reviewerQueue = (await import("@/app/api/reviewer/incidents/route")).GET;
     createComment = (await import("@/app/api/incidents/[id]/comments/route")).POST;
+
+    const statusRoute = await import("@/app/api/incidents/[id]/status/route"
+    );
+    updateStatus = statusRoute.PATCH;
 
     reporterUsername = `incident-${tag}`;
 
@@ -112,6 +117,26 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
         body: JSON.stringify(body),
         }),
     );
+
+  async function patchStatus(
+    incidentId: string,
+    body: unknown,
+    sessionCookie: string,
+  ) {
+    return updateStatus(
+      new Request(`https://app.test/api/incidents/${incidentId}/status`, {
+        method: "PATCH",
+        headers: {
+          origin: "https://app.test",
+          host: "app.test",
+          "content-type": "application/json",
+          cookie: sessionCookie,
+        },
+        body: JSON.stringify(body),
+      }),
+      { params: Promise.resolve({ id: incidentId }) },
+    );
+  }
   const postComment = (incidentId: string, body: unknown, sessionCookie = cookie,) =>
     createComment(
       new Request(
@@ -160,8 +185,21 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
         },
       }),
     );
-
+  const roleSessions: Partial<
+    Record<
+      "reviewer" | "admin",
+      {
+        user: Awaited<ReturnType<typeof db.user.create>>;
+        sessionCookie: string;
+      }
+    >
+  > = {};
 async function signInAs(role: "reviewer" | "admin") {
+    const existing = roleSessions[role];
+
+    if (existing) {
+      return existing;
+  }
   const username = `incident-${role}-${randomUUID().slice(0, 8)}`;
 
 
@@ -198,7 +236,10 @@ async function signInAs(role: "reviewer" | "admin") {
 
   expect(sessionCookie).not.toBe("");
 
-  return { user, sessionCookie };
+  const session = { user, sessionCookie };
+  roleSessions[role] = session;
+
+  return session;
 }
 
   it("creates an incident and its audit record", async () => {
@@ -1070,6 +1111,474 @@ it("allows reviewers to comment on under-review incidents (EP-11)", async () => 
   });
 
   expect(audit).not.toBeNull();
+});
+
+it("allows reviewers to advance open incidents to under-review (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Status transition integration test",
+    description: "Verify status changes and audit logging.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { user, sessionCookie } = await signInAs("reviewer");
+
+  const response = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(200);
+
+  const body = await response.json();
+
+  expect(body.incident.id).toBe(incident.id);
+  expect(body.incident.status).toBe("under_review");
+
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("under_review");
+
+  const audit = await db.auditLog.findFirst({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+      userId: user.id,
+    },
+  });
+
+  expect(audit).not.toBeNull();
+});
+
+it("allows reviewers to close under-review incidents (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Incident closure integration test",
+    description: "Verify the second permitted status transition.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { user, sessionCookie } = await signInAs("reviewer");
+
+  // First transition: open -> under_review.
+  const reviewing = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    sessionCookie,
+  );
+
+  expect(reviewing.status).toBe(200);
+
+  // Second transition: under_review -> closed.
+  const response = await patchStatus(
+    incident.id,
+    { status: "closed" },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(200);
+
+  const { incident: updated } = await response.json();
+
+  expect(updated.id).toBe(incident.id);
+  expect(updated.status).toBe("closed");
+
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("closed");
+
+  // Each successful transition must generate an audit event.
+  const audits = await db.auditLog.findMany({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+      userId: user.id,
+    },
+  });
+
+  expect(audits).toHaveLength(2);
+});
+
+it("rejects skipping directly from open to closed (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Skipped status transition test",
+    description: "Verify incidents cannot skip the review stage.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const response = await patchStatus(
+    incident.id,
+    { status: "closed" },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(409);
+
+  // The incident must remain open.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("open");
+
+  // Rejected transitions must not generate audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects reversing incident status to open (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Reversed status transition test",
+    description: "Verify incidents cannot return to open.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // First, advance the incident to under_review.
+  const reviewing = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    sessionCookie,
+  );
+
+  expect(reviewing.status).toBe(200);
+
+  // Attempt to reverse the transition.
+  const response = await patchStatus(
+    incident.id,
+    { status: "open" },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // The incident must remain under_review.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("under_review");
+
+  // Only the successful initial transition should be audited.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("rejects repeated incident status transitions (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Repeated status transition test",
+    description: "Verify duplicate transitions are rejected.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // First request succeeds.
+  const first = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    sessionCookie,
+  );
+
+  expect(first.status).toBe(200);
+
+  // Repeating the same transition must fail.
+  const second = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    sessionCookie,
+  );
+
+  expect(second.status).toBe(409);
+
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("under_review");
+
+  // Only the successful transition should be audited.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("rejects administrator status changes (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Administrator status restriction",
+    description: "Verify administrators cannot change incident status.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("admin");
+
+  const response = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(403);
+
+  // The incident must remain open.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("open");
+
+  // Rejected operations must not generate audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects reporter status changes (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Reporter status restriction",
+    description: "Verify reporters cannot change incident status.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  // Use the existing reporter session.
+  const response = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    cookie,
+  );
+
+  expect(response.status).toBe(403);
+
+  // The incident must remain open.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("open");
+
+  // No status transition audit event should exist.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects unauthenticated status changes (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Unauthenticated status restriction",
+    description: "Verify status changes require authentication.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  // No session cookie.
+  const response = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    "",
+  );
+
+  expect(response.status).toBe(401);
+
+  // The incident must remain open.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("open");
+
+  // No status transition audit event should exist.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("returns 404 for status changes on nonexistent incidents (EP-10)", async () => {
+  const incidentId = randomUUID();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const response = await patchStatus(
+    incidentId,
+    { status: "under_review" },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(404);
+
+  // No incident should have been created.
+  const stored = await db.incident.findUnique({
+    where: { id: incidentId },
+  });
+
+  expect(stored).toBeNull();
+
+  // Rejected operations must not generate audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incidentId,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("prevents competing status transitions (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Concurrent status transition test",
+    description: "Verify competing updates cannot both succeed.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // Submit two competing transitions concurrently.
+  const responses = await Promise.all([
+    patchStatus(
+      incident.id,
+      { status: "under_review" },
+      sessionCookie,
+    ),
+    patchStatus(
+      incident.id,
+      { status: "under_review" },
+      sessionCookie,
+    ),
+  ]);
+
+  const statuses = responses.map((response) => response.status).sort();
+
+  // Exactly one request should succeed.
+  expect(statuses).toEqual([200, 409]);
+
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("under_review");
+
+  // Only one successful transition should be audited.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("rejects invalid status request bodies (EP-10)", async () => {
+  const created = await postIncident({
+    title: "Status input validation test",
+    description: "Verify malformed status requests are rejected.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const invalidBodies = [
+    {},
+    { status: "invalid" },
+    { status: 123 },
+    { status: null },
+    { status: "under_review", reporterId },
+  ];
+
+  for (const invalidBody of invalidBodies) {
+    const response = await patchStatus(
+      incident.id,
+      invalidBody,
+      sessionCookie,
+    );
+
+    expect(response.status).toBe(400);
+  }
+
+  // None of the invalid requests should change the incident.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("open");
+
+  // Rejected requests must not produce status audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
 });
 
 });

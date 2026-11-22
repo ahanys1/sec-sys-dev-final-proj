@@ -16,3 +16,12 @@ export const createCommentSchema = z
   .strict();
 
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
+
+ // EP-10: Only forward incident status transitions are permitted.
+export const updateIncidentStatusSchema = z.strictObject({
+  status: z.enum(["under_review", "closed"]),
+});
+
+export type UpdateIncidentStatusInput = z.infer<
+  typeof updateIncidentStatusSchema
+>;

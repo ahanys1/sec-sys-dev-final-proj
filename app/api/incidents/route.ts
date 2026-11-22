@@ -5,7 +5,7 @@ import { createIncident, listReporterIncidents } from "@/src/lib/incidents/incid
 import { createIncidentSchema } from "@/src/lib/incidents/schemas";
 import { parseWrite } from "@/src/lib/request";
 
-// EP-08: A reporter can view their own incident list.
+// EP-19: A reporter can view their own incident list.
 export const GET = route("incident.list", async (_requestId, request) => {
   const { user } = await authenticate(request, { roles: ["user"] });
 

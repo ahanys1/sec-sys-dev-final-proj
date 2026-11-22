@@ -281,3 +281,12 @@
 - Assisted with implementing EP-11, including the comment creation endpoint, Zod request validation, role-based authorization, and transactional audit logging.
 - Assisted with developing integration tests for authenticated and unauthenticated requests, reporter restrictions, reviewer and administrator permissions, incident visibility, invalid inputs, database persistence, and audit events.
 - Human verification included reviewing the implementation, executing the database integration suite (73 tests passed), running TypeScript and ESLint checks, and verifying Git diff formatting.
+
+### Commit `feat(incidents): add audited status transitions API and tests`
+
+#### Jonathan's Agent
+
+- Assisted with implementing EP-10, including reviewer-only status transitions, strict Zod request validation, conditional database updates, and transactional audit logging.
+- Assisted with developing integration tests for valid and invalid transitions, authentication, role-based authorization, nonexistent incidents, malformed requests, concurrent updates, and audit record verification.
+- Assisted with identifying and correcting inconsistent endpoint labels and resolving test authentication rate-limit failures through reusable reviewer and administrator sessions.
+- Human verification included reviewing the implementation, running the database integration suite (84 tests passed), executing TypeScript and ESLint checks, and confirming clean Git diff formatting.

@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient, Role } from "@/src/generated/prisma/client";
 import { runAudited } from "../audit";
 import { ApiError } from "../http";
-import type { CreateIncidentInput, CreateCommentInput } from "./schemas";
+import type { CreateIncidentInput, CreateCommentInput, UpdateIncidentStatusInput } from "./schemas";
 
 export async function createIncident(
   db: PrismaClient,
@@ -38,7 +38,7 @@ export async function createIncident(
   );
 }
 
-// EP-08: Reporters can list only incidents they submitted.
+// EP-19: Reporters can list only incidents they submitted.
 // List responses deliberately exclude incident descriptions.
 export async function listReporterIncidents(
   db: PrismaClient,
@@ -61,7 +61,7 @@ export async function listReporterIncidents(
   });
 }
 
-// EP-10: Reviewers can list open and under-review incidents
+// EP-08: Reviewers can list open and under-review incidents
 // from all reporters. Descriptions are excluded from list results.
 export async function listReviewerIncidents(db: PrismaClient) {
   return db.incident.findMany({
@@ -175,5 +175,63 @@ export async function createIncidentComment(
   action: "comment.create",
   targetId: comment.incidentId,
 }),
+  );
+}
+
+ // EP-10: Reviewers advance incidents through the allowed workflow.
+ // Conditional updates prevent skipped, reversed, or competing transitions.
+export async function updateIncidentStatus(
+  db: PrismaClient,
+  incidentId: string,
+  reviewer: { id: string; role: Role },
+  input: UpdateIncidentStatusInput,
+) {
+  if (reviewer.role !== "reviewer") {
+    throw new ApiError("forbidden");
+  }
+
+  const expectedStatus =
+    input.status === "under_review" ? "open" : "under_review";
+
+  return runAudited(
+    db,
+    async (tx) => {
+      const result = await tx.incident.updateMany({
+        where: {
+          id: incidentId,
+          status: expectedStatus,
+        },
+        data: {
+          status: input.status,
+        },
+      });
+
+      if (result.count !== 1) {
+        const incident = await tx.incident.findUnique({
+          where: { id: incidentId },
+          select: { id: true },
+        });
+
+        if (!incident) {
+          throw new ApiError("not_found");
+        }
+
+        throw new ApiError("conflict");
+      }
+
+      return tx.incident.findUniqueOrThrow({
+        where: { id: incidentId },
+        select: {
+          id: true,
+          status: true,
+          updatedAt: true,
+        },
+      });
+    },
+    (incident) => ({
+      actor: { type: "user", userId: reviewer.id },
+      action: "incident.status",
+      targetId: incident.id,
+    }),
   );
 }

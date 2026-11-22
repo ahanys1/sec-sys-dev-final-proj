@@ -3,7 +3,7 @@ import { getDb } from "@/src/lib/db";
 import { jsonResponse, methodNotAllowed, route } from "@/src/lib/http";
 import { listReviewerIncidents } from "@/src/lib/incidents/incidents";
 
-// EP-10: Reviewers can list open and under-review incidents.
+// EP-08: Reviewers can list open and under-review incidents.
 export const GET = route("incident.review.queue", async (_requestId, request) => {
   await authenticate(request, { roles: ["reviewer"] });
 
