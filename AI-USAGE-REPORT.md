@@ -244,3 +244,23 @@
 - Declined, with reasons recorded in `.github/dependabot.yml`: #48 TypeScript 7 (typescript-eslint does not support it, `make lint` fails), #50 ESLint 10 (`eslint-config-next` plugins declare ESLint 9 only, `npm ls` reports invalid peers, and lint bans are an SDL control), #41 Node 26 image (the image must match `.nvmrc`, which dev and CI use). ESLint stays on 9.39.5.
 - Config changes so PRs stop failing: group `react` with `react-dom`, group the CodeQL `init` and `analyze` actions, and ignore the three major bumps above.
 - Also set slice 3 to Done in `docs/plan.md`.
+
+### Commit `feat(incidents): add reporter incident creation API and tests`
+
+#### Jonathan's Agent
+- Assisted with implementing the reporter-only incident creation endpoint using existing authentication, request validation, and response-handling utilities.
+- Assisted with creating strict Zod validation for incident titles, descriptions, and category identifiers.
+- Helped implement transactional incident creation and audit logging, ensuring invalid or inactive categories are rejected and incident descriptions are excluded from creation responses.
+- Assisted with PostgreSQL-backed integration tests covering successful creation, invalid categories, unauthenticated requests, unauthorized roles, and mandatory password changes.
+- Helped diagnose a test fixture failure caused by the database username-format constraint and correct the generated test usernames.
+- Human validation: reviewed and adjusted the implementation, resolved formatting issues, and executed TypeScript, ESLint, and database integration tests. All 52 database tests passed across five test files.
+
+### Commit `feat(incidents): add reporter listing and role-aware incident details`
+
+#### Jonathan's Agent
+- Assisted with implementing the reporter-only incident listing and role-aware incident detail endpoints using existing authentication and response-handling utilities.
+- Helped implement Prisma queries that restrict reporter listings to their own incidents, limit reviewer detail access to open and under-review incidents, and allow administrators to view incidents regardless of status.
+- Assisted with validating incident identifiers and returning consistent `404` responses for missing, malformed, and unauthorized incident requests.
+- Helped troubleshoot TypeScript errors involving Prisma status filters and inferred types.
+- Assisted with PostgreSQL-backed integration tests covering reporter ownership, reviewer and administrator access, closed incident restrictions, unauthenticated requests, and missing or malformed identifiers.
+- Human validation: reviewed the implementation against `ASSIGNMENT.md` and `docs/plan.md`, adjusted the code and tests, and verified TypeScript and database integration tests. All 62 database tests passed across five test files.
