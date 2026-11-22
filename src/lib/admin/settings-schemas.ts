@@ -9,7 +9,7 @@ export const updateSettingsSchema = z
     sessionIdleMinutes: z.number().int().min(5).max(60).optional(),
     sessionMaxHours: z.number().int().min(1).max(12).optional(),
     lockoutThreshold: z.number().int().min(3).max(10).optional(),
-    lockoutMinutes: z.number().int().min(1).max(60).optional(),
+    lockoutMinutes: z.number().int().min(5).max(60).optional(),
     tempPasswordHours: z.number().int().min(1).max(72).optional(),
   })
   .strict()

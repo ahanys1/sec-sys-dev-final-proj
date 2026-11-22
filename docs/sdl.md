@@ -117,7 +117,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | ORM / query layer | Prisma 7.10.1 with @prisma/adapter-pg 7.10.1 and pg 8.23.1 (D-6), exact pins; `effect` overridden to 3.22.5 (ReDoS in the Prisma CLI chain) | Chosen; `package.json`, `prisma/schema.prisma` |
 | Input validation | Zod 4.6.7 strict schemas (SR-7) | Chosen; `src/lib/request.ts` |
 | Test runner | Vitest | Chosen |
-| SAST | Semgrep CE and CodeQL | Chosen, execution pending |
+| SAST | Semgrep CE and CodeQL | Chosen, Running in CI; both passed on PR #53 |
 | DAST | ZAP baseline in CI and authenticated per-role scans | Chosen, execution pending |
 | Dependency and secret scans | npm audit --omit=dev, Dependabot (`.github/dependabot.yml`), gitleaks | Chosen; running in CI |
 | Load testing | k6, 50 VUs and workload in design §7.2 | Chosen, execution pending |
@@ -185,3 +185,4 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-20 | Added the image-build CI job and Dependabot; the runtime image no longer ships server source maps. |
 | 2026-11-20 | Auth and sessions implemented: login, logout, password change, session policy, lockout, first-admin CLI. ASVS rows for V3.3, V6.2, V6.3, V7, and V11 marked Done with evidence. |
 | 2026-11-20 | Added `docs/plan.md`, the PR template, and an AGENTS.md start-here section so any developer's agent can find the next slice and its status in the repo. |
+| 2026-11-21 | Slice #5 (EP-18, EP-20): implemented admin-only audit history with filtering and pagination, validated settings updates with transactional audit logging, and admin settings/audit interfaces. Verified 56 database tests and passing CI, CodeQL, Semgrep, and gitleaks checks on PR #53. Updated SDL implementation and static-analysis evidence; final verification remains pending. |

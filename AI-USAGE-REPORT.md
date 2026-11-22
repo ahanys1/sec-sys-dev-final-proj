@@ -289,3 +289,9 @@
 - Guided browser-based functional testing of settings persistence, audit record display, action and date filters, invalid date-range handling, and administrative navigation.
 - Guided authorization testing using a non-administrator account, confirming that direct access to administrative pages returned 404 responses and administrative API requests were rejected with forbidden responses.
 - Human validation: reviewed and adjusted the generated code, verified the interfaces in the browser, rebuilt and restarted the Docker application, and executed TypeScript, ESLint, and PostgreSQL-backed integration tests. All 56 database tests passed across six test files. Final formatting and Git checks were performed before committing.
+
+### Commit `docs: update Slice 5 security evidence and align settings validation`
+#### Jonathan's Agent
+- Assisted with reviewing and updating Slice #5 documentation in `docs/asvs/assignment-mapping.md` and `docs/sdl.md`, including implementation evidence, verification status, and remaining security testing.
+- Helped identify and correct a mismatch between the `lockoutMinutes` minimum in `settings-schemas.ts` and the centralized `LIMITS` configuration.
+- Human validation: reviewed the documentation changes, confirmed the settings validation bounds, ran TypeScript, ESLint, and PostgreSQL-backed tests (56 passed), and verified the Git diff before committing.
