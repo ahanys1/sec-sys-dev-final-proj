@@ -19,6 +19,7 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
   let list: (request: Request) => Promise<Response>;
   let detail: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
   let reviewerQueue: (request: Request) => Promise<Response>;
+  let createComment: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
 
   let reporterId: string;
   let reporterUsername: string;
@@ -35,6 +36,7 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
     login = (await import("@/app/api/auth/login/route")).POST;
     detail = (await import("@/app/api/incidents/[id]/route")).GET;
     reviewerQueue = (await import("@/app/api/reviewer/incidents/route")).GET;
+    createComment = (await import("@/app/api/incidents/[id]/comments/route")).POST;
 
     reporterUsername = `incident-${tag}`;
 
@@ -109,6 +111,23 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
         },
         body: JSON.stringify(body),
         }),
+    );
+  const postComment = (incidentId: string, body: unknown, sessionCookie = cookie,) =>
+    createComment(
+      new Request(
+        `https://app.test/api/incidents/${incidentId}/comments`,
+        {
+          method: "POST",
+          headers: {
+            origin: "https://app.test",
+            host: "app.test",
+            "content-type": "application/json",
+            cookie: sessionCookie,
+          },
+          body: JSON.stringify(body),
+        },
+      ),
+      { params: Promise.resolve({ id: incidentId }) },
     );
   const getIncidents = (sessionCookie = cookie) =>
     list(
@@ -714,4 +733,343 @@ it("rejects reviewer queue requests from reporters and admins", async () => {
   expect(adminBody.error.code).toBe("forbidden");
   expect(adminBody).not.toHaveProperty("incidents");
 });
+it("allows a reviewer to comment and records an audit event (EP-11)", async () => {
+  // Create an open incident using the existing reporter session.
+  const created = await postIncident({
+    title: "Comment integration test",
+    description: "Testing comment creation and audit logging.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const createdBody = await created.json();
+  const incidentId = createdBody.incident.id as string;
+
+  // Authenticate as a reviewer.
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const response = await postComment(
+    incidentId,
+    { body: "Reviewed the incident and confirmed the report." },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(201);
+
+  const body = await response.json();
+
+  expect(body.comment.incidentId).toBe(incidentId);
+  expect(body.comment.body).toBe(
+    "Reviewed the incident and confirmed the report.",
+  );
+
+  // Confirm the comment was persisted.
+  const stored = await db.comment.findUnique({
+    where: { id: body.comment.id },
+  });
+
+  expect(stored).not.toBeNull();
+  expect(stored?.incidentId).toBe(incidentId);
+  expect(stored?.body).toBe(body.comment.body);
+
+  // Confirm the corresponding audit record exists.
+  const audit = await db.auditLog.findFirst({
+    where: {
+      action: "comment.create",
+      targetId: incidentId,
+    },
+    orderBy: { id: "desc" },
+  });
+
+  expect(audit).not.toBeNull();
+});
+it("rejects reporter comments without creating records (EP-11)", async () => {
+  const created = await postIncident({
+    title: "Reporter comment restriction",
+    description: "Verify reporters cannot add comments.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  const response = await postComment(
+    incident.id,
+    { body: "Attempted reporter comment." },
+  );
+
+  expect(response.status).toBe(403);
+
+  const storedComments = await db.comment.count({
+    where: { incidentId: incident.id },
+  });
+
+  const auditEvents = await db.auditLog.count({
+    where: {
+      action: "comment.create",
+      targetId: incident.id,
+    },
+  });
+
+  expect(storedComments).toBe(0);
+  expect(auditEvents).toBe(0);
+});
+it("rejects unauthenticated comment creation (EP-11)", async () => {
+  const created = await postIncident({
+    title: "Unauthenticated comment restriction",
+    description: "Verify comments require authentication.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  const response = await postComment(
+    incident.id,
+    { body: "Attempted anonymous comment." },
+    "",
+  );
+
+  expect(response.status).toBe(401);
+
+  expect(
+    await db.comment.count({
+      where: { incidentId: incident.id },
+    }),
+  ).toBe(0);
+
+  expect(
+    await db.auditLog.count({
+      where: {
+        action: "comment.create",
+        targetId: incident.id,
+      },
+    }),
+  ).toBe(0);
+});
+it("hides closed incidents from reviewer comments (EP-11)", async () => {
+  const created = await postIncident({
+    title: "Closed incident comment restriction",
+    description: "Verify reviewers cannot comment on closed incidents.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  // Arrange a closed incident directly in the database.
+  await db.incident.update({
+    where: { id: incident.id },
+    data: { status: "closed" },
+  });
+
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const response = await postComment(
+    incident.id,
+    { body: "Attempted comment on a closed incident." },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(404);
+
+  // Rejected requests must not persist comments or comment audit events.
+  expect(
+    await db.comment.count({
+      where: { incidentId: incident.id },
+    }),
+  ).toBe(0);
+
+  expect(
+    await db.auditLog.count({
+      where: {
+        action: "comment.create",
+        targetId: incident.id,
+      },
+    }),
+  ).toBe(0);
+});
+it("allows admins to comment on closed incidents (EP-11)", async () => {
+  const created = await postIncident({
+    title: "Admin closed incident comment",
+    description: "Verify admins can comment on closed incidents.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  // Arrange a closed incident until EP-21 implements status transitions.
+  await db.incident.update({
+    where: { id: incident.id },
+    data: { status: "closed" },
+  });
+
+  const { user, sessionCookie } = await signInAs("admin");
+
+  const response = await postComment(
+    incident.id,
+    { body: "Administrative follow-up after closure." },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(201);
+
+  const { comment } = await response.json();
+
+  expect(comment.incidentId).toBe(incident.id);
+  expect(comment.authorId).toBe(user.id);
+  expect(comment.body).toBe("Administrative follow-up after closure.");
+
+  // Verify the comment was persisted.
+  const stored = await db.comment.findUnique({
+    where: { id: comment.id },
+  });
+
+  expect(stored).not.toBeNull();
+  expect(stored?.authorId).toBe(user.id);
+
+  // Verify the audit event identifies the administrator.
+  const audit = await db.auditLog.findFirst({
+    where: {
+      action: "comment.create",
+      targetId: incident.id,
+      userId: user.id,
+    },
+  });
+
+  expect(audit).not.toBeNull();
+});
+
+it("rejects invalid comment bodies without database changes (EP-11)", async () => {
+  const created = await postIncident({
+    title: "Comment validation test",
+    description: "Testing invalid comment inputs.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+  const { incident } = await created.json();
+
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const invalidBodies = [
+    { body: "" },
+    { body: "   " },
+    { body: "x".repeat(2001) },
+    { body: 123 },
+    { body: "Valid comment", authorId: reporterId },
+    {},
+  ];
+
+  for (const invalidBody of invalidBodies) {
+    const response = await postComment(
+      incident.id,
+      invalidBody,
+      sessionCookie,
+    );
+
+    expect(response.status).toBe(400);
+  }
+
+  expect(
+    await db.comment.count({
+      where: { incidentId: incident.id },
+    }),
+  ).toBe(0);
+
+  expect(
+    await db.auditLog.count({
+      where: {
+        action: "comment.create",
+        targetId: incident.id,
+      },
+    }),
+  ).toBe(0);
+});
+
+it("returns 404 for comments on nonexistent incidents (EP-11)", async () => {
+  const incidentId = randomUUID();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const response = await postComment(
+    incidentId,
+    { body: "Comment on a nonexistent incident." },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(404);
+
+  // No comment or audit record should be created.
+  expect(
+    await db.comment.count({
+      where: { incidentId },
+    }),
+  ).toBe(0);
+
+  expect(
+    await db.auditLog.count({
+      where: {
+        action: "comment.create",
+        targetId: incidentId,
+      },
+    }),
+  ).toBe(0);
+});
+
+it("allows reviewers to comment on under-review incidents (EP-11)", async () => {
+  const created = await postIncident({
+    title: "Under-review incident comment",
+    description: "Verify reviewers can comment during review.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  // Arrange the status directly until EP-21 is implemented.
+  await db.incident.update({
+    where: { id: incident.id },
+    data: { status: "under_review" },
+  });
+
+  const { user, sessionCookie } = await signInAs("reviewer");
+
+  const response = await postComment(
+    incident.id,
+    { body: "Review is currently in progress." },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(201);
+
+  const { comment } = await response.json();
+
+  expect(comment.incidentId).toBe(incident.id);
+  expect(comment.authorId).toBe(user.id);
+
+  const stored = await db.comment.findUnique({
+    where: { id: comment.id },
+  });
+
+  expect(stored).not.toBeNull();
+  expect(stored?.body).toBe("Review is currently in progress.");
+
+  const audit = await db.auditLog.findFirst({
+    where: {
+      action: "comment.create",
+      targetId: incident.id,
+      userId: user.id,
+    },
+  });
+
+  expect(audit).not.toBeNull();
+});
+
 });

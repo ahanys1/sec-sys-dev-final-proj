@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient, Role } from "@/src/generated/prisma/client";
 import { runAudited } from "../audit";
 import { ApiError } from "../http";
-import type { CreateIncidentInput } from "./schemas";
+import type { CreateIncidentInput, CreateCommentInput } from "./schemas";
 
 export async function createIncident(
   db: PrismaClient,
@@ -122,4 +122,58 @@ export async function getIncidentDetail(
   }
 
   return incident;
+}
+// EP-11: Only reviewers and admins may comment on accessible incidents.
+// The comment and audit record are committed atomically.
+export async function createIncidentComment(
+  db: PrismaClient,
+  incidentId: string,
+  author: { id: string; role: Role },
+  input: CreateCommentInput,
+) {
+  if (author.role === "user") {
+    throw new ApiError("forbidden");
+  }
+
+  return runAudited(
+    db,
+    async (tx) => {
+      const access: Prisma.IncidentWhereInput =
+        author.role === "admin"
+          ? {}
+          : { status: { in: ["open", "under_review"] } };
+
+      const incident = await tx.incident.findFirst({
+        where: {
+          id: incidentId,
+          ...access,
+        },
+        select: { id: true },
+      });
+
+      if (!incident) {
+        throw new ApiError("not_found");
+      }
+
+      return tx.comment.create({
+        data: {
+          incidentId: incident.id,
+          authorId: author.id,
+          body: input.body,
+        },
+        select: {
+          id: true,
+          incidentId: true,
+          authorId: true,
+          body: true,
+          createdAt: true,
+        },
+      });
+    },
+    (comment) => ({
+  actor: { type: "user", userId: author.id },
+  action: "comment.create",
+  targetId: comment.incidentId,
+}),
+  );
 }
