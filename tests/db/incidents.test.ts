@@ -18,6 +18,7 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
   let login: (request: Request) => Promise<Response>;
   let list: (request: Request) => Promise<Response>;
   let detail: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
+  let reviewerQueue: (request: Request) => Promise<Response>;
 
   let reporterId: string;
   let reporterUsername: string;
@@ -33,6 +34,7 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
     list = (await import("@/app/api/incidents/route")).GET;
     login = (await import("@/app/api/auth/login/route")).POST;
     detail = (await import("@/app/api/incidents/[id]/route")).GET;
+    reviewerQueue = (await import("@/app/api/reviewer/incidents/route")).GET;
 
     reporterUsername = `incident-${tag}`;
 
@@ -128,6 +130,16 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
         },
       }),
       { params: Promise.resolve({ id }) },
+    );
+  const getReviewerQueue = (sessionCookie = cookie) =>
+    reviewerQueue(
+      new Request("https://app.test/api/reviewer/incidents", {
+        method: "GET",
+        headers: {
+          host: "app.test",
+          cookie: sessionCookie,
+        },
+      }),
     );
 
 async function signInAs(role: "reviewer" | "admin") {
@@ -603,5 +615,103 @@ it("restricts closed incident details to the reporter and admin", async () => {
   const reporterResponse = await getIncident(incident.id);
   expect(reporterResponse.status).toBe(200);
   expect((await reporterResponse.json()).incident.id).toBe(incident.id);
+});
+it("rejects unauthenticated reviewer queue requests", async () => {
+  const response = await getReviewerQueue("");
+
+  expect(response.status).toBe(401);
+
+  const body = await response.json();
+  expect(body.error.code).toBe("unauthenticated");
+  expect(body).not.toHaveProperty("incidents");
+});
+it("lists open and under-review incidents from all reporters without descriptions", async () => {
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const otherReporter = await db.user.create({
+    data: {
+      username: `inc-other-${randomUUID().slice(0, 8)}`,
+      role: "user",
+      active: true,
+      mustChangePassword: false,
+      passwordHash: await hashPassword(PASSWORD),
+    },
+  });
+
+  const openIncident = await db.incident.create({
+    data: {
+      reporterId,
+      categoryId,
+      title: "EP10 open incident",
+      description: "EP10 private open description",
+      status: "open",
+    },
+  });
+
+  const reviewIncident = await db.incident.create({
+    data: {
+      reporterId: otherReporter.id,
+      categoryId,
+      title: "EP10 under-review incident",
+      description: "EP10 private review description",
+      status: "under_review",
+    },
+  });
+
+  const closedIncident = await db.incident.create({
+    data: {
+      reporterId,
+      categoryId,
+      title: "EP10 closed incident",
+      description: "EP10 private closed description",
+      status: "closed",
+    },
+  });
+
+  const response = await getReviewerQueue(sessionCookie);
+
+  expect(response.status).toBe(200);
+
+  const body = await response.json();
+  const ids = body.incidents.map((incident: { id: string }) => incident.id);
+
+  expect(ids).toContain(openIncident.id);
+  expect(ids).toContain(reviewIncident.id);
+  expect(ids).not.toContain(closedIncident.id);
+
+  expect(body.incidents.every(
+    (incident: { status: string }) =>
+      incident.status === "open" || incident.status === "under_review",
+  )).toBe(true);
+
+  expect(JSON.stringify(body)).not.toContain("EP10 private open description");
+  expect(JSON.stringify(body)).not.toContain("EP10 private review description");
+  expect(JSON.stringify(body)).not.toContain("EP10 private closed description");
+
+  expect(body.incidents.every(
+    (incident: Record<string, unknown>) =>
+      !Object.hasOwn(incident, "description"),
+  )).toBe(true);
+});
+it("rejects reviewer queue requests from reporters and admins", async () => {
+  // An ordinary reporter cannot access the reviewer queue.
+  const reporterResponse = await getReviewerQueue(cookie);
+
+  expect(reporterResponse.status).toBe(403);
+
+  const reporterBody = await reporterResponse.json();
+  expect(reporterBody.error.code).toBe("forbidden");
+  expect(reporterBody).not.toHaveProperty("incidents");
+
+  // Administrators cannot access this reviewer-specific endpoint.
+  const { sessionCookie } = await signInAs("admin");
+
+  const adminResponse = await getReviewerQueue(sessionCookie);
+
+  expect(adminResponse.status).toBe(403);
+
+  const adminBody = await adminResponse.json();
+  expect(adminBody.error.code).toBe("forbidden");
+  expect(adminBody).not.toHaveProperty("incidents");
 });
 });

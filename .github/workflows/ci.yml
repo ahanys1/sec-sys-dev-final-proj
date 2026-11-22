@@ -42,7 +42,7 @@ jobs:
       - run: npx prisma migrate deploy
         env:
           DATABASE_URL: postgresql://app_owner:ci-owner@127.0.0.1:5432/incidents
-      - run: npx vitest run tests/db
+      - run: npx vitest run tests/db --no-file-parallelism
         env:
           TEST_DATABASE_OWNER_URL: postgresql://app_owner:ci-owner@127.0.0.1:5432/incidents
           TEST_DATABASE_APP_URL: postgresql://app_user:ci-app@127.0.0.1:5432/incidents
