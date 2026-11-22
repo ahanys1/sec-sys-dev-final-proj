@@ -21,6 +21,7 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
   let reviewerQueue: (request: Request) => Promise<Response>;
   let createComment: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
   let updateStatus: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
+  let patchCategory: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
 
   let reporterId: string;
   let reporterUsername: string;
@@ -42,6 +43,10 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
     const statusRoute = await import("@/app/api/incidents/[id]/status/route"
     );
     updateStatus = statusRoute.PATCH;
+
+    const categoryRoute = await import("@/app/api/incidents/[id]/category/route"
+    );
+    patchCategory = categoryRoute.PATCH;
 
     reporterUsername = `incident-${tag}`;
 
@@ -137,6 +142,29 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
       { params: Promise.resolve({ id: incidentId }) },
     );
   }
+
+  const updateCategory = (
+    incidentId: string,
+    body: unknown,
+    sessionCookie = cookie,
+  ) =>
+    patchCategory(
+      new Request(
+        `https://app.test/api/incidents/${incidentId}/category`,
+        {
+          method: "PATCH",
+          headers: {
+            origin: "https://app.test",
+            host: "app.test",
+            "content-type": "application/json",
+            cookie: sessionCookie,
+          },
+          body: JSON.stringify(body),
+        },
+      ),
+      { params: Promise.resolve({ id: incidentId }) },
+    );
+
   const postComment = (incidentId: string, body: unknown, sessionCookie = cookie,) =>
     createComment(
       new Request(
@@ -1574,6 +1602,455 @@ it("rejects invalid status request bodies (EP-10)", async () => {
   const audits = await db.auditLog.count({
     where: {
       action: "incident.status",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("allows reviewers to assign an active category (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Incident classification test",
+    description: "Verify reviewer category assignment.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // Create a second active category for reassignment.
+  const destination = await db.category.create({
+    data: {
+      name: `classification-${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: destination.id },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(200);
+
+  const { incident: updated } = await response.json();
+
+  expect(updated.id).toBe(incident.id);
+  expect(updated.categoryId).toBe(destination.id);
+
+  // Verify the database was updated.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(destination.id);
+
+  // Verify the classification was audited.
+  const audits = await db.auditLog.findMany({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toHaveLength(1);
+});
+
+it("rejects inactive category assignments (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Inactive category restriction",
+    description: "Verify inactive categories cannot be assigned.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // Create a category that exists but is inactive.
+  const inactiveCategory = await db.category.create({
+    data: {
+      name: `inactive-${randomUUID().slice(0, 8)}`,
+      active: false,
+    },
+  });
+
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: inactiveCategory.id },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // The incident must retain its original category.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(categoryId);
+
+  // No classification audit event should be created.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects nonexistent category assignments (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Nonexistent category restriction",
+    description: "Verify unknown categories cannot be assigned.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // Valid UUID format, but no matching category record.
+  const nonexistentCategoryId = randomUUID();
+
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: nonexistentCategoryId },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // The original category must remain unchanged.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(categoryId);
+
+  // Rejected assignments must not generate audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects category changes on closed incidents (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Closed incident classification restriction",
+    description: "Verify reviewers cannot reclassify closed incidents.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // Create an active destination category.
+  const destination = await db.category.create({
+    data: {
+      name: `closed-classification-${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Arrange a closed incident using the EP-10 workflow.
+  const reviewing = await patchStatus(
+    incident.id,
+    { status: "under_review" },
+    sessionCookie,
+  );
+  expect(reviewing.status).toBe(200);
+
+  const closing = await patchStatus(
+    incident.id,
+    { status: "closed" },
+    sessionCookie,
+  );
+  expect(closing.status).toBe(200);
+
+  // A reviewer must not be able to reclassify a closed incident.
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: destination.id },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(404);
+
+  // The original category must remain unchanged.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.status).toBe("closed");
+  expect(stored?.categoryId).toBe(categoryId);
+
+  // No classification audit event should be created.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects administrator category changes (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Administrator classification restriction",
+    description: "Verify administrators cannot reclassify incidents.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("admin");
+
+  const destination = await db.category.create({
+    data: {
+      name: `admin-classification-${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: destination.id },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(403);
+
+  // The incident must retain its original category.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(categoryId);
+
+  // Rejected operations must not generate classification audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects reporter category changes (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Reporter classification restriction",
+    description: "Verify reporters cannot reclassify incidents.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  // The existing reporter session is used by default.
+  const destination = await db.category.create({
+    data: {
+      name: `reporter-classification-${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: destination.id },
+  );
+
+  expect(response.status).toBe(403);
+
+  // Verify the original category remains unchanged.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(categoryId);
+
+  // No classification audit event should be generated.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects unauthenticated category changes (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Unauthenticated classification restriction",
+    description: "Verify authentication is required for classification.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  const destination = await db.category.create({
+    data: {
+      name: `unauth-classification-${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Supply no session cookie.
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: destination.id },
+    "",
+  );
+
+  expect(response.status).toBe(401);
+
+  // The incident must remain unchanged.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(categoryId);
+
+  // No classification audit event should be generated.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects malformed category IDs (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Malformed category validation",
+    description: "Verify category IDs must be valid UUIDs.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // Invalid UUID format should fail Zod validation.
+  const response = await updateCategory(
+    incident.id,
+    { categoryId: "not-a-valid-uuid" },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // Verify the original category remains unchanged.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(categoryId);
+
+  // Rejected requests must not generate classification audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: incident.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects classification of nonexistent incidents (EP-21)", async () => {
+  const { sessionCookie } = await signInAs("reviewer");
+
+  // Generate a valid UUID that does not identify an incident.
+  const nonexistentIncidentId = randomUUID();
+
+  const response = await updateCategory(
+    nonexistentIncidentId,
+    { categoryId },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(404);
+
+  // No classification audit event should be generated.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
+      targetId: nonexistentIncidentId,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects unexpected fields in category updates (EP-21)", async () => {
+  const created = await postIncident({
+    title: "Category mass-assignment restriction",
+    description: "Verify unexpected fields are rejected.",
+    categoryId,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const destination = await db.category.create({
+    data: {
+      name: `mass-assignment-${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Attempt to modify both category and status.
+  const response = await updateCategory(
+    incident.id,
+    {
+      categoryId: destination.id,
+      status: "closed",
+    },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // Neither field should have changed.
+  const stored = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(stored?.categoryId).toBe(categoryId);
+  expect(stored?.status).toBe("open");
+
+  // Rejected requests must not generate classification audit events.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "incident.classify",
       targetId: incident.id,
     },
   });

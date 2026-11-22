@@ -290,3 +290,12 @@
 - Assisted with developing integration tests for valid and invalid transitions, authentication, role-based authorization, nonexistent incidents, malformed requests, concurrent updates, and audit record verification.
 - Assisted with identifying and correcting inconsistent endpoint labels and resolving test authentication rate-limit failures through reusable reviewer and administrator sessions.
 - Human verification included reviewing the implementation, running the database integration suite (84 tests passed), executing TypeScript and ESLint checks, and confirming clean Git diff formatting.
+
+### Commit `feat(incidents): add reviewer category classification endpoint`
+
+#### Jonathan's Agent
+
+- Assisted with implementing EP-21, including reviewer-only category classification, strict Zod request validation, active-category verification, incident visibility restrictions, conditional database updates, and transactional audit logging.
+- Assisted with developing integration tests for successful classification, inactive and nonexistent categories, closed incidents, authentication, role-based authorization, malformed identifiers, nonexistent incidents, unexpected request fields, database persistence, and audit verification.
+- Assisted with resolving a missing TypeScript type import during implementation.
+- Human verification included reviewing the implementation, executing the database integration suite (94 tests passed), running TypeScript and ESLint checks, and confirming clean Git diff formatting.

@@ -25,3 +25,12 @@ export const updateIncidentStatusSchema = z.strictObject({
 export type UpdateIncidentStatusInput = z.infer<
   typeof updateIncidentStatusSchema
 >;
+
+ // EP-21: Reviewers may assign only valid category identifiers.
+export const updateIncidentCategorySchema = z.strictObject({
+  categoryId: z.uuid(),
+});
+
+export type UpdateIncidentCategoryInput = z.infer<
+  typeof updateIncidentCategorySchema
+>;

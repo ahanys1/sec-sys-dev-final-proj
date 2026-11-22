@@ -1,7 +1,7 @@
 import type { Prisma, PrismaClient, Role } from "@/src/generated/prisma/client";
 import { runAudited } from "../audit";
 import { ApiError } from "../http";
-import type { CreateIncidentInput, CreateCommentInput, UpdateIncidentStatusInput } from "./schemas";
+import type { CreateIncidentInput, CreateCommentInput, UpdateIncidentStatusInput, UpdateIncidentCategoryInput } from "./schemas";
 
 export async function createIncident(
   db: PrismaClient,
@@ -232,6 +232,78 @@ export async function updateIncidentStatus(
       actor: { type: "user", userId: reviewer.id },
       action: "incident.status",
       targetId: incident.id,
+    }),
+  );
+}
+
+ // EP-21: Only reviewers may classify accessible incidents.
+ // Category assignment and audit logging are atomic.
+export async function updateIncidentCategory(
+  db: PrismaClient,
+  incidentId: string,
+  reviewer: { id: string; role: Role },
+  input: UpdateIncidentCategoryInput,
+) {
+  if (reviewer.role !== "reviewer") {
+    throw new ApiError("forbidden");
+  }
+
+  return runAudited(
+    db,
+    async (tx) => {
+      // Reviewers cannot modify closed or nonexistent incidents.
+      const incident = await tx.incident.findFirst({
+        where: {
+          id: incidentId,
+          status: { in: ["open", "under_review"] },
+        },
+        select: { id: true },
+      });
+
+      if (!incident) {
+        throw new ApiError("not_found");
+      }
+
+      // The destination category must exist and be active.
+      const category = await tx.category.findFirst({
+        where: {
+          id: input.categoryId,
+          active: true,
+        },
+        select: { id: true },
+      });
+
+      if (!category) {
+        throw new ApiError("invalid_request");
+      }
+
+      const result = await tx.incident.updateMany({
+        where: {
+          id: incident.id,
+          status: { in: ["open", "under_review"] },
+        },
+        data: {
+          categoryId: category.id,
+        },
+      });
+
+      if (result.count !== 1) {
+        throw new ApiError("not_found");
+      }
+
+      return tx.incident.findUniqueOrThrow({
+        where: { id: incident.id },
+        select: {
+          id: true,
+          categoryId: true,
+          updatedAt: true,
+        },
+      });
+    },
+    (updated) => ({
+      actor: { type: "user", userId: reviewer.id },
+      action: "incident.classify",
+      targetId: updated.id,
     }),
   );
 }
