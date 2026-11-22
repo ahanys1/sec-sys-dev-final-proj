@@ -22,6 +22,8 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
   let createComment: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
   let updateStatus: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
   let patchCategory: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
+  let getAdminCategories: (request: Request) => Promise<Response>;
+  let postAdminCategory: (request: Request) => Promise<Response>;
 
   let reporterId: string;
   let reporterUsername: string;
@@ -39,6 +41,11 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
     detail = (await import("@/app/api/incidents/[id]/route")).GET;
     reviewerQueue = (await import("@/app/api/reviewer/incidents/route")).GET;
     createComment = (await import("@/app/api/incidents/[id]/comments/route")).POST;
+
+    const adminCategoriesRoute = await import("@/app/api/admin/categories/route"
+    );
+    getAdminCategories = adminCategoriesRoute.GET;
+    postAdminCategory = adminCategoriesRoute.POST;
 
     const statusRoute = await import("@/app/api/incidents/[id]/status/route"
     );
@@ -142,6 +149,23 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
       { params: Promise.resolve({ id: incidentId }) },
     );
   }
+
+  const createAdminCategory = (
+    body: unknown,
+    sessionCookie: string,
+  ) =>
+    postAdminCategory(
+      new Request("https://app.test/api/admin/categories", {
+        method: "POST",
+        headers: {
+          origin: "https://app.test",
+          host: "app.test",
+          "content-type": "application/json",
+          cookie: sessionCookie,
+        },
+        body: JSON.stringify(body),
+      }),
+    );
 
   const updateCategory = (
     incidentId: string,
@@ -2056,6 +2080,340 @@ it("rejects unexpected fields in category updates (EP-21)", async () => {
   });
 
   expect(audits).toBe(0);
+});
+
+it("allows administrators to create active categories (EP-22)", async () => {
+  const {sessionCookie } = await signInAs("admin");
+
+  const name = `Admin category ${randomUUID().slice(0, 8)}`;
+
+  const response = await createAdminCategory(
+    { name },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(201);
+
+  const { category } = await response.json();
+
+  expect(category.name).toBe(name);
+  expect(category.active).toBe(true);
+
+  // Verify persistence.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.name).toBe(name);
+  expect(stored?.active).toBe(true);
+
+  // Verify transactional audit logging.
+  const audits = await db.auditLog.findMany({
+    where: {
+      action: "category.create",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toHaveLength(1);
+});
+
+it("rejects duplicate category names regardless of case (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const name = `Duplicate Category ${randomUUID().slice(0, 8)}`;
+
+  // Create the original category.
+  const first = await createAdminCategory(
+    { name },
+    sessionCookie,
+  );
+
+  expect(first.status).toBe(201);
+
+  const { category } = await first.json();
+
+  // Attempt to create the same category using different capitalization.
+  const duplicate = await createAdminCategory(
+    { name: name.toLowerCase() },
+    sessionCookie,
+  );
+
+  expect(duplicate.status).toBe(409);
+
+  // Only one category with this name should exist.
+  const matches = await db.category.findMany({
+    where: {
+      name: {
+        equals: name,
+        mode: "insensitive",
+      },
+    },
+  });
+
+  expect(matches).toHaveLength(1);
+
+  // The rejected request must not create another audit event.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.create",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("rejects empty or whitespace-only category names (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const response = await createAdminCategory(
+    { name: "   " },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+});
+
+it("rejects category names exceeding 100 characters (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const response = await createAdminCategory(
+    { name: "A".repeat(101) },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+});
+
+it("rejects unexpected fields during category creation (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const name = `Mass Assignment ${randomUUID().slice(0, 8)}`;
+
+  // Attempt to override the category's default active state.
+  const response = await createAdminCategory(
+    {
+      name,
+      active: false,
+    },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // Verify the rejected request did not create a category.
+  const stored = await db.category.findFirst({
+    where: { name },
+  });
+
+  expect(stored).toBeNull();
+});
+
+it("allows administrators to list active and inactive categories (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const suffix = randomUUID().slice(0, 8);
+
+  const activeCategory = await db.category.create({
+    data: {
+      name: `Active List ${suffix}`,
+      active: true,
+    },
+  });
+
+  const inactiveCategory = await db.category.create({
+    data: {
+      name: `Inactive List ${suffix}`,
+      active: false,
+    },
+  });
+
+  const response = await getAdminCategories(
+    new Request("https://app.test/api/admin/categories", {
+      method: "GET",
+      headers: {
+        cookie: sessionCookie,
+      },
+    }),
+  );
+
+  expect(response.status).toBe(200);
+
+  const { categories } = await response.json();
+
+  const active = categories.find(
+    (category: { id: string }) => category.id === activeCategory.id,
+  );
+
+  const inactive = categories.find(
+    (category: { id: string }) => category.id === inactiveCategory.id,
+  );
+
+  expect(active).toMatchObject({
+    id: activeCategory.id,
+    name: activeCategory.name,
+    active: true,
+  });
+
+  expect(inactive).toMatchObject({
+    id: inactiveCategory.id,
+    name: inactiveCategory.name,
+    active: false,
+  });
+});
+
+it("rejects reporter access to category management (EP-22)", async () => {
+  // Use the existing reporter session.
+  const getResponse = await getAdminCategories(
+    new Request("https://app.test/api/admin/categories", {
+      method: "GET",
+      headers: {
+        cookie,
+      },
+    }),
+  );
+
+  expect(getResponse.status).toBe(403);
+
+  const name = `Reporter Category ${randomUUID().slice(0, 8)}`;
+
+  const postResponse = await createAdminCategory(
+    { name },
+    cookie,
+  );
+
+  expect(postResponse.status).toBe(403);
+
+  // Verify the rejected POST did not create a category.
+  const stored = await db.category.findFirst({
+    where: { name },
+  });
+
+  expect(stored).toBeNull();
+});
+
+it("rejects reviewer access to category management (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const getResponse = await getAdminCategories(
+    new Request("https://app.test/api/admin/categories", {
+      method: "GET",
+      headers: {
+        cookie: sessionCookie,
+      },
+    }),
+  );
+
+  expect(getResponse.status).toBe(403);
+
+  const name = `Reviewer Category ${randomUUID().slice(0, 8)}`;
+
+  const postResponse = await createAdminCategory(
+    { name },
+    sessionCookie,
+  );
+
+  expect(postResponse.status).toBe(403);
+
+  // Rejected creation must not modify the database.
+  const stored = await db.category.findFirst({
+    where: { name },
+  });
+
+  expect(stored).toBeNull();
+});
+
+it("rejects unauthenticated category management requests (EP-22)", async () => {
+  // GET without a session cookie.
+  const getResponse = await getAdminCategories(
+    new Request("https://app.test/api/admin/categories", {
+      method: "GET",
+    }),
+  );
+
+  expect(getResponse.status).toBe(401);
+
+  const name = `Unauth Category ${randomUUID().slice(0, 8)}`;
+
+  // POST without a session cookie.
+  const postResponse = await createAdminCategory(
+    { name },
+    "",
+  );
+
+  expect(postResponse.status).toBe(401);
+
+  // Verify the rejected POST did not create a category.
+  const stored = await db.category.findFirst({
+    where: { name },
+  });
+
+  expect(stored).toBeNull();
+});
+
+it("trims category names before creation (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const name = `Trimmed Category ${randomUUID().slice(0, 8)}`;
+
+  const response = await createAdminCategory(
+    { name: `   ${name}   ` },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(201);
+
+  const { category } = await response.json();
+
+  // The API should return the normalized name.
+  expect(category.name).toBe(name);
+  expect(category.active).toBe(true);
+
+  // The database should store the normalized name.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.name).toBe(name);
+
+  // Successful creation must be audited.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.create",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("accepts category names exactly 100 characters long (EP-22)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  // Unique name with exactly 100 characters.
+  const name = `Boundary-${randomUUID()}-`.padEnd(100, "A");
+
+  expect(name).toHaveLength(100);
+
+  const response = await createAdminCategory(
+    { name },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(201);
+
+  const { category } = await response.json();
+
+  expect(category.name).toBe(name);
+  expect(category.active).toBe(true);
+
+  // Verify the full name was persisted.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.name).toBe(name);
 });
 
 });
