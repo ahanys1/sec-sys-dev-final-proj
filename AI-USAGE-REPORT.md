@@ -245,6 +245,87 @@
 - Config changes so PRs stop failing: group `react` with `react-dom`, group the CodeQL `init` and `analyze` actions, and ignore the three major bumps above.
 - Also set slice 3 to Done in `docs/plan.md`.
 
+### Commit `feat(incidents): add reporter incident creation API and tests`
+
+#### Jonathan's Agent
+- Assisted with implementing the reporter-only incident creation endpoint using existing authentication, request validation, and response-handling utilities.
+- Assisted with creating strict Zod validation for incident titles, descriptions, and category identifiers.
+- Helped implement transactional incident creation and audit logging, ensuring invalid or inactive categories are rejected and incident descriptions are excluded from creation responses.
+- Assisted with PostgreSQL-backed integration tests covering successful creation, invalid categories, unauthenticated requests, unauthorized roles, and mandatory password changes.
+- Helped diagnose a test fixture failure caused by the database username-format constraint and correct the generated test usernames.
+- Human validation: reviewed and adjusted the implementation, resolved formatting issues, and executed TypeScript, ESLint, and database integration tests. All 52 database tests passed across five test files.
+
+### Commit `feat(incidents): add reporter listing and role-aware incident details`
+
+#### Jonathan's Agent
+- Assisted with implementing the reporter-only incident listing and role-aware incident detail endpoints using existing authentication and response-handling utilities.
+- Helped implement Prisma queries that restrict reporter listings to their own incidents, limit reviewer detail access to open and under-review incidents, and allow administrators to view incidents regardless of status.
+- Assisted with validating incident identifiers and returning consistent `404` responses for missing, malformed, and unauthorized incident requests.
+- Helped troubleshoot TypeScript errors involving Prisma status filters and inferred types.
+- Assisted with PostgreSQL-backed integration tests covering reporter ownership, reviewer and administrator access, closed incident restrictions, unauthenticated requests, and missing or malformed identifiers.
+- Human validation: reviewed the implementation against `ASSIGNMENT.md` and `docs/plan.md`, adjusted the code and tests, and verified TypeScript and database integration tests. All 62 database tests passed across five test files.
+
+### Commit `feat(incidents): add reviewer incident queue API and tests`
+
+#### Jonathan's Agent
+- Assisted with implementing the reviewer-only incident queue endpoint using the existing authentication, database, and HTTP response utilities.
+- Helped implement PostgreSQL queries that return open and under-review incidents across reporters while excluding closed incidents and incident descriptions.
+- Assisted with database integration tests covering reviewer access, status filtering, multiple reporters, response privacy, and unauthorized requests.
+- Human validation: reviewed and adjusted the implementation and executed TypeScript, ESLint, whitespace checks, and PostgreSQL integration tests. All 65 database tests passed across five test files.
+- Assisted with diagnosing a database CI failure caused by parallel test execution and updating the GitHub Actions database test command to use --no-file-parallelism, consistent with the approach used during Slice #5.
+
+### Commit `feat(incidents): add audited incident comments API and tests`
+
+#### Jonathan's Agent
+
+- Assisted with implementing EP-11, including the comment creation endpoint, Zod request validation, role-based authorization, and transactional audit logging.
+- Assisted with developing integration tests for authenticated and unauthenticated requests, reporter restrictions, reviewer and administrator permissions, incident visibility, invalid inputs, database persistence, and audit events.
+- Human verification included reviewing the implementation, executing the database integration suite (73 tests passed), running TypeScript and ESLint checks, and verifying Git diff formatting.
+
+### Commit `feat(incidents): add audited status transitions API and tests`
+
+#### Jonathan's Agent
+
+- Assisted with implementing EP-10, including reviewer-only status transitions, strict Zod request validation, conditional database updates, and transactional audit logging.
+- Assisted with developing integration tests for valid and invalid transitions, authentication, role-based authorization, nonexistent incidents, malformed requests, concurrent updates, and audit record verification.
+- Assisted with identifying and correcting inconsistent endpoint labels and resolving test authentication rate-limit failures through reusable reviewer and administrator sessions.
+- Human verification included reviewing the implementation, running the database integration suite (84 tests passed), executing TypeScript and ESLint checks, and confirming clean Git diff formatting.
+
+### Commit `feat(incidents): add reviewer category classification endpoint`
+
+#### Jonathan's Agent
+
+- Assisted with implementing EP-21, including reviewer-only category classification, strict Zod request validation, active-category verification, incident visibility restrictions, conditional database updates, and transactional audit logging.
+- Assisted with developing integration tests for successful classification, inactive and nonexistent categories, closed incidents, authentication, role-based authorization, malformed identifiers, nonexistent incidents, unexpected request fields, database persistence, and audit verification.
+- Assisted with resolving a missing TypeScript type import during implementation.
+- Human verification included reviewing the implementation, executing the database integration suite (94 tests passed), running TypeScript and ESLint checks, and confirming clean Git diff formatting.
+
+### Commit `feat(categories): add administrator category management`
+
+#### Jonathan's Agent
+
+- Assisted with implementing EP-22, including administrator-only category listing and creation, strict Zod request validation, category name normalization, length restrictions, case-insensitive uniqueness enforcement, and transactional audit logging.
+- Assisted with implementing Prisma duplicate-name error handling to return HTTP 409 Conflict and developing integration tests for successful creation, active and inactive category listing, duplicate names, invalid inputs, unexpected fields, authentication, role-based authorization, database persistence, and audit verification.
+- Assisted with validating category name boundaries, including whitespace trimming, rejection of names exceeding 100 characters, and acceptance of names exactly 100 characters long.
+- Human verification included reviewing the implementation, incrementally executing the database integration suite (105 tests passed), and verifying endpoint behavior. TypeScript, ESLint, and Git diff checks were also used throughout development.
+
+### Commit `feat(categories): add administrator category updates`
+
+#### Jonathan's Agent
+
+- **AI assistance:** Assisted with implementing EP-23, including administrator-only category updates, request validation, duplicate-name conflict handling, and transactional audit logging.
+- **Security considerations:** Reviewed role-based authorization, strict input validation, mass-assignment prevention, and preservation of existing incident-category relationships when categories are deactivated.
+- **Testing assistance:** Helped develop integration tests covering category renaming, deactivation/reactivation, duplicate names, unauthorized access, nonexistent categories, empty requests, unexpected fields, and audit behavior.
+- **Human verification:** Reviewed the implementation, executed integration tests (115/115 passing), and verified TypeScript compilation, ESLint, and Git whitespace checks.
+### Commit `feat(admin): add category management UI`
+
+#### Jonathan's Agent
+
+- **AI assistance:** Assisted with implementing the administrator category-management interface using Next.js server and client components.
+- **Implementation:** Added category listing, creation, renaming, activation, and deactivation controls using existing EP-22 and EP-23 endpoints.
+- **Security considerations:** Preserved server-side administrator authorization, backend validation, duplicate-name handling, and audited category modifications.
+- **Human verification:** Manually tested category creation, duplicate rejection, renaming, deactivation, reactivation, and reviewer category availability. Verified `category.create` and `category.update` records in PostgreSQL.
+- **Validation:** TypeScript and ESLint checks completed successfully.
 ### Commit Claim Slice #5 — Audit View and Settings
 ### Jonathan's Agent
 - Assisted with local development environment setup using WSL2, Node.js 24, Docker Compose, PostgreSQL, and Prisma.

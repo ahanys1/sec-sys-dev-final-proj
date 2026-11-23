@@ -11,10 +11,31 @@ export function AppHeader({ username, role }: { username: string; role: string }
         <span>
           {username} ({role})
         </span>
+        {role === "user" && (
+          <>
+            <Link href="/incidents" className="underline">
+              My Incidents
+            </Link>
+            <Link href="/incidents/new" className="underline">
+              Report Incident
+            </Link>
+          </>
+        )}
+        {role === "reviewer" && (
+          <Link href="/reviewer/incidents" className="underline">
+            Reviewer Queue
+          </Link>
+        )}
         {role === "admin" ? (
           <>
             <Link href="/admin/users" className="underline">
               Users
+            </Link>
+            <Link href="/admin/incidents" className="underline">
+              Incidents
+            </Link>
+            <Link href="/admin/categories" className="underline">
+              Categories
             </Link>
             <Link href="/admin/audit" className="underline">
               Audit history
