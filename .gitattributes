@@ -1,0 +1,14 @@
+# Source-only exports: never distribute local secrets or generated runtime data (SR-14, ASVS V13.3.1).
+.env* export-ignore
+.env.example -export-ignore
+*.key export-ignore
+*.pem export-ignore
+*.crt export-ignore
+*.log export-ignore
+*.dump export-ignore
+*.backup export-ignore
+node_modules export-ignore
+.next export-ignore
+out export-ignore
+coverage export-ignore
+src/generated export-ignore

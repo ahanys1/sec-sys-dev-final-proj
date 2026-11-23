@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate clean
+.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate clean package-source
 
 ENV_FILE ?= .env
 
@@ -72,3 +72,6 @@ migrate: ## Apply database migrations with the owner role (one-off job)
 
 clean: ## Remove build output and coverage
 	rm -rf .next out coverage
+
+package-source: ## Export committed source and SHA-256 checksum to out/ (requires Git)
+	sh scripts/package-source.sh

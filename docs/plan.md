@@ -29,7 +29,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 5 | Audit view and settings | 2 | Next | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Next; the threat-model PR can start now | #12, #21 |
 | 7 | Verification | 3, 4, 5 | Next | #13, #14, #16, #17 |
-| 8 | Release | 7 | In progress: #20 manual and source packaging; final release blocked on verification | #18 to #20, #22 |
+| 8 | Release | 7 | In progress: #20 manual/source packaging in review (#55); final release blocked on verification | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
 

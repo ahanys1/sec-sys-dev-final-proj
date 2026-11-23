@@ -249,3 +249,11 @@
 #### Alex's Agent
 - Claimed issue #20 on a feature branch and marked release documentation in progress in the slice tracker.
 - Human direction: begin #20 and open a PR; dependent incident, audit, and settings interfaces remain in other PRs, so this work must not claim final release verification.
+
+### Commit docs: add user manual and source export (NFR-8, NFR-9, SR-14)
+#### Alex's Agent
+- Produced the user manual, component/packaging guide, committed-source export target with SHA-256 checksum and export exclusions, README corrections, and SDL/plan evidence for PR #55.
+- Human direction: begin issue #20 on a new branch and push a PR in the existing format. No subsequent human edits to this output at authoring time.
+- Security corrections during AI review: removed certificate-bypass and routine destructive-reset advice; documented local plaintext configuration as development-only; kept pending incident/audit/settings workflows and final release evidence explicitly unverified; excluded environment/key/generated files from exports while retaining placeholder configuration. Did not mark broad ASVS requirements Done based on documentation alone.
+- Identified the existing conflict between named AI-log headings and submission anonymity; retained provenance and documented a separate submission-rendering gate instead of silently rewriting historical records.
+- Validation: shell syntax, documentation links, Make target discovery, and source export checks (repeatability, dirty-tree refusal, and exclusion of synthetic secret-file fixtures). Full application checks require Node 24 and Docker, unavailable in this environment; browser/HTTPS and final integrated release verification remain pending.
