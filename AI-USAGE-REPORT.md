@@ -244,3 +244,8 @@
 - Declined, with reasons recorded in `.github/dependabot.yml`: #48 TypeScript 7 (typescript-eslint does not support it, `make lint` fails), #50 ESLint 10 (`eslint-config-next` plugins declare ESLint 9 only, `npm ls` reports invalid peers, and lint bans are an SDL control), #41 Node 26 image (the image must match `.nvmrc`, which dev and CI use). ESLint stays on 9.39.5.
 - Config changes so PRs stop failing: group `react` with `react-dom`, group the CodeQL `init` and `analyze` actions, and ignore the three major bumps above.
 - Also set slice 3 to Done in `docs/plan.md`.
+
+### Commit docs: claim user manual and source packaging (NFR-8, NFR-9)
+#### Alex's Agent
+- Claimed issue #20 on a feature branch and marked release documentation in progress in the slice tracker.
+- Human direction: begin #20 and open a PR; dependent incident, audit, and settings interfaces remain in other PRs, so this work must not claim final release verification.
