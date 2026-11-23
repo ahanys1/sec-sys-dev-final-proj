@@ -6,21 +6,21 @@ Text below is quoted from ASSIGNMENT.md (sub-bullets joined with `;`). SR-15 doe
 
 | Req | Text | ASVS IDs | Status | Evidence |
 |---|---|---|---|---|
-| SR-1 | The system shall require authentication for all non-public endpoints. | V8.2.1, V8.3.1, V7.2.1 | TODO | |
+| SR-1 | The system shall require authentication for all non-public endpoints. | V8.2.1, V8.3.1, V7.2.1 | TODO | Slice #5: 'src/lib/admin/guard.ts', 'src/lib/auth/page.ts', 'tests/db/admin-settings.test.ts', 'tests/db/admin-audit.test.ts' |
 | SR-2 | Passwords shall be stored using an established and secure algorithm. | V11.4.2 | Done | `src/lib/auth/password.ts` (argon2id); `tests/auth/password.test.ts` |
 | SR-3 | If web-based, authentication tokens (e.g. session cookies) shall be protected using secure flags (HttpOnly, Secure, SameSite). | V3.3.1, V3.3.2, V3.3.4 | Done | `src/lib/auth/session.ts`; `tests/auth/session-helpers.test.ts`; `tests/db/auth.test.ts` |
-| SR-4 | The system shall enforce RBAC for user, reviewer, and admin roles. | V8.1.1, V8.2.1, V8.2.2 | TODO | |
-| SR-5 | Authorization checks shall be performed for every request. | V8.2.1, V8.2.2, V8.3.1 | TODO | |
+| SR-4 | The system shall enforce RBAC for user, reviewer, and admin roles. | V8.1.1, V8.2.1, V8.2.2 | TODO | Slice #5: 'src/lib/admin/guard.ts', 'src/lib/auth/page.ts', 'tests/db/admin-settings.test.ts', 'tests/db/admin-audit.test.ts' |
+| SR-5 | Authorization checks shall be performed for every request. | V8.2.1, V8.2.2, V8.3.1 | TODO | Slice #5: 'src/lib/admin/guard.ts', 'src/lib/auth/page.ts', 'tests/db/admin-settings.test.ts', 'tests/db/admin-audit.test.ts' |
 | SR-6 | Users shall not be able to modify their own roles. | V8.2.1, V8.2.3, V15.3.3 | Done | `src/lib/admin/users.ts` (target must differ from the caller; `assertNotSelf`); strict schemas reject `role` on profile and password routes; `tests/db/admin-users.test.ts` (own role, status, and reset refused), `tests/db/auth.test.ts` (role ignored on password change) |
-| SR-7 | All user input shall be validated and sanitized. | V2.2.1, V2.2.2, V1.2.1, V3.2.2, V15.3.5 | TODO | |
+| SR-7 | All user input shall be validated and sanitized. | V2.2.1, V2.2.2, V1.2.1, V3.2.2, V15.3.5 | TODO | Slice #5: 'src/lib/admin/settings-schemas.ts', 'src/lib/auth/settings.ts', 'tests/db/admin-settings.test.ts' |
 | SR-8 | The system shall use parameterized queries for all database operations. | V1.2.4 | TODO | |
-| SR-9 | Logs shall not contain sensitive data (passwords, tokens, full incident descriptions). | V16.2.5, V14.1.2 | TODO | |
-| SR-10 | Audit logs shall include user ID, timestamp, action, and target ID. | V16.2.1 | TODO | |
-| SR-11 | Logs shall be protected from tampering. | V16.4.1, V16.4.2, V16.4.3 | TODO | |
-| SR-12 | Error messages shall not reveal queries. | V16.5.1 | TODO | |
+| SR-9 | Logs shall not contain sensitive data (passwords, tokens, full incident descriptions). | V16.2.5, V14.1.2 | TODO | src/lib/audit.ts, src/lib/admin/audit.ts, tests/db/admin-audit.test.ts |
+| SR-10 | Audit logs shall include user ID, timestamp, action, and target ID. | V16.2.1 | TODO | src/lib/audit.ts, src/lib/admin/audit.ts, tests/db/admin-audit.test.ts |
+| SR-11 | Logs shall be protected from tampering. | V16.4.1, V16.4.2, V16.4.3 | TODO | Slice #5: Audit schema protections and 'tests/db/audit.test.ts', subject to confirming exactly what those tests establish |
+| SR-12 | Error messages shall not reveal queries. | V16.5.1 | TODO | Slice #5: Audit schema protections and 'tests/db/audit.test.ts', subject to confirming exactly what those tests establish |
 | SR-13 | Detailed errors shall be logged. | V16.3.4 | TODO | |
 | SR-14 | Secrets (DB credentials) shall not be stored in an unencrypted mode. | V13.3.1, V13.3.2 | TODO | |
-| SR-16 | The system shall protect against: Sensitive data exposure; Security misconfiguration; Insufficient logging & monitoring | V14.2.1, V14.3.2, V12.2.1, V13.4.1, V13.4.2, V3.4.1, V3.4.4, V16.3.1, V16.3.2, V16.3.3 | TODO | |
+| SR-16 | The system shall protect against: Sensitive data exposure; Security misconfiguration; Insufficient logging & monitoring | V14.2.1, V14.3.2, V12.2.1, V13.4.1, V13.4.2, V3.4.1, V3.4.4, V16.3.1, V16.3.2, V16.3.3 | TODO | Slice #5: 'src/lib/admin/settings.ts', 'src/lib/auth/settings.ts', 'tests/db/admin-settings.test.ts' |
 | FR-11 | The system shall log all key actions, including: Incident creation; Incident status changes; Comment creation; User creation, role changes, and deactivation; Password changes | V16.3.1, V16.3.3 | TODO | |
 | FR-12 | Audit logs shall be immutable and append-only. | V16.4.2 | TODO | |
 | NFR-2 | Error messages shall be user-friendly and not reveal internal details. | V16.5.1 | TODO | |
