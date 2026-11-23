@@ -326,3 +326,53 @@
 - **Security considerations:** Preserved server-side administrator authorization, backend validation, duplicate-name handling, and audited category modifications.
 - **Human verification:** Manually tested category creation, duplicate rejection, renaming, deactivation, reactivation, and reviewer category availability. Verified `category.create` and `category.update` records in PostgreSQL.
 - **Validation:** TypeScript and ESLint checks completed successfully.
+### Commit Claim Slice #5 — Audit View and Settings
+### Jonathan's Agent
+- Assisted with local development environment setup using WSL2, Node.js 24, Docker Compose, PostgreSQL, and Prisma.
+- Helped troubleshoot Windows/WSL dependency conflicts and GitHub CLI authentication.
+- Reviewed the delivery-plan workflow and recommended claiming Slice #5 through an early draft pull request.
+- Human direction: the developer selected Slice #5 and established a working local environment before beginning implementation. No application functionality or security testing is claimed as completed.
+
+### Commit feat(admin): add read-only audit history API with filtering and tests
+#### Jonathan's Agent
+- Assisted with implementing the admin-only `GET /api/admin/audit` endpoint, including action filtering, date-range filtering, pagination, and strict query validation.
+- Helped diagnose and resolve a Prisma `BigInt` JSON serialization error encountered during manual API testing.
+- Guided manual security testing of authentication (401), authorization (403), unsupported HTTP methods (405), invalid parameters, filtering, and pagination.
+- Assisted with creating Vitest unit tests and PostgreSQL-backed integration tests for audit retrieval, ordering, pagination, and date boundaries.
+- Helped verify that direct audit-log writes are centralized in `src/lib/audit.ts`, preserving the existing transactional audit mechanism.
+- Human validation: reviewed the implementation, executed browser-based API tests, ran automated tests and ESLint, and verified the changes before committing. The database-backed suite passed 50 tests, and the non-database suite passed 83 tests with 50 skipped.
+
+### Commit feat(admin): add validated settings API with transactional audit logging
+#### Jonathan's Agent
+- Assisted with implementing the admin-only `GET` and `PATCH /api/admin/settings` endpoints, including input validation, bounded configuration values, and partial updates.
+- Helped implement Serializable transactions to ensure settings changes and their corresponding audit records are committed together.
+- Assisted with creating Vitest validation tests and PostgreSQL-backed integration tests covering settings persistence, audit recording, unchanged settings, partial updates, and transaction rollback.
+- Reviewed the audit logging implementation and identified a potential bypass introduced by an optional audit writer parameter. Human direction: removed the parameter to ensure production settings updates always invoke `recordAudit()`.
+- Human validation: reviewed the implementation, ran TypeScript checks and ESLint, and executed the database integration suite. All 54 database tests passed across 6 files.
+- Testing limitation: transaction rollback was verified, but a real audit insertion failure through `updateAdminSettings()` was not directly simulated.
+
+### Commit `feat(admin): add admin settings API with validation, audit logging, and tests`
+#### Jonathan's Agent
+- Assisted with implementing the admin-only `GET /api/admin/settings` and `PATCH /api/admin/settings` endpoints, including request validation, role-based authorization, and settings persistence.
+- Helped implement transactional settings updates with audit records containing the previous and new values, while avoiding unnecessary writes when settings remain unchanged.
+- Assisted with creating Vitest validation tests and PostgreSQL-backed integration tests covering settings persistence, partial updates, audit logging, and transaction rollback.
+- Guided additional endpoint authorization testing to verify `401` responses for unauthenticated requests and `403` responses for unauthorized roles, including checks that rejected requests do not modify settings.
+- Helped investigate an intermittent authentication lockout test failure and improve test fixture isolation to prevent shared settings values from affecting other database tests.
+- Human validation: reviewed the implementation, adjusted test fixtures, and executed database integration tests. The latest database-backed run passed all 56 tests across six test files. Final TypeScript, ESLint, and Git checks all passed.
+
+### Commit `feat(admin): add audit history and settings interfaces`
+#### Jonathan's Agent
+
+- Assisted with implementing the admin-only Application Settings interface, including editable configuration fields, input validation, change detection, and integration with the existing settings API.
+- Helped develop the read-only Audit History interface with action filtering, date-range filtering, pagination, and display of permitted settings changes without exposing incident descriptions or secrets.
+- Assisted with integrating both administrative pages into the application's existing navigation and role-based page authorization.
+- Helped troubleshoot frontend development issues, including TypeScript import resolution, React effect handling, ESLint warnings, Docker build failures, and changes not appearing in the deployed application.
+- Guided browser-based functional testing of settings persistence, audit record display, action and date filters, invalid date-range handling, and administrative navigation.
+- Guided authorization testing using a non-administrator account, confirming that direct access to administrative pages returned 404 responses and administrative API requests were rejected with forbidden responses.
+- Human validation: reviewed and adjusted the generated code, verified the interfaces in the browser, rebuilt and restarted the Docker application, and executed TypeScript, ESLint, and PostgreSQL-backed integration tests. All 56 database tests passed across six test files. Final formatting and Git checks were performed before committing.
+
+### Commit `docs: update Slice 5 security evidence and align settings validation`
+#### Jonathan's Agent
+- Assisted with reviewing and updating Slice #5 documentation in `docs/asvs/assignment-mapping.md` and `docs/sdl.md`, including implementation evidence, verification status, and remaining security testing.
+- Helped identify and correct a mismatch between the `lockoutMinutes` minimum in `settings-schemas.ts` and the centralized `LIMITS` configuration.
+- Human validation: reviewed the documentation changes, confirmed the settings validation bounds, ran TypeScript, ESLint, and PostgreSQL-backed tests (56 passed), and verified the Git diff before committing.

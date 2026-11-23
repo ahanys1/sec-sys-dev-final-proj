@@ -37,6 +37,12 @@ export function AppHeader({ username, role }: { username: string; role: string }
             <Link href="/admin/categories" className="underline">
               Categories
             </Link>
+            <Link href="/admin/audit" className="underline">
+              Audit history
+            </Link>
+            <Link href="/admin/settings" className="underline">
+              Settings
+            </Link>
           </>
         ) : null}
         <Link href="/account/password" className="underline">
