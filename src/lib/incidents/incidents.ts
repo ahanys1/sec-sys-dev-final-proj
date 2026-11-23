@@ -85,7 +85,25 @@ export async function listReviewerIncidents(db: PrismaClient) {
     ],
   });
 }
-
+// EP-08: Administrators may view incidents in all statuses.
+// List responses exclude descriptions and other sensitive details.
+export async function listAdminIncidents(db: PrismaClient) {
+  return db.incident.findMany({
+    select: {
+      id: true,
+      title: true,
+      status: true,
+      categoryId: true,
+      reporterId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+    orderBy: [
+      { createdAt: "desc" },
+      { id: "desc" },
+    ],
+  });
+}
 // EP-09: Return incident details only when the caller is authorized.
 // Missing and forbidden incidents produce the same 404.
 export async function getIncidentDetail(
