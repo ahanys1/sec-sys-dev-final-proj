@@ -24,6 +24,7 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
   let patchCategory: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
   let getAdminCategories: (request: Request) => Promise<Response>;
   let postAdminCategory: (request: Request) => Promise<Response>;
+  let patchAdminCategory: (request: Request, context: { params: Promise<{ id: string }> },) => Promise<Response>;
 
   let reporterId: string;
   let reporterUsername: string;
@@ -46,6 +47,10 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
     );
     getAdminCategories = adminCategoriesRoute.GET;
     postAdminCategory = adminCategoriesRoute.POST;
+
+    const adminCategoryRoute = await import("@/app/api/admin/categories/[id]/route"
+    );
+    patchAdminCategory = adminCategoryRoute.PATCH;
 
     const statusRoute = await import("@/app/api/incidents/[id]/status/route"
     );
@@ -187,6 +192,29 @@ describe.skipIf(!ownerUrl || !appUrl)("incident creation", () => {
         },
       ),
       { params: Promise.resolve({ id: incidentId }) },
+    );
+
+
+  const updateAdminCategory = (
+    categoryId: string,
+    body: unknown,
+    sessionCookie: string,
+  ) =>
+    patchAdminCategory(
+      new Request(
+        `https://app.test/api/admin/categories/${categoryId}`,
+        {
+          method: "PATCH",
+          headers: {
+            origin: "https://app.test",
+            host: "app.test",
+            "content-type": "application/json",
+            cookie: sessionCookie,
+          },
+          body: JSON.stringify(body),
+        },
+      ),
+      { params: Promise.resolve({ id: categoryId }) },
     );
 
   const postComment = (incidentId: string, body: unknown, sessionCookie = cookie,) =>
@@ -2414,6 +2442,417 @@ it("accepts category names exactly 100 characters long (EP-22)", async () => {
   });
 
   expect(stored?.name).toBe(name);
+});
+
+it("allows administrators to rename categories (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+  const suffix = randomUUID().slice(0, 8);
+
+  const category = await db.category.create({
+    data: {
+      name: `Original Category ${suffix}`,
+      active: true,
+    },
+  });
+
+  const newName = `Renamed Category ${suffix}`;
+
+  const response = await updateAdminCategory(
+    category.id,
+    { name: newName },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(200);
+
+  const { category: updated } = await response.json();
+
+  expect(updated.id).toBe(category.id);
+  expect(updated.name).toBe(newName);
+  expect(updated.active).toBe(true);
+
+  // Verify the updated name was persisted.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.name).toBe(newName);
+  expect(stored?.active).toBe(true);
+
+  // Verify transactional audit logging.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("preserves incident assignments when a category is deactivated (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const category = await db.category.create({
+    data: {
+      name: `Deactivation ${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Create an incident assigned to this category.
+  const created = await postIncident({
+    title: "Historical category preservation",
+    description: "Verify category relationships survive deactivation.",
+    categoryId: category.id,
+  });
+
+  expect(created.status).toBe(201);
+
+  const { incident } = await created.json();
+
+  // Administrator deactivates the category.
+  const response = await updateAdminCategory(
+    category.id,
+    { active: false },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(200);
+
+  const { category: updated } = await response.json();
+
+  expect(updated.active).toBe(false);
+
+  // Category still exists but is inactive.
+  const storedCategory = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(storedCategory?.active).toBe(false);
+
+  // Existing incident retains its category assignment.
+  const storedIncident = await db.incident.findUnique({
+    where: { id: incident.id },
+  });
+
+  expect(storedIncident?.categoryId).toBe(category.id);
+
+  // Verify the deactivation was audited.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("allows administrators to reactivate categories (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const category = await db.category.create({
+    data: {
+      name: `Reactivation ${randomUUID().slice(0, 8)}`,
+      active: false,
+    },
+  });
+
+  // Administrator reactivates the category.
+  const response = await updateAdminCategory(
+    category.id,
+    { active: true },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(200);
+
+  const { category: updated } = await response.json();
+
+  expect(updated.id).toBe(category.id);
+  expect(updated.active).toBe(true);
+  expect(updated.name).toBe(category.name);
+
+  // Verify the category was reactivated in the database.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.active).toBe(true);
+
+  // Verify the update was audited.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(1);
+});
+
+it("rejects duplicate category names during renaming (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+  const suffix = randomUUID().slice(0, 8);
+
+  const original = await db.category.create({
+    data: {
+      name: `Original Name ${suffix}`,
+      active: true,
+    },
+  });
+
+  const existing = await db.category.create({
+    data: {
+      name: `Existing Name ${suffix}`,
+      active: true,
+    },
+  });
+
+  // Attempt to rename using an existing name with different capitalization.
+  const response = await updateAdminCategory(
+    original.id,
+    { name: existing.name.toLowerCase() },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(409);
+
+  // Neither category should be modified.
+  const storedOriginal = await db.category.findUnique({
+    where: { id: original.id },
+  });
+
+  const storedExisting = await db.category.findUnique({
+    where: { id: existing.id },
+  });
+
+  expect(storedOriginal?.name).toBe(original.name);
+  expect(storedExisting?.name).toBe(existing.name);
+
+  // Failed renaming must not generate a successful update audit.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: original.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects reporter category updates (EP-23)", async () => {
+  const category = await db.category.create({
+    data: {
+      name: `Reporter Update ${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Use the existing reporter session.
+  const response = await updateAdminCategory(
+    category.id,
+    { active: false },
+    cookie,
+  );
+
+  expect(response.status).toBe(403);
+
+  // The category must remain active.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.active).toBe(true);
+
+  // Rejected updates must not generate a successful audit event.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects reviewer category updates (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("reviewer");
+
+  const category = await db.category.create({
+    data: {
+      name: `Reviewer Update ${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Reviewers cannot modify category definitions.
+  const response = await updateAdminCategory(
+    category.id,
+    { active: false },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(403);
+
+  // The category must remain active.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.active).toBe(true);
+
+  // No successful update audit event should be created.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects unauthenticated category updates (EP-23)", async () => {
+  const category = await db.category.create({
+    data: {
+      name: `Unauthenticated Update ${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Send the PATCH request without a session cookie.
+  const response = await updateAdminCategory(
+    category.id,
+    { active: false },
+    "",
+  );
+
+  expect(response.status).toBe(401);
+
+  // The category must remain unchanged.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.active).toBe(true);
+  expect(stored?.name).toBe(category.name);
+
+  // No successful category.update audit event should exist.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects updates to nonexistent categories (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  // Valid UUID, but no matching category record.
+  const nonexistentCategoryId = randomUUID();
+
+  const response = await updateAdminCategory(
+    nonexistentCategoryId,
+    { active: false },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(404);
+
+  // No successful update audit event should be created.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: nonexistentCategoryId,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects empty category update requests (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const category = await db.category.create({
+    data: {
+      name: `Empty Update ${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // No fields supplied for the update.
+  const response = await updateAdminCategory(
+    category.id,
+    {},
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // Verify the category remains unchanged.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.name).toBe(category.name);
+  expect(stored?.active).toBe(true);
+
+  // Rejected updates must not generate a successful audit event.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(0);
+});
+
+it("rejects unexpected fields in category updates (EP-23)", async () => {
+  const { sessionCookie } = await signInAs("admin");
+
+  const category = await db.category.create({
+    data: {
+      name: `Mass Assignment ${randomUUID().slice(0, 8)}`,
+      active: true,
+    },
+  });
+
+  // Attempt to modify an unauthorized field.
+  const response = await updateAdminCategory(
+    category.id,
+    {
+      active: false,
+      id: randomUUID(),
+    },
+    sessionCookie,
+  );
+
+  expect(response.status).toBe(400);
+
+  // Verify no fields were modified.
+  const stored = await db.category.findUnique({
+    where: { id: category.id },
+  });
+
+  expect(stored?.id).toBe(category.id);
+  expect(stored?.name).toBe(category.name);
+  expect(stored?.active).toBe(true);
+
+  // No successful update audit event should be created.
+  const audits = await db.auditLog.count({
+    where: {
+      action: "category.update",
+      targetId: category.id,
+    },
+  });
+
+  expect(audits).toBe(0);
 });
 
 });
