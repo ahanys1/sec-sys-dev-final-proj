@@ -376,3 +376,8 @@
 - Assisted with reviewing and updating Slice #5 documentation in `docs/asvs/assignment-mapping.md` and `docs/sdl.md`, including implementation evidence, verification status, and remaining security testing.
 - Helped identify and correct a mismatch between the `lockoutMinutes` minimum in `settings-schemas.ts` and the centralized `LIMITS` configuration.
 - Human validation: reviewed the documentation changes, confirmed the settings validation bounds, ran TypeScript, ESLint, and PostgreSQL-backed tests (56 passed), and verified the Git diff before committing.
+
+### Commit `docs: claim slice 6 and update threat model for live host (AR-9)`
+#### Liam's Agent
+- Surveyed open PRs and `docs/plan.md`, proposed Slice 6 scope, and drafted the T-06, T-51, T-52, T-63 and AR-5/AR-8 updates plus new AR-9 in `docs/stride.md`, `docs/threat-model.md`, `docs/sdl.md` and `docs/plan.md`.
+- Human decisions: chose AWS EC2 with SSM (no SSH) and Liam as dotenvx key holder. AR-9 is marked pending approval, not approved, because the agent can't approve risk on the team's behalf.
