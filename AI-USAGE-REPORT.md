@@ -401,3 +401,8 @@
 #### Liam's Agent
 - Drafted `scripts/aws-provision.sh` (security group 80/443, IAM role scoped to one secret, IMDSv2 hop limit 1, encrypted gp3, no key pair, Elastic IP attach) and runbook sections 2a/2b.
 - Human/security changes: the script is not run by CI or the agent and asks for confirmation; the developer reviews it first. Docker Compose, buildx and Node 24 on Amazon Linux 2023 are deliberately left as manual, checked steps because the agent could not verify package availability. Not run against AWS.
+
+### Commit `docs: record verified host setup steps in deployment runbook`
+#### Liam's Agent
+- Guided the developer through checking Amazon Linux 2023 for Compose and Node, and recorded the working commands in runbook section 2b.
+- Human/security changes: the developer chose the Compose version and ran the checksum verification (`sha256sum -c` printed OK); the agent did not guess versions. Docker-group access for `ssm-user` is root-equivalent and is accepted under AR-1.
