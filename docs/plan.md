@@ -27,7 +27,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 3 | Admin accounts | 2 | Done (#51) | #6, #5 |
 | 4 | Incidents and comments | 2 | Done (#54) | #7, #8 |
 | 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
-| 6 | Live deployment | 3, 4 (grader accounts need all three roles) | In progress (lwiles; PR #TBD): threat-model update first, then deploy | #12, #21 |
+| 6 | Live deployment | 3, 4 (grader accounts need all three roles) | In progress (lwiles; PR #57): threat-model update first, then deploy | #12, #21 |
 | 7 | Verification | 3, 4, 5 | Next | #13, #14, #16, #17 |
 | 8 | Release | 7 | Next | #18 to #20, #22 |
 
