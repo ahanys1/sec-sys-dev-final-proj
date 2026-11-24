@@ -317,6 +317,7 @@
 - **Security considerations:** Reviewed role-based authorization, strict input validation, mass-assignment prevention, and preservation of existing incident-category relationships when categories are deactivated.
 - **Testing assistance:** Helped develop integration tests covering category renaming, deactivation/reactivation, duplicate names, unauthorized access, nonexistent categories, empty requests, unexpected fields, and audit behavior.
 - **Human verification:** Reviewed the implementation, executed integration tests (115/115 passing), and verified TypeScript compilation, ESLint, and Git whitespace checks.
+
 ### Commit `feat(admin): add category management UI`
 
 #### Jonathan's Agent
@@ -326,6 +327,7 @@
 - **Security considerations:** Preserved server-side administrator authorization, backend validation, duplicate-name handling, and audited category modifications.
 - **Human verification:** Manually tested category creation, duplicate rejection, renaming, deactivation, reactivation, and reviewer category availability. Verified `category.create` and `category.update` records in PostgreSQL.
 - **Validation:** TypeScript and ESLint checks completed successfully.
+
 ### Commit Claim Slice #5 — Audit View and Settings
 ### Jonathan's Agent
 - Assisted with local development environment setup using WSL2, Node.js 24, Docker Compose, PostgreSQL, and Prisma.
@@ -444,6 +446,11 @@
 - Assisted with updating `docs/asvs/assignment-mapping.md` and `docs/sdl.md` to record verified requirements, supporting evidence, partial verification results, and remaining security testing activities without overstating requirement coverage.
 - Human validation: manually executed browser-based integration and security tests, PostgreSQL queries, and application-log checks; reviewed automated test results and GitHub CI/security checks; reviewed and adjusted documentation changes and verified the Git diff before committing.
 
+### Commit `feat(logging): log denied access as access.denied (SR-16, V16.3.2)`
+#### Liam's Agent
+- Added an `access.denied` warning log for 403 and 404 API responses in `route()` (with request ID, route, method, status), the caller's `userId` where `authenticate` knows it, and a page-level log for wrong-role 404s; unit tests in `tests/http.test.ts` and a database test in `tests/db/admin-users.test.ts`; marked ASVS V16.3.2 Done with evidence.
+- Human/security changes: stayed inside the logger's field allowlist (no role, path, body or cookie), kept denials out of the append-only audit table (FR-12), and added assertions that neither the cookie value nor the attempted username appears in the log. `make test-db` (125 tests) and lint, type check, unit tests and guards passed locally. The page-level log (`requirePageUser`) has no automated test because it needs the Next.js request runtime.
+
 ### Commit `docs: use "user" for the role across design, threat-model and test docs`
 #### Liam's Agent
 - Replaced "reporter" with "user" wherever it names the role (FR-2, SR-4) in `docs/design.md`, `docs/threat-model.md`, `docs/use-misuse-cases.md`, `docs/sdl.md` and `docs/asvs/assignment-mapping.md`; "its reporter" (the incident's owner) became "its owner".
@@ -498,3 +505,8 @@
 #### Liam's Agent
 - Recorded a second-machine port sweep (only 80 and 443 open) and added an "update the running host" section to `docs/deployment.md` for deploying `main` after PRs #57 and #59 merge.
 - Human/security changes: the developer chose to deploy `main` after both PRs merge. The sweep is labelled as not a full 65,535-port scan, and the section tells the operator to verify denial logging after deploy. The update steps are unrun.
+
+### Commit `Merge main into fix/log-authz-denials`
+#### Liam's Agent
+- Resolved the `AI-USAGE-REPORT.md` conflict by keeping both sides' entries, fixed missing blank lines between entries, and replaced a stale "PR #59" reference in the SR-16 row with the evidence paths now that #57 is merged.
+- Human/security changes: none to the code. Lint, type check, unit tests (90) and the CI guards pass on the merged tree; database tests were run before the merge and are re-run by CI.

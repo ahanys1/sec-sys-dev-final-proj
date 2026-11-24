@@ -23,7 +23,7 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
 | V16.3.1 | 2 | Verify that all authentication operations are logged, including successful and unsuccessful attempts. Additional metadata, such as the type of authentication or factors used, should also be collected. | TODO | |
-| V16.3.2 | 2 | Verify that failed authorization attempts are logged. For L3, this must include logging all authorization decisions, including logging when sensitive data is accessed (without logging the sensitive data itself). | TODO | |
+| V16.3.2 | 2 | Verify that failed authorization attempts are logged. For L3, this must include logging all authorization decisions, including logging when sensitive data is accessed (without logging the sensitive data itself). | Done | `access.denied` (warn) from `route()` in `src/lib/http.ts` for 403 and 404, plus `userId` from `authenticate` (`src/lib/auth/guard.ts`) and page denials in `src/lib/auth/page.ts`; tests: `tests/http.test.ts`, `tests/db/admin-users.test.ts` (logs caller and request ID, no cookie or body). 404 also covers missing records by design (T-25). |
 | V16.3.3 | 2 | Verify that the application logs the security events that are defined in the documentation and also logs attempts to bypass the security controls, such as input validation, business logic, and anti-automation. | TODO | |
 | V16.3.4 | 2 | Verify that the application logs unexpected errors and security control failures such as backend TLS failures. | TODO | |
 
