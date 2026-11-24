@@ -388,3 +388,7 @@
 - Assisted with reconciling GitHub issues #7, #8, #9, and #10 against implementation and verification evidence.
 - Assisted with updating `docs/asvs/assignment-mapping.md` and `docs/sdl.md` to record verified requirements, supporting evidence, partial verification results, and remaining security testing activities without overstating requirement coverage.
 - Human validation: manually executed browser-based integration and security tests, PostgreSQL queries, and application-log checks; reviewed automated test results and GitHub CI/security checks; reviewed and adjusted documentation changes and verified the Git diff before committing.
+### Commit `feat(logging): log denied access as access.denied (SR-16, V16.3.2)`
+#### Liam's Agent
+- Added an `access.denied` warning log for 403 and 404 API responses in `route()` (with request ID, route, method, status), the caller's `userId` where `authenticate` knows it, and a page-level log for wrong-role 404s; unit tests in `tests/http.test.ts` and a database test in `tests/db/admin-users.test.ts`; marked ASVS V16.3.2 Done with evidence.
+- Human/security changes: stayed inside the logger's field allowlist (no role, path, body or cookie), kept denials out of the append-only audit table (FR-12), and added assertions that neither the cookie value nor the attempted username appears in the log. `make test-db` (125 tests) and lint, type check, unit tests and guards passed locally. The page-level log (`requirePageUser`) has no automated test because it needs the Next.js request runtime.

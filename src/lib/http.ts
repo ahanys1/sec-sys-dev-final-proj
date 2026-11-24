@@ -28,6 +28,8 @@ export class ApiError extends Error {
     readonly code: ErrorCode,
     readonly fields?: Record<string, string>,
     readonly headers?: Record<string, string>,
+    /** The authenticated caller, when known, for the denial log (V16.3.2). Never sent to the client. */
+    readonly userId?: string,
   ) {
     super(code);
     this.name = "ApiError";
@@ -60,7 +62,20 @@ export function route<Args extends unknown[]>(
     try {
       return await handler(requestId, request, ...args);
     } catch (err) {
-      if (err instanceof ApiError) return errorResponse(err.code, requestId, err.fields, err.headers);
+      if (err instanceof ApiError) {
+        // SR-16, ASVS V16.3.2: failed authorization is logged. not_found also covers missing records, by design (T-25).
+        if (err.code === "forbidden" || err.code === "not_found") {
+          logger.warn("access.denied", {
+            requestId,
+            route: name,
+            method: request.method,
+            status: STATUS[err.code].status,
+            reason: err.code,
+            userId: err.userId,
+          });
+        }
+        return errorResponse(err.code, requestId, err.fields, err.headers);
+      }
       logger.error("request.unhandled", { requestId, route: name, method: request.method, ...scrubError(err) });
       return errorResponse("internal", requestId);
     }
