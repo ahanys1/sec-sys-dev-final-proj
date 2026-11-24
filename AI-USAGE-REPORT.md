@@ -453,3 +453,8 @@
 #### Liam's Agent
 - Read `LIMITS`, the Prisma default and `app/api/auth/login/route.ts` to confirm that temporary passwords expire (default 24 h, maximum 72 h) and are refused at login after expiry; added the warning and the grader-account result to `docs/deployment.md`.
 - Human/security changes: the developer created the accounts and chose to leave them on temporary passwords for the instructor; the agent recommended resetting them shortly before submission. No credentials were seen by the agent.
+
+### Commit `docs: record grader accounts with final passwords`
+#### Liam's Agent
+- Updated the runbook Results row: the developer logged in to each grader account and replaced its temporary password, so the 24 to 72 hour expiry no longer applies.
+- Human/security changes: the developer chose to set the final passwords themselves after the agent explained the expiry. No credentials were seen by the agent.
