@@ -478,3 +478,8 @@
 #### Liam's Agent
 - Added a per-role demo script with misuse scenes to `docs/deployment.md` and recorded the two host checks (no `.env.keys`, no `DOTENV_PRIVATE_KEY` in image history) in the Results table.
 - Human/security changes: the developer ran the host checks. The agent's first draft of demo step 4 claimed the admin incident view has no status control without checking; it was verified in `app/` (only the reviewer page uses `StatusControls`; the status API allows reviewers only) and reworded. Audit tampering (T-33) is deliberately not shown live and points to `tests/db/audit.test.ts`.
+
+### Commit `docs: record the full TCP scan of the live host`
+#### Liam's Agent
+- Recorded the developer's `nmap -p-` result (only 80 and 443 open) in the runbook Results table.
+- Human/security changes: the agent noticed that most ports reported "closed (connection refused)" and a 2 ms latency, which an AWS security group would not produce, and recorded that caveat instead of presenting the scan as clean evidence of the security group.
