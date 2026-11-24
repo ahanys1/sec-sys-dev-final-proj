@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate clean
+.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate live-up clean
 
 ENV_FILE ?= .env
 
@@ -69,6 +69,9 @@ logs: ## Follow the stack logs
 
 migrate: ## Apply database migrations with the owner role (one-off job)
 	npx dotenvx run -f $(ENV_FILE) -- docker compose --profile ops run --build --rm migrate
+
+live-up: ## Start the live stack on the EC2 host (needs SECRET_ID; docs/deployment.md)
+	scripts/live-up.sh
 
 clean: ## Remove build output and coverage
 	rm -rf .next out coverage

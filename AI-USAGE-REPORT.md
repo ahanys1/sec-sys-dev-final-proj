@@ -381,3 +381,8 @@
 #### Liam's Agent
 - Surveyed open PRs and `docs/plan.md`, proposed Slice 6 scope, and drafted the T-06, T-51, T-52, T-63 and AR-5/AR-8 updates plus new AR-9 in `docs/stride.md`, `docs/threat-model.md`, `docs/sdl.md` and `docs/plan.md`.
 - Human decisions: chose AWS EC2 with SSM (no SSH) and Liam as dotenvx key holder. AR-9 is marked pending approval, not approved, because the agent can't approve risk on the team's behalf.
+
+### Commit `feat(deploy): add live-up script, make target, and deployment runbook`
+#### Liam's Agent
+- Drafted `scripts/live-up.sh`, the `make live-up` target and `docs/deployment.md` (EC2 + SSM + Secrets Manager runbook, verification table).
+- Human/security changes: the first plaintext-`.env` check misbehaved in an ad hoc shell test (the regex was right; the zsh test harness was misleading), so it was re-tested with the exact `sh` form against encrypted and plaintext fixtures before keeping it. The runbook's Results table is deliberately empty: nothing has run on AWS yet.
