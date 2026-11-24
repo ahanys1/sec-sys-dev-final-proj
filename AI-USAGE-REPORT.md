@@ -473,3 +473,8 @@
 #### Liam's Agent
 - Changed AR-9 from pending to approved in `docs/stride.md`, `docs/threat-model.md` and `docs/sdl.md`, dated 2026-11-24.
 - Human/security changes: the developer made the approval decision; the agent only recorded it and did not approve it. Team member names stay out of the record (team number only).
+
+### Commit `docs: add demo script and record host checks`
+#### Liam's Agent
+- Added a per-role demo script with misuse scenes to `docs/deployment.md` and recorded the two host checks (no `.env.keys`, no `DOTENV_PRIVATE_KEY` in image history) in the Results table.
+- Human/security changes: the developer ran the host checks. The agent's first draft of demo step 4 claimed the admin incident view has no status control without checking; it was verified in `app/` (only the reviewer page uses `StatusControls`; the status API allows reviewers only) and reworded. Audit tampering (T-33) is deliberately not shown live and points to `tests/db/audit.test.ts`.
