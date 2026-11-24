@@ -33,4 +33,4 @@ for c in $(docker compose ps -q); do
   docker inspect --format '{{range .Config.Env}}{{println .}}{{end}}' "$c" | grep -q '^DOTENV_PRIVATE_KEY=' \
     && { echo "DOTENV_PRIVATE_KEY found in a container environment"; exit 1; }
 done
-echo "Live stack is up. Create the first admin with: make create-admin"
+echo "Live stack is up. On a fresh database, create the first admin with scripts/live-run.sh make create-admin."
