@@ -5,25 +5,36 @@ One EC2 instance runs the same compose stack as local (`docker-compose.yml`, `Ca
 **Status: runbook only. Nothing here has been run against AWS yet; the Results table at the bottom is empty until it is.**
 
 ## 1. Encrypted env and key (one person, once)
-Do this on a clean checkout, not on a machine with a corporate CA in `.env.local`.
+Do this on a clean checkout, not on a machine with a corporate CA in `.env.local`. Needs the AWS CLI configured with permission to allocate addresses and create secrets. No instance is needed yet.
 
+### 1a. Get the host address
+Caddy needs a hostname to get an HTTPS certificate (Let's Encrypt won't certify a bare IP), and the hostname needs a fixed public IP.
+
+1. Allocate an Elastic IP: `aws ec2 allocate-address --domain vpc` (or EC2 console, Elastic IPs, Allocate). Note `PublicIp`, for example `3.14.15.92`. It is billed hourly while unattached, so do this shortly before launching the instance.
+2. Make the hostname: replace dots with dashes and append `.sslip.io`, giving `3-14-15-92.sslip.io`. sslip.io is a free public DNS service that resolves that name to the IP; nothing to sign up for. If the team owns a domain, create an A record to the IP and use that name instead.
+3. This is your `SITE_ADDRESS`. It gets encrypted into `.env`, so decide it before 1b. To change it later: `npx dotenvx set SITE_ADDRESS <new> -f .env`.
+
+The Elastic IP is attached to the instance later (section 2); it stays the same across instance restarts.
+
+### 1b. Encrypt the env and store the key
 ```sh
 # replace every placeholder with a random value (same as `make env-local`)
 awk '/change-me/ { c = "openssl rand -hex 24"; c | getline r; close(c); sub(/change-me/, r) } { print }' .env.example > .env
-# set SITE_ADDRESS=<domain> and CADDY_TLS=<ACME contact email> in .env (add the lines if missing)
+# in .env set SITE_ADDRESS=<hostname from 1a> and CADDY_TLS=<your email for Let's Encrypt> (add the lines if missing)
 npx dotenvx encrypt -f .env          # writes ciphertext into .env and the private key into .env.keys
+grep -v '^#' .env                    # check: only encrypted: values and DOTENV_PUBLIC_KEY
 git add .env                         # ciphertext only; .env.keys stays ignored (.gitignore, .dockerignore)
 aws secretsmanager create-secret --name incident-app/dotenvx-key \
   --secret-string "$(grep '^DOTENV_PRIVATE_KEY=' .env.keys | cut -d= -f2- | tr -d '"')"
 ```
-Then delete `.env.keys` from the laptop or keep it in a password manager. Never paste the key into chat, a PR or an issue. Check the diff for plaintext before committing; `scripts/live-up.sh` also refuses a plaintext `.env`.
+Optional: `npx dotenvx get -f .env` should print decrypted values (don't paste the output anywhere). Then delete `.env.keys` from the laptop or keep it in a password manager; if the key is lost, regenerate `.env` and re-encrypt. Never paste the key into chat, a PR or an issue. `scripts/live-up.sh` also refuses a plaintext `.env`.
 
 ## 2. Host
 | Setting | Value |
 |---|---|
 | Instance | t3.medium (image build needs about 4 GB), Amazon Linux 2023, encrypted gp3 volume |
 | Metadata | IMDSv2 required |
-| Address | Elastic IP; domain `<ip-with-dashes>.sslip.io` unless the team has a real one (set as `SITE_ADDRESS`) |
+| Address | the Elastic IP from 1a, associated after launch: `aws ec2 associate-address --instance-id <id> --allocation-id <eipalloc-id>` |
 | Key pair | **none** (no SSH) |
 | Security group | inbound TCP 80 and 443 from anywhere, nothing else. Default outbound is needed for the ACME certificate and package installs. |
 | IAM role | `AmazonSSMManagedInstanceCore` plus `secretsmanager:GetSecretValue` on the one secret above |

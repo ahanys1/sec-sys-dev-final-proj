@@ -386,3 +386,8 @@
 #### Liam's Agent
 - Drafted `scripts/live-up.sh`, the `make live-up` target and `docs/deployment.md` (EC2 + SSM + Secrets Manager runbook, verification table).
 - Human/security changes: the first plaintext-`.env` check misbehaved in an ad hoc shell test (the regex was right; the zsh test harness was misleading), so it was re-tested with the exact `sh` form against encrypted and plaintext fixtures before keeping it. The runbook's Results table is deliberately empty: nothing has run on AWS yet.
+
+### Commit `docs: clarify host address and key steps in deployment runbook`
+#### Liam's Agent
+- Rewrote runbook section 1 into 1a (Elastic IP, sslip.io hostname, `SITE_ADDRESS`) and 1b (encrypt, check, store key), and added the `associate-address` command to section 2.
+- Human change: the original step 1 was too terse for the person running it; rewritten after they asked what "pick the host address" meant. Commands are unrun; no AWS access used.
