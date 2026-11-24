@@ -389,7 +389,7 @@ Each threat in [stride.md](stride.md) lists its mitigations (C-x, SR/FR, ASVS) a
 | T-43 | Middleware bypass (CVE-2025-29927, `x-middleware-subrequest`) skips authentication or headers. | 6.6* | No auth in middleware (C-2); see [stride.md](stride.md) |
 | T-18 | An admin changes their own role or deactivates themself, or removes or deactivates the last active admin. | 6.0* | Target must differ from the caller (SR-6); see [stride.md](stride.md) |
 
-Medium and Low threats are in [stride.md](stride.md). Residual risks AR-1 to AR-8 are developer-approved; AR-9 (live grading host) is pending approval. All are listed there. Six design changes (DC-1 to DC-6) came out of this pass and are applied to Part 1.
+Medium and Low threats are in [stride.md](stride.md). Residual risks AR-1 to AR-9 are developer-approved (AR-9, the live grading host, on 2026-11-24). All are listed there. Six design changes (DC-1 to DC-6) came out of this pass and are applied to Part 1.
 
 **D-4 resolved (SR-14): dotenvx.** The encrypted `.env` is committed. The private key lives in a gitignored `.env.keys` locally, or is injected as `DOTENV_PRIVATE_KEY` at runtime; it is never in the repo, the image, or a build argument. `.env.example` keeps placeholders. Secret scanning runs in CI. On AWS, credentials come from Secrets Manager through the task's IAM role. Owner and app database credentials are separate. Residual risk: AR-5. The `AGENTS.md` rule is updated.
 

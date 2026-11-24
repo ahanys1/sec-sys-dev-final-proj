@@ -468,3 +468,8 @@
 #### Liam's Agent
 - Told the developer to look for login and denied-access entries in the audit view; that was wrong, because FR-11 and `AUDIT_ACTIONS` do not include them. After the developer's screenshot, read `src/lib/audit.ts` and the login route, corrected the runbook row and recorded the result.
 - Human/security changes: the developer ran the role checks and caught the discrepancy. ASVS V16.3.2 (log failed authorization) is flagged as not found in the code and left for the team to decide.
+
+### Commit `docs: record approval of AR-9 (live grading host)`
+#### Liam's Agent
+- Changed AR-9 from pending to approved in `docs/stride.md`, `docs/threat-model.md` and `docs/sdl.md`, dated 2026-11-24.
+- Human/security changes: the developer made the approval decision; the agent only recorded it and did not approve it. Team member names stay out of the record (team number only).

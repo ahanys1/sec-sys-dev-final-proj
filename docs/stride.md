@@ -191,7 +191,7 @@ Numbers are threat IDs (`7` = T-07). N/A reasons:
 
 ## Accepted risks
 
-The developer approved AR-1 through AR-8 on 2026-11-18 with the reviewer-supplied design answers. AR-9 was added on 2026-11-23 for the live grading host and needs developer approval.
+The developer approved AR-1 through AR-8 on 2026-11-18 with the reviewer-supplied design answers. AR-9 was added on 2026-11-23 for the live grading host and the developer approved it on 2026-11-24.
 
 | ID | Residual risk |
 |---|---|
