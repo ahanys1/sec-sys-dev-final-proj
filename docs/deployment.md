@@ -76,8 +76,9 @@ In an SSM session:
 git clone https://github.com/ahanys1/sec-sys-dev-final-proj.git && cd sec-sys-dev-final-proj
 git checkout <release tag or main>
 SECRET_ID=incident-app/dotenvx-key AWS_REGION=<region> make live-up
-make create-admin                      # first administrator; prompts
+SECRET_ID=incident-app/dotenvx-key scripts/live-run.sh make create-admin   # first administrator; prompts
 ```
+Every later `make` command that reads `.env` (`create-admin`, `logs`, `down`, `up`, `migrate`) needs the key too, because only `live-up.sh` supplies it by itself. Run them through `scripts/live-run.sh` as above. Without the key the Makefile now stops with a decryption error (`dotenvx run --strict`) instead of starting containers with ciphertext as their settings.
 `scripts/live-up.sh` checks `.env` is encrypted, runs `npm ci --ignore-scripts`, reads the key from Secrets Manager into the process environment only, runs `make migrate` then `make up`, and fails if the database publishes a port or any container has `DOTENV_PRIVATE_KEY` in its environment.
 
 ## 4. Grader accounts (ASSUMP-2)

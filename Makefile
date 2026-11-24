@@ -53,22 +53,22 @@ ca-bundle: env-local ## Trust your network's TLS inspection for image builds (ma
 	echo "Wrote ca-bundle.pem and set EXTRA_CA_CERT in .env.local"
 
 up: ## Start the full stack at https://localhost (ENV_FILE=.env.local for a local env)
-	npx dotenvx run -f $(ENV_FILE) -- docker compose up --build -d
+	npx dotenvx run --strict -f $(ENV_FILE) -- docker compose up --build -d
 
 down: ## Stop the stack (keeps the database volume)
-	npx dotenvx run -f $(ENV_FILE) -- docker compose down
+	npx dotenvx run --strict -f $(ENV_FILE) -- docker compose down
 
 reset: ## Stop the stack and DELETE the database volume
-	npx dotenvx run -f $(ENV_FILE) -- docker compose down -v
+	npx dotenvx run --strict -f $(ENV_FILE) -- docker compose down -v
 
 create-admin: ## Create the first administrator (prompts; one-off)
-	npx dotenvx run -f $(ENV_FILE) -- docker compose --profile ops run --build --rm create-admin
+	npx dotenvx run --strict -f $(ENV_FILE) -- docker compose --profile ops run --build --rm create-admin
 
 logs: ## Follow the stack logs
-	npx dotenvx run -f $(ENV_FILE) -- docker compose logs -f
+	npx dotenvx run --strict -f $(ENV_FILE) -- docker compose logs -f
 
 migrate: ## Apply database migrations with the owner role (one-off job)
-	npx dotenvx run -f $(ENV_FILE) -- docker compose --profile ops run --build --rm migrate
+	npx dotenvx run --strict -f $(ENV_FILE) -- docker compose --profile ops run --build --rm migrate
 
 live-up: ## Start the live stack on the EC2 host (needs SECRET_ID; docs/deployment.md)
 	scripts/live-up.sh

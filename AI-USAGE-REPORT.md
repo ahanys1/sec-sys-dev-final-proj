@@ -416,3 +416,8 @@
 #### Liam's Agent
 - Added runbook section 6 (redeploy from `main`: what must still exist, per-situation steps) and renumbered teardown to 7; rewrote the README "Team secrets" note.
 - Human/security changes: the README note warns that a plain `make up` now defaults to the live `.env`, which needs the key and targets the live hostname, so local work stays on `ENV_FILE=.env.local`. The redeploy steps are unrun.
+
+### Commit `fix(deploy): fail closed without the dotenvx key; add live-run wrapper`
+#### Liam's Agent
+- Diagnosed a failed `make create-admin` on the live host: the key was only exported inside `live-up.sh`, so dotenvx passed ciphertext through, recreated the db container with ciphertext env, and the CLI failed with `Invalid URL`. Added `--strict` to every `dotenvx run` in the Makefile and `scripts/live-run.sh` to supply the key for one-off commands; updated runbook section 3.
+- Human/security changes: tested `--strict` (exit 1 without the key, exit 0 with a plaintext `.env.local`). Fixing the runbook, which had told the operator to run `make create-admin` without the key.
