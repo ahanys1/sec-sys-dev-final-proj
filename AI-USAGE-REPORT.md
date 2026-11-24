@@ -483,3 +483,8 @@
 #### Liam's Agent
 - Recorded the developer's `nmap -p-` result (only 80 and 443 open) in the runbook Results table.
 - Human/security changes: the agent noticed that most ports reported "closed (connection refused)" and a 2 ms latency, which an AWS security group would not produce, and recorded that caveat instead of presenting the scan as clean evidence of the security group.
+
+### Commit `docs: update tracking docs and correct the scan caveat`
+#### Liam's Agent
+- Set ASVS V12.2.1, V13.3.1 and SR-14 to Done with evidence, V12.1.1, V13.3.2 and SR-16 to In progress, and slice 6 to In review (`docs/asvs/*`, `docs/plan.md`).
+- Human/security changes: the developer ran the scan, then corrected the agent's guess that a corporate network caused the odd results (it was a personal laptop off VPN). The caveat now says the cause is unknown instead of asserting one. SR-16 and V12.1.1 were deliberately not marked Done because SAST/DAST (#56) and the full cipher scan are outstanding.

@@ -22,8 +22,8 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V13.3.1 | 2 | Verify that a secrets management solution, such as a key vault, is used to securely create, store, control access to, and destroy backend secrets. These could include passwords, key material, integrations with databases and third-party systems, keys and seeds for time-based tokens, other internal secrets, and API keys. Secrets must not be included in application source code or included in build artifacts. For an L3 application, this must involve a hardware-backed solution such as an HSM. | TODO | |
-| V13.3.2 | 2 | Verify that access to secret assets adheres to the principle of least privilege. | TODO | |
+| V13.3.1 | 2 | Verify that a secrets management solution, such as a key vault, is used to securely create, store, control access to, and destroy backend secrets. These could include passwords, key material, integrations with databases and third-party systems, keys and seeds for time-based tokens, other internal secrets, and API keys. Secrets must not be included in application source code or included in build artifacts. For an L3 application, this must involve a hardware-backed solution such as an HSM. | Done | Encrypted `.env` plus Secrets Manager for the key: `.env`, `scripts/live-up.sh`, `docs/deployment.md` (SR-14 evidence). |
+| V13.3.2 | 2 | Verify that access to secret assets adheres to the principle of least privilege. | In progress | IAM role scoped to the one secret in `scripts/aws-provision.sh`; not independently reviewed in AWS. |
 
 ## V13.4 Unintended Information Leakage
 
