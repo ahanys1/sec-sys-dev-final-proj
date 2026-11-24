@@ -40,7 +40,18 @@ Optional: `npx dotenvx get -f .env` should print decrypted values (don't paste t
 | IAM role | `AmazonSSMManagedInstanceCore` plus `secretsmanager:GetSecretValue` on the one secret above |
 | Access | SSM Session Manager only |
 
-Install on the host: Docker, the Docker Compose v2 plugin, git, make, and Node 24 (`engines` in `package.json`).
+### 2a. Create it
+Read `scripts/aws-provision.sh`, then run it yourself: `EIP_ALLOC_ID=<eipalloc-id> sh scripts/aws-provision.sh`. It asks for confirmation, creates the security group, role, instance profile and instance, attaches the Elastic IP, and prints the instance id. Connecting needs the AWS Session Manager plugin on your machine (`session-manager-plugin`).
+
+### 2b. Install what user data doesn't (unverified: check each)
+User data installs only Docker, git and make. In an SSM session, check and install the rest, then record what worked here:
+```sh
+docker --version && git --version && make --version
+docker compose version     # Compose v2 plugin; not part of the AL2023 docker package as far as we know
+docker buildx version      # needed by `compose build` with build secrets
+node --version             # must satisfy engines in package.json (24.x)
+```
+Install anything missing from a pinned release and verify its checksum; don't pipe a download into a shell. Add the commands that worked to this section.
 
 ## 3. Start
 In an SSM session:

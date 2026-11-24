@@ -396,3 +396,8 @@
 #### Liam's Agent
 - Walked the developer through generating and encrypting `.env` with dotenvx and storing the private key in AWS Secrets Manager. The agent never read `.env.keys` or decrypted values; permissions blocked it from reading `.env`.
 - Human/security checks: the developer ran a masked check confirming every value is `encrypted:` ciphertext, chose the Local key store, stored the key in Secrets Manager, and committed only `.env` (`.env.keys` is gitignored).
+
+### Commit `feat(deploy): add AWS provisioning script for the live host`
+#### Liam's Agent
+- Drafted `scripts/aws-provision.sh` (security group 80/443, IAM role scoped to one secret, IMDSv2 hop limit 1, encrypted gp3, no key pair, Elastic IP attach) and runbook sections 2a/2b.
+- Human/security changes: the script is not run by CI or the agent and asks for confirmation; the developer reviews it first. Docker Compose, buildx and Node 24 on Amazon Linux 2023 are deliberately left as manual, checked steps because the agent could not verify package availability. Not run against AWS.
