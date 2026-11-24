@@ -3,10 +3,11 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import pg from "pg";
 import type { PrismaClient, Role } from "@/src/generated/prisma/client";
 import { ApiError } from "@/src/lib/http";
+import { getSettings } from "@/src/lib/auth/settings";
 import { hashPassword, verifyPassword } from "@/src/lib/auth/password";
 import { authenticate } from "@/src/lib/auth/guard";
 import { createFirstAdmin } from "@/src/lib/auth/create-admin";
-import { hashToken, tokenFromCookieHeader } from "@/src/lib/auth/session";
+import { createSession, hashToken, tokenFromCookieHeader } from "@/src/lib/auth/session";
 
 // Needs a migrated database (see tests/db/schema.test.ts). Skipped when unset.
 const ownerUrl = process.env.TEST_DATABASE_OWNER_URL;
@@ -188,6 +189,44 @@ describe.skipIf(!ownerUrl || !appUrl)("authentication and sessions", () => {
     });
   });
 
+  describe("single-use temporary credentials (A-6, SR-2/3; ASVS V6.4.1)", () => {
+    it("consumes once, preserves the password-change session, and permits an admin reset", async () => {
+      const user = await makeUser({ mustChangePassword: true });
+      const first = await doLogin(user.username);
+      expect(first.status).toBe(200);
+      expect((await doLogin(user.username)).status).toBe(401);
+      expect((await authenticate(withCookie(cookieOf(first)), { allowPasswordChange: true })).user.id).toBe(user.id);
+      const admin = await makeUser({ role: "admin" });
+      const { resetPassword } = await import("@/src/lib/admin/users");
+      const reset = await resetPassword(db, admin.id, user.id);
+      expect((await db.user.findUniqueOrThrow({ where: { id: user.id } })).tempPasswordUsedAt).toBeNull();
+      expect((await doLogin(user.username, reset.temporaryPassword)).status).toBe(200);
+      expect((await doLogin(user.username, reset.temporaryPassword)).status).toBe(401);
+      expect(await codeOf(authenticate(withCookie(cookieOf(first)), { allowPasswordChange: true }))).toBe("unauthenticated");
+    });
+
+    it("allows exactly one of two competing first logins", async () => {
+      const user = await makeUser({ mustChangePassword: true });
+      const responses = await Promise.all([doLogin(user.username), doLogin(user.username)]);
+      expect(responses.map((r) => r.status).sort()).toEqual([200, 401]);
+      expect(await db.session.count({ where: { userId: user.id } })).toBe(1);
+      expect((await db.user.findUniqueOrThrow({ where: { id: user.id } })).tempPasswordUsedAt).not.toBeNull();
+    });
+
+    it("does not consume a reset credential using a previously verified hash", async () => {
+      const user = await makeUser({ mustChangePassword: true });
+      const previous = await db.user.findUniqueOrThrow({ where: { id: user.id } });
+      const admin = await makeUser({ role: "admin" });
+      const { resetPassword } = await import("@/src/lib/admin/users");
+      await resetPassword(db, admin.id, user.id);
+      await expect(createSession(db, user.id, await getSettings(db), {
+        passwordHash: previous.passwordHash, mustChangePassword: true,
+      })).rejects.toMatchObject({ code: "invalid_credentials" });
+      expect((await db.user.findUniqueOrThrow({ where: { id: user.id } })).tempPasswordUsedAt).toBeNull();
+      expect(await db.session.count({ where: { userId: user.id } })).toBe(0);
+    });
+  });
+
   describe("session checks (SR-1, SR-4, SR-5, C-1, C-2, C-11)", () => {
     it("rejects a missing or forged cookie", async () => {
       expect(await codeOf(authenticate(new Request("https://app.test/x")))).toBe("unauthenticated");
@@ -278,8 +317,9 @@ describe.skipIf(!ownerUrl || !appUrl)("authentication and sessions", () => {
 
     it("changes the password, clears the temporary-password gate, ends other sessions, and audits it", async () => {
       const user = await makeUser({ mustChangePassword: true });
+      // An existing session models a browser already open when an initial credential is consumed.
+      const other = `__Host-session=${await createSession(db, user.id, await getSettings(db))}`;
       const first = cookieOf(await doLogin(user.username));
-      const other = cookieOf(await doLogin(user.username));
       const response = await change(first, { currentPassword: PASSWORD, newPassword: NEW_PASSWORD });
       expect(response.status).toBe(200);
 

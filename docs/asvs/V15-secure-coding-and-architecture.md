@@ -15,14 +15,14 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
 | V15.2.1 | 1 | Verify that the application only contains components which have not breached the documented update and remediation time frames. | TODO | |
-| V15.2.2 | 2 | Verify that the application has implemented defenses against loss of availability due to functionality which is time-consuming or resource-demanding, based on the documented security decisions and strategies for this. | TODO | |
+| V15.2.2 | 2 | Verify that the application has implemented defenses against loss of availability due to functionality which is time-consuming or resource-demanding, based on the documented security decisions and strategies for this. | In progress | `src/lib/incidents/pagination.ts`, `components/IncidentPagination.tsx`; `tests/incidents-pagination.test.ts`, `tests/db/incidents.test.ts` (bounded nonoverlapping pages). Image optimizer disabled in `next.config.ts`. Load testing remains pending. |
 | V15.2.3 | 2 | Verify that the production environment only includes functionality that is required for the application to function, and does not expose extraneous functionality such as test code, sample snippets, and development functionality. | TODO | |
 
 ## V15.3 Defensive Coding
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V15.3.1 | 1 | Verify that the application only returns the required subset of fields from a data object. For example, it should not return an entire data object, as some individual fields should not be accessible to users. | TODO | |
+| V15.3.1 | 1 | Verify that the application only returns the required subset of fields from a data object. For example, it should not return an entire data object, as some individual fields should not be accessible to users. | Done | Explicit select allowlists in incidents and admin users/audit; `tests/db/incidents.test.ts` (summary fields, denied detail), `tests/db/admin-users.test.ts`, `tests/db/admin-audit.test.ts` (secret exclusion). |
 | V15.3.2 | 2 | Verify that where the application backend makes calls to external URLs, it is configured to not follow redirects unless it is intended functionality. | TODO | |
 | V15.3.3 | 2 | Verify that the application has countermeasures to protect against mass assignment attacks by limiting allowed fields per controller and action, e.g., it is not possible to insert or update a field value when it was not intended to be part of that action. | TODO | |
 | V15.3.4 | 2 | Verify that all proxying and middleware components transfer the user's original IP address correctly using trusted data fields that cannot be manipulated by the end user, and the application and web server use this correct value for logging and security decisions such as rate limiting, taking into account that even the original IP address may not be reliable due to dynamic IPs, VPNs, or corporate firewalls. | TODO | |

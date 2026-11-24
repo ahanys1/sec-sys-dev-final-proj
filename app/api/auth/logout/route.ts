@@ -19,3 +19,13 @@ export const POST = route("auth.logout", async (requestId, request) => {
 });
 
 export const OPTIONS = () => methodNotAllowed(["POST"]);
+
+export const GET = () => methodNotAllowed(["POST"]);
+
+export const HEAD = () => methodNotAllowed(["POST"]);
+
+export const PUT = () => methodNotAllowed(["POST"]);
+
+export const PATCH = () => methodNotAllowed(["POST"]);
+
+export const DELETE = () => methodNotAllowed(["POST"]);

@@ -520,3 +520,10 @@
 #### Team #13's Agent
 - Claimed remediation of the eight local integration findings on a branch from main; checked open PRs to keep fixes separate from SAST/DAST (#56) and release documentation (#55).
 - Human/security changes: the developer requested a new branch from main and fixes for the reported findings. No application changes or security acceptance claims in this commit.
+
+### Commit `fix: close integration gaps (SR-4, SR-7, SR-16; ASVS V8.2.2)`
+#### Team #13's Agent
+- Implemented bounded incident pagination and navigation, summary-only user access, safe UUID paths, closed-incident privacy, explicit API method errors, and edge rejection security headers. Added a migration and transactional single-use temporary credentials, including concurrent-login and stale-hash protection; updated reset/change flows.
+- Added unit and database regressions; corrected two old tests that permitted user detail access against R-14, and an old fixture that reused a temporary password to create two sessions. Updated the design, entry point inventory, ASVS evidence, SDL progress and plan.
+- Human/security changes: the developer requested the fixes on a new branch from main. No human code edits have been reported. Security refinements during implementation keep role checks inside handlers, scope paging in the database, preserve generic errors and sensitive-log exclusions, and require an admin reset if a consumed initial session is lost. Existing untracked security scripts were left untouched. No live deployment or release approval is claimed.
+- Validation: lint, TypeScript, guards, 104 unit tests, 131 database tests, Docker production build, production audit (0 vulnerabilities), local HTTPS rechecks, and Admin/User/Reviewer browser pagination. Native `make check` fails at Turbopack worker port binding on this host, including elevated retry; no application build error was observed in Docker. Corrected a temporary live-test harness assumption: an unchanged settings save is intentionally unaudited; a unique real change was audited successfully.

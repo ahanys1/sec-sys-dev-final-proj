@@ -28,7 +28,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 4 | Incidents and comments | 2 | Done (#54) | #7, #8 |
 | 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; the demo script moves into the user manual after #55 | #12, #21 |
-| 7 | Verification | 3, 4, 5 | In progress: local regression fixes on `codex/fix-local-integration-findings`; SAST/DAST tracked separately in #56 | #13, #14, #16, #17 |
+| 7 | Verification | 3, 4, 5 | In review: local regression remediation #61; SAST/DAST tracked separately in #56 | #13, #14, #16, #17 |
 | 8 | Release | 7 | Next | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
@@ -82,3 +82,9 @@ Incident response plan and `SECURITY.md` (SDL #14), final security review (SDL #
 
 ## If time runs short
 Keep slices 4 and 6 and the audit trail. Cut settings polish, k6 tuning, and extra admin screens first. All High threats and the release gate in `docs/sdl.md` stay mandatory.
+
+### Local regression remediation (#61)
+
+Reconciled EP-08/09/19 with the built routes; enforced summary-only user access, malformed-ID rejection and closed-incident privacy; bounded incident queries and page navigation; consumed temporary credentials atomically; standardized method errors and edge rejection headers. Regression evidence: `tests/db/auth.test.ts`, `tests/db/incidents.test.ts`, `tests/incidents-pagination.test.ts`, `tests/api-methods.test.ts`, `tests/proxy.test.ts`, `tests/security-headers.test.ts`. Verification of these fixes does not complete slice 7 or the release gate.
+
+Validation for #61 (2026-11-24): lint, TypeScript, CI guards, 104 unit tests, 131 PostgreSQL tests, Docker production build, and production dependency audit (0 vulnerabilities) passed. Local HTTPS rechecks verified the targeted controls and all three roles' browser pagination. Native `make check` stops at Turbopack's local worker port-binding permission error even outside the sandbox; the Docker production build passes. No live deployment, full fuzz/load run, or release acceptance is claimed.

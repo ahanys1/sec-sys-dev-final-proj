@@ -103,6 +103,6 @@ describe("EP-03 /api/health (V13.4.5, T-48)", () => {
   it("refuses OPTIONS with 405", () => {
     const res = OPTIONS();
     expect(res.status).toBe(405);
-    expect(res.headers.get("allow")).toBe("GET");
+    expect(res.headers.get("allow")).toBe("GET, HEAD");
   });
 });

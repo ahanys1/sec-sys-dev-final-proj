@@ -1,3 +1,6 @@
+import { IncidentPagination } from "@/components/IncidentPagination";
+import { incidentPage, type PageParams } from "@/src/lib/incidents/pagination";
+import { incidentPageQuery } from "@/src/lib/incidents/page";
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
 import { requirePageUser } from "@/src/lib/auth/page";
@@ -5,9 +8,10 @@ import { getDb } from "@/src/lib/db";
 import { listAdminIncidents } from "@/src/lib/incidents/incidents";
 
 // EP-08: Administrators can view incidents in all statuses.
-export default async function AdminIncidentsPage() {
+export default async function AdminIncidentsPage({ searchParams }: { searchParams: Promise<PageParams> }) {
   const admin = await requirePageUser({ roles: ["admin"] });
-  const incidents = await listAdminIncidents(getDb());
+  const page = incidentPageQuery(await searchParams);
+  const { incidents, pagination } = incidentPage(await listAdminIncidents(getDb(), page), page);
 
   return (
     <>
@@ -45,6 +49,7 @@ export default async function AdminIncidentsPage() {
             ))}
           </div>
         )}
+        <IncidentPagination path="/admin/incidents" page={page} hasNext={pagination.hasNext} />
       </main>
     </>
   );
