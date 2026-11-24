@@ -493,3 +493,8 @@
 #### Liam's Agent
 - Recorded the developer's `nmap ssl-enum-ciphers` result and the agent's direct TLS 1.2 and 1.3 handshakes in `docs/deployment.md`; set ASVS V12.1.1 to Done; refreshed the stale runbook status line.
 - Human/security changes: nmap listed only TLS 1.3, which conflicted with an earlier note that TLS 1.2 is accepted. The agent re-tested directly (TLS 1.2 handshake and a TLS 1.2-only `curl` succeeded) and recorded nmap's list as incomplete rather than changing the finding. An earlier `openssl` line (`Protocol: TLSv1.1`) printed even for refused handshakes, so refusals are judged by the `protocol version` alert, not that line.
+
+### Commit `docs: record port sweep and add update-in-place steps`
+#### Liam's Agent
+- Recorded a second-machine port sweep (only 80 and 443 open) and added an "update the running host" section to `docs/deployment.md` for deploying `main` after PRs #57 and #59 merge.
+- Human/security changes: the developer chose to deploy `main` after both PRs merge. The sweep is labelled as not a full 65,535-port scan, and the section tells the operator to verify denial logging after deploy. The update steps are unrun.

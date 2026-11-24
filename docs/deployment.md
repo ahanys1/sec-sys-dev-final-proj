@@ -122,6 +122,15 @@ Works once this branch is merged. It needs three things to still exist: the encr
 
 Budget about half an hour. Re-run the section 5 checks afterwards.
 
+### Update the running host (deploy `main`)
+Use this after the code changes, for example when PRs merge. The database volume is kept, so grader accounts and incidents survive.
+```sh
+cd ~/sec-sys-dev-final-proj
+git fetch && git checkout main && git pull --ff-only
+SECRET_ID=incident-app/dotenvx-key AWS_REGION=us-east-1 make live-up   # rebuilds the app image, applies migrations
+```
+Then re-check: `curl -sI https://107-23-118-127.sslip.io/login` returns 200, log in once, and, to confirm denial logging, trigger a denial (as `grader-user` open `/admin/users`) and run `SECRET_ID=incident-app/dotenvx-key scripts/live-run.sh docker compose logs --since 10m app | grep access.denied`. Deploying a branch tip means later commits change the live app; for the grading period consider checking out a tag instead.
+
 ## 7. Teardown (after grading)
 Terminate the instance, release the Elastic IP, delete the secret. The data is demo data only. Keep the secret and the IP until grading ends if you may need a redeploy (section 6).
 
@@ -139,4 +148,5 @@ Terminate the instance, release the Elastic IP, delete the secret. The data is d
 | On the host: no `.env.keys` file (`ls -a ~ ~/sec-sys-dev-final-proj \| grep env.keys` printed nothing); app image history has no `DOTENV_PRIVATE_KEY` (`grep -c` printed 0) | 2026-11-24 | Pass (reported by the operator) |
 | Full TCP scan from outside: `nmap -Pn -p- -T4 --max-retries 1 107.23.118.127` | 2026-11-24 | Pass: only 80 and 443 open. Caveat: run from a personal laptop off the corporate VPN, yet 53,276 ports showed as closed (connection refused) rather than filtered and latency was 2 ms, which a security group would not produce; cause not identified (something on the scanner's path may be answering). An earlier `nc` check from a different network timed out on 22, 3000, 5432 and 2375, as a security group drops packets. Only 80 and 443 answered as open in both. |
 | `nmap --script ssl-enum-ciphers -p 443` from a THD laptop (completed a real handshake): TLS 1.3 only listed, all ciphers grade A, server preference | 2026-11-24 | Pass. It did not list TLS 1.2, but direct handshakes show TLS 1.2 (`ECDHE-ECDSA-AES128-GCM-SHA256`) is accepted, a client offering both negotiates TLS 1.3, and 1.0 and 1.1 are refused, so treat nmap's list as incomplete, not the server as TLS 1.3 only. |
+| Port sweep with `nc -z` from a second machine: ports 1 to 1024 plus 1433, 1521, 2049, 2375, 2376, 3000, 3306, 3389, 4000, 5000, 5432, 5601, 5900, 6379, 6443, 8000, 8080, 8081, 8443, 8888, 9000, 9090, 9200, 9300, 10250, 11211, 27017 | 2026-11-24 | Pass: only 80 and 443 open (this path timed out on the rest, as a security group drops packets). Not a full 65,535-port scan. |
 | `psql` refusal | | Not run; `nc` shows 5432 closed or filtered |
