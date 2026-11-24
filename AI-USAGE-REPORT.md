@@ -463,3 +463,8 @@
 #### Liam's Agent
 - Found that categories are created at `/admin/categories` and that a fresh live database has none, and added the step to runbook section 4.
 - Human/security changes: categories are created by the admin on the live site, not seeded, to keep T-63 (no seed data in the deployed start path).
+
+### Commit `docs: correct audit expectations in the live verification table`
+#### Liam's Agent
+- Told the developer to look for login and denied-access entries in the audit view; that was wrong, because FR-11 and `AUDIT_ACTIONS` do not include them. After the developer's screenshot, read `src/lib/audit.ts` and the login route, corrected the runbook row and recorded the result.
+- Human/security changes: the developer ran the role checks and caught the discrepancy. ASVS V16.3.2 (log failed authorization) is flagged as not found in the code and left for the team to decide.

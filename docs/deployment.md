@@ -98,7 +98,7 @@ Create a reviewer, a user (the role that submits incidents) and a grader admin o
 | TLS | `nmap --script ssl-enum-ciphers -p 443 <host>` | TLS 1.2 and 1.3 only | T-06 |
 | Key on host | `ls -a ~ . \| grep env.keys` | no `.env.keys` | AR-5 |
 | Key in image | `docker history --no-trunc <app image> \| grep -c DOTENV_PRIVATE_KEY` | `0` | AR-5 |
-| Roles | log in as each role; try an admin API as a user, another user's incident | 403 or 404, audit row written | T-17, T-19, T-24 |
+| Roles | log in as each role; try an admin API as a user, another user's incident | 403 or 404. Denials are not audit events (FR-11 lists none); logins appear in the server log (`auth.login.ok`, `auth.login.failed`) | T-17, T-19, T-24 |
 
 ## 6. Redeploy from `main`
 Works once this branch is merged. It needs three things to still exist: the encrypted `.env` on `main`, the key (secret `incident-app/dotenvx-key`, or the `.env.keys` backup in the password manager), and the Elastic IP, because `SITE_ADDRESS` in `.env` is tied to it. If the IP was released, redo 1a and re-encrypt with a new `SITE_ADDRESS`.
@@ -124,4 +124,5 @@ Terminate the instance, release the Elastic IP, delete the secret. The data is d
 | TLS versions with `openssl s_client`: 1.2 and 1.3 accepted; 1.0 and 1.1 refused with a `protocol version` alert | 2026-11-24 | Pass (not a full cipher scan) |
 | First administrator created; site loads and login works | 2026-11-24 | Pass (reported by the operator) |
 | Accounts created on the live site: own admin, `grader-admin`, `grader-reviewer`, `grader-user` ; each logged in once and its temporary password replaced with a final one, so expiry no longer applies | 2026-11-24 | Done (reported by the operator) |
+| Role checks in the browser as `grader-user`, `grader-reviewer`, `grader-admin`; audit page lists the FR-11 actions (incident create, status, classify, comments, user create, password change, category create) | 2026-11-24 | Pass (reported by the operator, screenshot reviewed). Logins and denied access are not in the audit table by design; V16.3.2 (denied access logging) not found in the code |
 | Full `nmap -p-` and `ssl-enum-ciphers` scans, `psql` refusal, role and misuse checks, `.env.keys` and image-history checks | | Not run yet |
