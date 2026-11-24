@@ -510,3 +510,8 @@
 #### Liam's Agent
 - Resolved the `AI-USAGE-REPORT.md` conflict by keeping both sides' entries, fixed missing blank lines between entries, and replaced a stale "PR #59" reference in the SR-16 row with the evidence paths now that #57 is merged.
 - Human/security changes: none to the code. Lint, type check, unit tests (90) and the CI guards pass on the merged tree; database tests were run before the merge and are re-run by CI.
+
+### Commit `docs: record live verification of main and mark slice 6 done`
+#### Liam's Agent
+- Recorded the redeploy of `main` and the live denial-logging check in `docs/deployment.md`, marked ASVS V16.3.2 verified on the live host and slice 6 Done in `docs/plan.md`, and replaced an out-of-date "create the first admin" message at the end of `scripts/live-up.sh`.
+- Human/security changes: the developer ran the redeploy and the denial test on the instance and pasted the log lines; the agent confirmed they carry a user ID and request ID and no cookie, password or incident text before recording the result.
