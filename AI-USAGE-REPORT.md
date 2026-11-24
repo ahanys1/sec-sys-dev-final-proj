@@ -488,3 +488,8 @@
 #### Liam's Agent
 - Set ASVS V12.2.1, V13.3.1 and SR-14 to Done with evidence, V12.1.1, V13.3.2 and SR-16 to In progress, and slice 6 to In review (`docs/asvs/*`, `docs/plan.md`).
 - Human/security changes: the developer ran the scan, then corrected the agent's guess that a corporate network caused the odd results (it was a personal laptop off VPN). The caveat now says the cause is unknown instead of asserting one. SR-16 and V12.1.1 were deliberately not marked Done because SAST/DAST (#56) and the full cipher scan are outstanding.
+
+### Commit `docs: record TLS evidence and refresh the runbook status`
+#### Liam's Agent
+- Recorded the developer's `nmap ssl-enum-ciphers` result and the agent's direct TLS 1.2 and 1.3 handshakes in `docs/deployment.md`; set ASVS V12.1.1 to Done; refreshed the stale runbook status line.
+- Human/security changes: nmap listed only TLS 1.3, which conflicted with an earlier note that TLS 1.2 is accepted. The agent re-tested directly (TLS 1.2 handshake and a TLS 1.2-only `curl` succeeded) and recorded nmap's list as incomplete rather than changing the finding. An earlier `openssl` line (`Protocol: TLSv1.1`) printed even for refused handshakes, so refusals are judged by the `protocol version` alert, not that line.

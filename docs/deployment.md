@@ -2,7 +2,7 @@
 
 One EC2 instance runs the same compose stack as local (`docker-compose.yml`, `Caddyfile`). Scope and accepted risk: AR-9 in [stride.md](stride.md). Requirements: SR-14, SR-16, ASVS V13.3.1, V12.1.1.
 
-**Status:** live at `https://107-23-118-127.sslip.io` (us-east-1). Sections 1 to 3 done; first administrator and grader accounts (section 4) and most checks in section 5 are still to do. See Results at the bottom.
+**Status:** live at `https://107-23-118-127.sslip.io` (us-east-1). Sections 1 to 4 done (grader accounts exist with final passwords). Section 5 checks are recorded in Results at the bottom, with the gaps listed there.
 
 ## 1. Encrypted env and key (one person, once)
 Do this on a clean checkout, not on a machine with a corporate CA in `.env.local`. Needs the AWS CLI configured with permission to allocate addresses and create secrets. No instance is needed yet.
@@ -132,10 +132,11 @@ Terminate the instance, release the Elastic IP, delete the secret. The data is d
 | Redirect: `curl -I http://107-23-118-127.sslip.io` | 2026-11-24 | 308 to `https://` (Caddy) |
 | HTTPS with a trusted certificate (curl without `-k`), HSTS, CSP, nosniff, frame-deny headers | 2026-11-24 | Pass |
 | Port spot check from outside with `nc` (not a full `nmap -p-`): 22, 3000, 5432, 2375 | 2026-11-24 | Closed or filtered; 80 and 443 open |
-| TLS versions with `openssl s_client`: 1.2 and 1.3 accepted; 1.0 and 1.1 refused with a `protocol version` alert | 2026-11-24 | Pass (not a full cipher scan) |
+| TLS versions with `openssl s_client`: 1.2 and 1.3 accepted; 1.0 and 1.1 refused with a `protocol version` alert | 2026-11-24 | Pass |
 | First administrator created; site loads and login works | 2026-11-24 | Pass (reported by the operator) |
 | Accounts created on the live site: own admin, `grader-admin`, `grader-reviewer`, `grader-user` ; each logged in once and its temporary password replaced with a final one, so expiry no longer applies | 2026-11-24 | Done (reported by the operator) |
 | Role checks in the browser as `grader-user`, `grader-reviewer`, `grader-admin`; audit page lists the FR-11 actions (incident create, status, classify, comments, user create, password change, category create) | 2026-11-24 | Pass (reported by the operator, screenshot reviewed). Logins and denied access are not in the audit table by design; V16.3.2 (denied access logging) not found in the code |
 | On the host: no `.env.keys` file (`ls -a ~ ~/sec-sys-dev-final-proj \| grep env.keys` printed nothing); app image history has no `DOTENV_PRIVATE_KEY` (`grep -c` printed 0) | 2026-11-24 | Pass (reported by the operator) |
 | Full TCP scan from outside: `nmap -Pn -p- -T4 --max-retries 1 107.23.118.127` | 2026-11-24 | Pass: only 80 and 443 open. Caveat: run from a personal laptop off the corporate VPN, yet 53,276 ports showed as closed (connection refused) rather than filtered and latency was 2 ms, which a security group would not produce; cause not identified (something on the scanner's path may be answering). An earlier `nc` check from a different network timed out on 22, 3000, 5432 and 2375, as a security group drops packets. Only 80 and 443 answered as open in both. |
-| `nmap --script ssl-enum-ciphers -p 443` full cipher scan; `psql` refusal | | Not run (TLS versions spot-checked with `openssl`; database port checked with `nc`) |
+| `nmap --script ssl-enum-ciphers -p 443` from a THD laptop (completed a real handshake): TLS 1.3 only listed, all ciphers grade A, server preference | 2026-11-24 | Pass. It did not list TLS 1.2, but direct handshakes show TLS 1.2 (`ECDHE-ECDSA-AES128-GCM-SHA256`) is accepted, a client offering both negotiates TLS 1.3, and 1.0 and 1.1 are refused, so treat nmap's list as incomplete, not the server as TLS 1.3 only. |
+| `psql` refusal | | Not run; `nc` shows 5432 closed or filtered |
