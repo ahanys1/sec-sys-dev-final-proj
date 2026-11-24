@@ -515,3 +515,8 @@
 #### Liam's Agent
 - Recorded the redeploy of `main` and the live denial-logging check in `docs/deployment.md`, marked ASVS V16.3.2 verified on the live host and slice 6 Done in `docs/plan.md`, and replaced an out-of-date "create the first admin" message at the end of `scripts/live-up.sh`.
 - Human/security changes: the developer ran the redeploy and the denial test on the instance and pasted the log lines; the agent confirmed they carry a user ID and request ID and no cookie, password or incident text before recording the result.
+
+### Commit `docs: claim local integration fixes (SR-4, SR-7, SR-16)`
+#### Team #13's Agent
+- Claimed remediation of the eight local integration findings on a branch from main; checked open PRs to keep fixes separate from SAST/DAST (#56) and release documentation (#55).
+- Human/security changes: the developer requested a new branch from main and fixes for the reported findings. No application changes or security acceptance claims in this commit.

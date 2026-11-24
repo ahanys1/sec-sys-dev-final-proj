@@ -28,7 +28,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 4 | Incidents and comments | 2 | Done (#54) | #7, #8 |
 | 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; the demo script moves into the user manual after #55 | #12, #21 |
-| 7 | Verification | 3, 4, 5 | Next | #13, #14, #16, #17 |
+| 7 | Verification | 3, 4, 5 | In progress: local regression fixes on `codex/fix-local-integration-findings`; SAST/DAST tracked separately in #56 | #13, #14, #16, #17 |
 | 8 | Release | 7 | Next | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
