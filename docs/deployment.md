@@ -82,7 +82,7 @@ Every later `make` command that reads `.env` (`create-admin`, `logs`, `down`, `u
 `scripts/live-up.sh` checks `.env` is encrypted, runs `npm ci --ignore-scripts`, reads the key from Secrets Manager into the process environment only, runs `make migrate` then `make up`, and fails if the database publishes a port or any container has `DOTENV_PRIVATE_KEY` in its environment.
 
 ## 4. Grader accounts (ASSUMP-2)
-Create a reviewer, a reporter and a grader admin on the admin screen. Each gets a one-time temporary password and must change it at first login. Send the credentials to the instructor privately; never commit them.
+Create a reviewer, a user (the role that submits incidents) and a grader admin on the admin screen. Each gets a one-time temporary password and must change it at first login. Send the credentials to the instructor privately; never commit them.
 
 ## 5. Verify (run from outside AWS)
 | Check | Command | Expect | Threat |
@@ -94,7 +94,7 @@ Create a reviewer, a reporter and a grader admin on the admin screen. Each gets 
 | TLS | `nmap --script ssl-enum-ciphers -p 443 <host>` | TLS 1.2 and 1.3 only | T-06 |
 | Key on host | `ls -a ~ . \| grep env.keys` | no `.env.keys` | AR-5 |
 | Key in image | `docker history --no-trunc <app image> \| grep -c DOTENV_PRIVATE_KEY` | `0` | AR-5 |
-| Roles | log in as each role; try an admin API as reporter, another user's incident | 403 or 404, audit row written | T-17, T-19, T-24 |
+| Roles | log in as each role; try an admin API as a user, another user's incident | 403 or 404, audit row written | T-17, T-19, T-24 |
 
 ## 6. Redeploy from `main`
 Works once this branch is merged. It needs three things to still exist: the encrypted `.env` on `main`, the key (secret `incident-app/dotenvx-key`, or the `.env.keys` backup in the password manager), and the Elastic IP, because `SITE_ADDRESS` in `.env` is tied to it. If the IP was released, redo 1a and re-encrypt with a new `SITE_ADDRESS`.

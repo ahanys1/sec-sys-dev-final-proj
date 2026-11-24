@@ -426,3 +426,8 @@
 #### Liam's Agent
 - Ran read-only `nc` and `openssl s_client` checks against the live host and recorded them in the runbook Results table.
 - Human/security changes: the first TLS 1.1 attempt failed inside the local client (`no protocols available`) and was not counted as a server result; it was retried with a lowered client security level, which showed the server's `protocol version` alert. The table says these are spot checks, not full `nmap`/`ssl-enum-ciphers` scans.
+
+### Commit `docs: use the app's role name "user" instead of "reporter"`
+#### Liam's Agent
+- Replaced "reporter" with "user" where it names a role in `docs/deployment.md` and `docs/plan.md`, after the developer found no "reporter" role in the admin screen. The schema roles are `user`, `reviewer`, `admin` (FR-2, SR-4).
+- Human/security changes: limited to role-name uses. "Reporter" as a plain word or as the `reporter_id` column in the design, threat-model, STRIDE and use/misuse documents was left as is.
