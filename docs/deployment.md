@@ -2,7 +2,7 @@
 
 One EC2 instance runs the same compose stack as local (`docker-compose.yml`, `Caddyfile`). Scope and accepted risk: AR-9 in [stride.md](stride.md). Requirements: SR-14, SR-16, ASVS V13.3.1, V12.1.1.
 
-**Status:** section 1 done (Elastic IP allocated in us-east-1, encrypted `.env` committed, key stored in Secrets Manager as `incident-app/dotenvx-key`). Sections 2 to 5 are not run yet, so the Results table at the bottom is empty.
+**Status:** live at `https://107-23-118-127.sslip.io` (us-east-1). Sections 1 to 3 done; first administrator and grader accounts (section 4) and most checks in section 5 are still to do. See Results at the bottom.
 
 ## 1. Encrypted env and key (one person, once)
 Do this on a clean checkout, not on a machine with a corporate CA in `.env.local`. Needs the AWS CLI configured with permission to allocate addresses and create secrets. No instance is needed yet.
@@ -59,7 +59,16 @@ sudo install -m 0755 docker-compose-linux-x86_64 /usr/local/lib/docker/cli-plugi
 docker compose version                              # v5.8.0
 
 sudo usermod -aG docker ssm-user                    # then reconnect; root-equivalent, accepted under AR-1
+
+# Compose v5.8.0 needs buildx 0.17.0 or newer; the AL2023 package is 0.12.2. Same pattern, checksums.txt from the release:
+VER=v0.39.0
+cd "$(mktemp -d)"
+curl -fsSLO https://github.com/docker/buildx/releases/download/$VER/buildx-$VER.linux-amd64
+curl -fsSLO https://github.com/docker/buildx/releases/download/$VER/checksums.txt
+grep "buildx-$VER.linux-amd64\$" checksums.txt | sha256sum -c     # must print OK
+sudo install -m 0755 buildx-$VER.linux-amd64 /usr/local/lib/docker/cli-plugins/docker-buildx   # searched before the package's copy
 ```
+Work in your home directory (`cd ~`) before cloning; the session starts somewhere `ssm-user` can't write.
 
 ## 3. Start
 In an SSM session:
@@ -92,4 +101,7 @@ Terminate the instance, release the Elastic IP, delete the secret. The data is d
 ## Results
 | Check | Date | Result |
 |---|---|---|
-| (not run yet) | | |
+| Stack up via `make live-up` (migrations applied; script's db-port and key-in-container checks passed) | 2026-11-24 | Pass |
+| Redirect: `curl -I http://107-23-118-127.sslip.io` | 2026-11-24 | 308 to `https://` (Caddy) |
+| HTTPS with a trusted certificate (curl without `-k`), HSTS, CSP, nosniff, frame-deny headers | 2026-11-24 | Pass |
+| Port scan, TLS version scan, role and misuse checks, `.env.keys` and image-history checks | | Not run yet |

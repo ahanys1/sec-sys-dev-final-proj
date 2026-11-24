@@ -406,3 +406,8 @@
 #### Liam's Agent
 - Guided the developer through checking Amazon Linux 2023 for Compose and Node, and recorded the working commands in runbook section 2b.
 - Human/security changes: the developer chose the Compose version and ran the checksum verification (`sha256sum -c` printed OK); the agent did not guess versions. Docker-group access for `ssm-user` is root-equivalent and is accepted under AR-1.
+
+### Commit `docs: record live deployment and first verification results`
+#### Liam's Agent
+- Recorded the buildx upgrade step and the first live results (redirect, trusted certificate, security headers) in `docs/deployment.md`; ran the read-only `curl -I` checks against the live host.
+- Human/security changes: the developer ran the deployment on the host and chose and checksum-verified the buildx version. The agent reported only what was observed; port scan, TLS version scan and role checks are marked not run.
