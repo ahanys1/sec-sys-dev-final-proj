@@ -19,6 +19,6 @@ export async function authenticate(request: Request, options: Options = {}): Pro
   const session = await resolveSession(db, tokenFromCookieHeader(request.headers.get("cookie")), await getSettings(db));
   if (!session) throw new ApiError("unauthenticated");
   if (session.user.mustChangePassword && !options.allowPasswordChange) throw new ApiError("password_change_required");
-  if (options.roles && !options.roles.includes(session.user.role)) throw new ApiError("forbidden");
+  if (options.roles && !options.roles.includes(session.user.role)) throw new ApiError("forbidden", undefined, undefined, session.user.id);
   return session;
 }

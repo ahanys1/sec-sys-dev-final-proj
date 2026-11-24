@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import type { Role } from "../../generated/prisma/client";
 import { getDb } from "../db";
+import { logger } from "../logger";
 import { getSettings } from "./settings";
 import { resolveSession, SESSION_COOKIE, type SessionUser } from "./session";
 
@@ -10,7 +11,11 @@ export async function requirePageUser(options: { allowPasswordChange?: boolean; 
   const user = await currentUser();
   if (!user) redirect("/login");
   if (user.mustChangePassword && !options.allowPasswordChange) redirect("/account/password");
-  if (options.roles && !options.roles.includes(user.role)) notFound();
+  if (options.roles && !options.roles.includes(user.role)) {
+    // SR-16, ASVS V16.3.2: wrong role is logged even though the client just sees a 404.
+    logger.warn("access.denied", { route: "page", reason: "role", userId: user.id });
+    notFound();
+  }
   return user;
 }
 

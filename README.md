@@ -5,7 +5,7 @@ Spec: [ASSIGNMENT.md](ASSIGNMENT.md) · Design: [docs/design.md](docs/design.md)
 
 > **Every AI-assisted change must add an entry to [AI-USAGE-REPORT.md](AI-USAGE-REPORT.md) in the same commit.**
 
-Status: sign-in, sign-out, password change, sessions, and admin account management are implemented. Incidents/comments and audit/settings are in follow-up PRs.
+Status: authentication, account management, incidents/comments, categories, audit history, and settings are implemented. The live deployment runbook and recorded checks are in [docs/deployment.md](docs/deployment.md); final release verification remains in progress.
 
 Start with the [user manual](docs/user-manual.md) for setup and account workflows. See [documented source and packaging](docs/source-packaging.md) for the component map and release checklist.
 
@@ -54,7 +54,7 @@ Day to day:
 
 Passwords are set in the database on its **first start**. Editing `.env.local` does not rotate them. Preserve the original configuration or coordinate credential rotation. `make reset` destroys the database and Caddy CA volumes; use it only for deliberately disposable data, never as routine password recovery.
 
-**Team secrets:** the shared `.env` is dotenvx-encrypted (SR-14) and not created yet. Once it exists, put `.env.keys` from the team password manager in the repo root and drop `ENV_FILE=...`. Never commit `.env.keys` or a plaintext `.env`.
+**Team secrets:** the committed `.env` is the **live deployment's** config, dotenvx-encrypted (SR-14); see [docs/deployment.md](docs/deployment.md). Keep using `ENV_FILE=.env.local` for local work: a plain `make up` defaults to `.env`, which needs the private key and points Caddy at the live hostname, so it fails locally. Never commit `.env.keys` or a plaintext `.env`.
 
 ## Everyday commands
 

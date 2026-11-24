@@ -33,7 +33,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 13 | Verification | Threat Model and Attack Surface Review | Compare built routes and pages with the threat-model §1.4 inventory; update STRIDE for any change. | TODO | `docs/threat-model.md` revision history |
 | 14 | Release | Incident Response Plan | Short plan for a vulnerability or breach in this app. | TODO | [Outline below](#incident-response-plan-practice-14) |
 | 15 | Release | Final Security Review | Team-internal review against the #3 gates before submission. | TODO | [Checklist below](#final-security-review-practice-15) |
-| 16 | Release | Release / Archive | Tagged release and archived submission. | In progress: manual and source export prepared; final release pending | `docs/user-manual.md`; `docs/source-packaging.md`; `make package-source` (#55); [Plan below](#release-and-archive-practice-16) |
+| 16 | Release | Release / Archive | Tagged release and archived submission. | In progress: manual refreshed for integrated roles, categories and live deployment; source export prepared; final release pending | `docs/user-manual.md`; `docs/source-packaging.md`; `make package-source` (#55); [Plan below](#release-and-archive-practice-16) |
 | 17 | Response | Execute the Incident Response Plan | Only if an incident happens after release. | N/A: no production release in the course. Applies if the app is deployed to AWS later. | |
 
 ## Deliverables mapped to SDL practices
@@ -78,7 +78,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 6. Every AI-assisted change is in `AI-USAGE-REPORT.md` (AC-4).
 7. Gitleaks is clean, and CI rejects Server Actions and a published database port.
 
-Approved tools are Semgrep CE and CodeQL for SAST, ZAP baseline in CI plus authenticated per-role scans, Dependabot, and gitleaks. `make check` remains a gate. Residual risks AR-1 through AR-8 are approved in `docs/stride.md`.
+Approved tools are Semgrep CE and CodeQL for SAST, ZAP baseline in CI plus authenticated per-role scans, Dependabot, and gitleaks. `make check` remains a gate. Residual risks AR-1 through AR-9 are approved in `docs/stride.md` (AR-9, the live grading host, on 2026-11-24).
 
 **Bug bar.** Rate threats and findings with DREAD (average of the five 1 to 10 scores):
 
@@ -117,7 +117,7 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 | ORM / query layer | Prisma 7.10.1 with @prisma/adapter-pg 7.10.1 and pg 8.23.1 (D-6), exact pins; `effect` overridden to 3.22.5 (ReDoS in the Prisma CLI chain) | Chosen; `package.json`, `prisma/schema.prisma` |
 | Input validation | Zod 4.6.7 strict schemas (SR-7) | Chosen; `src/lib/request.ts` |
 | Test runner | Vitest | Chosen |
-| SAST | Semgrep CE and CodeQL | Chosen, execution pending |
+| SAST | Semgrep CE and CodeQL | Chosen, Running in CI; both passed on PR #53 |
 | DAST | ZAP baseline in CI and authenticated per-role scans | Chosen, execution pending |
 | Dependency and secret scans | npm audit --omit=dev, Dependabot (`.github/dependabot.yml`), gitleaks | Chosen; running in CI |
 | Load testing | k6, 50 VUs and workload in design §7.2 | Chosen, execution pending |
@@ -153,6 +153,60 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 - **Recovery:** fix on a branch, run the #3 release gate again, redeploy, and restore the database from backup if data was changed.
 - **Lessons learned:** update the threat model and add a test for the issue.
 
+## Post-merge integration verification (2026-11-23)
+
+Following the merge of Slices #4 and #5 (PRs #54 and #53),
+the application was rebuilt and tested using the local Docker
+stack on the `test/integration-verification` branch.
+
+### Functional verification
+
+- Verified role-appropriate navigation for users, reviewers,
+  and administrators.
+- Verified incident submission, reviewer classification,
+  comment creation, and status transitions from open to
+  under-review to closed.
+- Confirmed closed incidents are excluded from reviewer access
+  but remain accessible to administrators.
+- Verified category management and audit history integration.
+- Confirmed incident lifecycle events were recorded in the
+  audit history with the appropriate actor, timestamp,
+  action, and target identifiers.
+
+### Security verification
+
+| Control | Verification evidence | Result |
+|---|---|---|
+| Server-side authorization (SR-4, SR-5) | Direct user access to administrative settings and audit history denied; reviewer access to closed incidents denied. | Pass |
+| Input validation and safe rendering (SR-7) | Duplicate category rejected; required-field validation enforced; stored XSS test comment rendered as inert text without execution. | Pass |
+| Sensitive-data exclusion (SR-9) | Tested incident description absent from application logs and audit records; targeted audit-details keyword screening returned zero matches. | Partial |
+| Audit metadata (SR-10) | Required metadata verified through administrator audit history and PostgreSQL queries. | Pass |
+| Audit tamper protection (FR-12, SR-11) | UPDATE and DELETE denied under the effective application database role; TRUNCATE privilege absent. Independent database trigger rejected UPDATE, DELETE, and TRUNCATE. | Pass (audit trail) |
+| Transactional audit integrity (FR-11) | Database integration tests verified atomic business and audit writes, including rollback when audit insertion fails. | Pass |
+| Safe error handling (SR-12, NFR-2) | Generic authentication failures, duplicate category feedback, required-field validation, and generic Not Found responses disclosed no internal implementation details. | Pass (tested workflows) |
+
+### Automated validation
+
+- TypeScript and ESLint checks passed.
+- PostgreSQL-backed integration tests: 124/124 passed
+  across seven test files.
+- All seven GitHub CI/security checks passed on PR #54,
+  including CodeQL, Semgrep, gitleaks, and image build.
+- Git merge conflicts resolved and staged changes checked
+  for formatting errors.
+
+### Remaining verification
+
+- Comprehensive endpoint authorization and input validation.
+- Explicit password and token leakage testing.
+- Application-log tamper protection.
+- Broader DAST, fuzzing, and load testing.
+- Deployment verification and final security review.
+
+These results establish targeted integration and security
+verification evidence for issues #7, #8, #9, and #10.
+They do not constitute completion of the full release gate.
+
 ## Final security review (Practice #15)
 
 Before submission, the team checks and records the outcome here (Pass / Pass with exceptions / Fail):
@@ -185,3 +239,5 @@ Before submission, the team checks and records the outcome here (Pass / Pass wit
 | 2026-11-20 | Added the image-build CI job and Dependabot; the runtime image no longer ships server source maps. |
 | 2026-11-20 | Auth and sessions implemented: login, logout, password change, session policy, lockout, first-admin CLI. ASVS rows for V3.3, V6.2, V6.3, V7, and V11 marked Done with evidence. |
 | 2026-11-20 | Added `docs/plan.md`, the PR template, and an AGENTS.md start-here section so any developer's agent can find the next slice and its status in the repo. |
+| 2026-11-21 | Slice #5 (EP-18, EP-20): implemented admin-only audit history with filtering and pagination, validated settings updates with transactional audit logging, and admin settings/audit interfaces. Verified 56 database tests and passing CI, CodeQL, Semgrep, and gitleaks checks on PR #53. Updated SDL implementation and static-analysis evidence; final verification remains pending. |
+| 2026-11-23 | Recorded post-merge integration verification for Slices #4 and #5 (PRs #53 and #54). Verified incident lifecycle, role-based interfaces, stored XSS rendering, safe error handling, audit metadata, append-only database enforcement, and targeted sensitive-data exclusion. All 124 database integration tests and seven PR checks passed. Updated assignment requirements mapping and documented remaining verification activities. |

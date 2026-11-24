@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import pg from "pg";
 import type { PrismaClient, Role } from "@/src/generated/prisma/client";
 import { ApiError } from "@/src/lib/http";
@@ -111,6 +111,35 @@ describe.skipIf(!ownerUrl || !appUrl)("admin account management (EP-12 to EP-17;
       const after = await db.user.findUnique({ where: { id: target.id } });
       expect(after).toMatchObject({ role: "user", active: true });
       expect(await audit(target.id)).toEqual([]);
+    });
+
+    it("logs a denied role with the caller's ID and a request ID, never the cookie or body (SR-9, SR-16, V16.3.2)", async () => {
+      const caller = await signIn({ role: "reviewer" });
+      const attempted = nextName();
+      const lines: string[] = [];
+      const spy = vi.spyOn(process.stdout, "write").mockImplementation((chunk: string | Uint8Array) => {
+        lines.push(String(chunk));
+        return true;
+      });
+      try {
+        expect((await create(req("POST", "/api/admin/users", { username: attempted, role: "admin" }, caller.cookie))).status).toBe(403);
+      } finally {
+        spy.mockRestore();
+      }
+      const entries = lines.flatMap((line) => {
+        try {
+          return [JSON.parse(line)];
+        } catch {
+          return [];
+        }
+      });
+      const denied = entries.filter((entry) => entry.event === "access.denied");
+      expect(denied).toHaveLength(1);
+      expect(denied[0]).toMatchObject({ level: "warn", reason: "forbidden", status: 403, method: "POST", userId: caller.id });
+      expect(denied[0].requestId).toEqual(expect.any(String));
+      const text = lines.join("");
+      expect(text).not.toContain(attempted);
+      expect(text).not.toContain(caller.cookie.split("=")[1]);
     });
 
     it("rejects a cross-origin write before it does anything (C-4)", async () => {

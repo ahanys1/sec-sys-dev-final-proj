@@ -25,11 +25,11 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 1 | Foundation: lint bans, CI, Docker stack, database schema, proxy and shared libraries, image checks | none | Done (#34 to #37) | #2, #3, #11 (part), #12 (part) |
 | 2 | Auth and sessions: login, logout, password change, lockout, first-admin CLI | 1 | Done (#38) | #4, #5 (part) |
 | 3 | Admin accounts | 2 | Done (#51) | #6, #5 |
-| 4 | Incidents and comments | 2 | Next | #7, #8 |
-| 5 | Audit view and settings | 2 | Next | #9, #10 |
-| 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Next; the threat-model PR can start now | #12, #21 |
+| 4 | Incidents and comments | 2 | Done (#54) | #7, #8 |
+| 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
+| 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; demo script in `docs/user-manual.md` (#55) | #12, #21 |
 | 7 | Verification | 3, 4, 5 | Next | #13, #14, #16, #17 |
-| 8 | Release | 7 | In progress: #20 manual/source packaging in review (#55); final release blocked on verification | #18 to #20, #22 |
+| 8 | Release | 7 | In progress: #20 manual/source packaging in review (#55), refreshed for integrated workflows and live deployment; final release blocked on verification | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
 
@@ -37,13 +37,17 @@ Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. 
 `generateTemporaryPassword` (CSPRNG, shown once with `no-store`, expires after `tempPasswordHours`, sets `mustChangePassword`); create, update username, role change, deactivate, password reset; the target must differ from the caller (SR-6); the last active admin is protected with `serializable`; deactivate and reset call `destroyUserSessions`; mass-assignment tests (`role` and `active` rejected on profile edits); the admin users page. Flips V6.4.1 and V7.4.2.
 
 ### Slice 4: Incidents and comments (EP-07 to EP-11, EP-19, EP-21 to EP-23)
-Reporter submit and own list; reviewer queue (open and under-review only) and detail; admin sees all; status moves only open to under-review to closed via `updateMany` with an expected status; category must exist and be active; the same 404 for missing and forbidden (T-25); lists never return descriptions; comments by reviewer and admin; every action audited with the existing action names; pages for each role.
+Users submit incidents and see their own list; reviewer queue (open and under-review only) and detail; admin sees all; status moves only open to under-review to closed via `updateMany` with an expected status; category must exist and be active; the same 404 for missing and forbidden (T-25); lists never return descriptions; comments by reviewer and admin; every action audited with the existing action names; pages for each role.
 
 ### Slice 5: Audit view and settings (EP-18, EP-20)
 Admin-only audit view with filters and paging, never showing descriptions or secrets; settings validated with `LIMITS`, audited with old and new values, a missing or invalid row falling back to defaults; a logout link on every authenticated page (V7.4.4).
 
+**Implementation status (PR #53):** Backend and frontend implemented for EP-18 and EP-20. Includes admin-only audit history with action/date filtering and pagination; settings management with bounded validation, default fallbacks, and transactional audit records containing old/new values; and admin-only navigation with server-side authorization. Logout remains available on authenticated pages.
+
+**Verification:** All 56 database tests passed across six test files, and all seven GitHub Actions checks passed. Browser testing confirmed settings persistence, audit history filtering, invalid date-range handling, and non-admin access restrictions (404 for admin pages and 403 for admin APIs). Pagination is implemented but has not yet been manually exercised with more than 25 records.
+
 ### Slice 6: Live deployment (no new entry points)
-Threat-model PR first (re-rate T-06, T-51, T-52, T-63; add an accepted risk scoped to the grading window). One small host running the same compose stack, only 80 and 443 open, no SSH. Grader accounts made with `make create-admin` and the admin screens, credentials shared privately. Demo script in `docs/user-manual.md`. Open decisions: who generates the dotenvx keys for the shared encrypted `.env`, and the live host and domain.
+Threat-model PR first (re-rate T-06, T-51, T-52, T-63; add an accepted risk scoped to the grading window). One small host running the same compose stack, only 80 and 443 open, no SSH. Grader accounts made with `make create-admin` and the admin screens, credentials shared privately. Demo script in `docs/user-manual.md`. Decided: AWS EC2 (SSM, no SSH), lwiles generates and holds the dotenvx key (Secrets Manager on the host). Open: the domain (default `<elastic-ip>.sslip.io`).
 
 ### Slice 7: Verification
 Run the use and misuse cases, ZAP (baseline and per role, local and live), the MAN-01 to MAN-13 tests, fuzzing of the write endpoints (SDL #12), k6 at 50 users, one backup and restore drill, and the attack-surface review against the built routes (SDL #13). Record results in `docs/security-testing.md`.

@@ -6,7 +6,7 @@ Requirements: NFR-8–9; FR-1–12; SR-1–14 and SR-16. See the [assignment](..
 
 ## What is available
 
-This manual describes the source snapshot containing PR #55. Sign-in, sign-out, password changes, and administrator account management are implemented. Incident and comment screens (PR #54), audit viewing and settings (PR #53), and live deployment are pending integration. The workflow section below labels those pending features; it is not evidence that they work. No public site address or shared login is supplied in this document.
+This manual covers authentication, administrator account management, incident submission and review, comments, categories, audit history, and settings after integration of PRs #53, #54, #57, and #59. The [live deployment runbook](deployment.md) records the deployed host and executed checks. Final release verification remains tracked in [security testing](security-testing.md); these instructions do not certify every release gate.
 
 Use synthetic accounts and incident content for all demonstrations (ASSUMP-2). Do not enter real personal information, credentials, or tokens in reports, comments, screenshots, or support requests.
 
@@ -32,9 +32,9 @@ make migrate ENV_FILE=.env.local
 make create-admin ENV_FILE=.env.local
 ```
 
-The initial build can take several minutes. Run migrations before signing in. The first-administrator command prompts for a username, password, and confirmation; enter these interactively so secrets do not appear in command history. There is no default account or public registration page. Use a synthetic username such as `demo-admin`, 3–32 characters from `a-z`, `0-9`, `.`, `_`, and `-`. Usernames are normalized to lowercase. Use a unique password meeting the policy below. Subsequent accounts should be created through **Users**.
+The initial build can take several minutes. Run migrations before signing in. The first-administrator command prompts for a username, password, and confirmation; enter these interactively so secrets do not appear in command history. There is no default account or public registration page. Use a synthetic username such as `demo-admin`, 3–32 characters from `a-z`, `0-9`, `.`, `_`, and `-`. Usernames are normalized to lowercase. Use a unique password meeting the policy below. Subsequent accounts should be created through **Users**. Before the first incident submission, an administrator must add an active category at **Categories** (`/admin/categories`); a fresh database has none.
 
-The local configuration contains generated plaintext credentials and must remain private and git-ignored. It is a local development convenience, not evidence that shared/deployed secret management meets SR-14. Never submit it. The shared dotenvx-encrypted `.env` is not yet supplied. Once the team provisions it, obtain `.env.keys` privately, protect it with `chmod 600 .env.keys`, and use the same Make targets without `ENV_FILE=.env.local`. Never put keys in a PR or report.
+The local configuration contains generated plaintext credentials and must remain private and git-ignored. It is a local development convenience, not evidence that shared/deployed secret management meets SR-14. Never submit it. The committed dotenvx-encrypted `.env` configures the live hostname. Keep `ENV_FILE=.env.local` for local work; the live configuration requires its private key and is not a local replacement. On the live host, the operator uses Secrets Manager through `scripts/live-up.sh` and `scripts/live-run.sh` as described in the deployment runbook. Never put keys in a PR or report.
 
 | Configuration | Meaning |
 |---|---|
@@ -59,7 +59,7 @@ openssl x509 -in caddy-root.crt -noout -subject -fingerprint -sha256
 
 Import that certificate into the trust store of the machine running your browser: Keychain Access/System on macOS; your Linux distribution's local CA store; or the Windows host's Trusted Root Certification Authorities when using WSL2. Browsers with their own certificate store may need a separate import. Only trust the certificate you copied from this stack. Restart the browser if needed. Remove that trust when the local stack is retired. Recreating the Caddy volume changes its CA and requires repeating this step.
 
-A live deployment needs its own approved domain and publicly trusted certificate; these local instructions are not a completed live deployment procedure.
+The live site uses a publicly trusted certificate; it does not require importing this local CA. See the live deployment section below.
 
 ## Start, stop, and check the service
 
@@ -92,7 +92,7 @@ Passwords must be 15–128 characters. Common passwords, passwords containing `i
 
 Temporary passwords are shown once to the administrator, normally expire after 24 hours, and must be changed after sign-in. Ask an administrator for a new reset if yours is lost or expired. There is no email reset flow. Do not share passwords in issues, chat logs, or screen recordings.
 
-Default sessions expire after 30 minutes idle or 8 hours total. A sixth session ends the oldest of the five existing sessions. Defaults can change through the planned settings feature. Repeated failed sign-ins can lock an account (default: five failures, 15 minutes); IP limits also apply. Wait before retrying instead of repeatedly submitting. Failure messages deliberately do not disclose whether a username exists.
+Default sessions expire after 30 minutes idle or 8 hours total. A sixth session ends the oldest of the five existing sessions. Administrators can change these defaults through **Settings**. Repeated failed sign-ins can lock an account (default: five failures, 15 minutes); IP limits also apply. Wait before retrying instead of repeatedly submitting. Failure messages deliberately do not disclose whether a username exists.
 
 ## Administrator: accounts and roles
 
@@ -106,21 +106,37 @@ Select **Users** in the header (`/admin/users`). This page requires an administr
 
 The last active administrator is protected against demotion or deactivation. If a change conflicts with another administrator's action, refresh and inspect the current state before retrying. Account records are deactivated rather than deleted, preserving audit history.
 
-## Incident, review, comment, and settings workflows — pending integration
+## Administrator: initialize and maintain categories
 
-These are the agreed workflows from the design, not clickable instructions for this snapshot. Replace them with exact screen labels and browser-verified steps after PRs #53 and #54 merge. Missing screens on the current home page are expected.
+Before reporters submit, select **Categories** (`/admin/categories`). A fresh database has no categories. Enter a **Category Name** (1–100 characters), such as `Phishing` or `Other`, and select **Create Category**. Confirm the success message and that the category appears in the list.
 
-| Role / task | Intended workflow and boundary | Completion dependency |
-|---|---|---|
-| Reporter: submit | Enter a title (1–200 characters), description (1–10,000), and active category; submit once and confirm the new incident. Use synthetic content only. | #54: creation and UI |
-| Reporter: track | Open own incident list, inspect own details and current status. Another reporter's records must remain inaccessible. | #54: lists/detail |
-| Reviewer: review/classify | Open the queue of open/under-review incidents, inspect a report, select an active category as needed, and move `open` → `under_review` → `closed`. Closed items leave the reviewer queue. | #54: classification/status/UI |
-| Reviewer/admin: comment | Open an authorized incident and add a comment (1–5,000 characters). Reporters do not create comments. Confirm the saved result before retrying a failed response to avoid duplicate submissions. | #54: comments/UI |
-| Admin: incidents/categories | View all incidents and manage categories; inactive categories must not be available for new reports. | #54: admin/category UI |
-| Admin: audit | Filter/page audit entries by the supported controls. Entries expose actor, time, action, and target; no edit/delete action, passwords, tokens, or full descriptions. | #53: audit UI |
-| Admin: settings | Edit the supported settings below and save; invalid values must be rejected. A successful update is audited. | #53: settings UI |
+Use **Rename Category** and **Rename** to change a name, or **Deactivate** / **Activate** to change availability. New reports and reviewer classification require an active category. Deactivation preserves existing records; it does not delete a category or its incidents.
 
-Planned settings limits (current defaults are enforced by `src/lib/auth/settings.ts`):
+## Reporter: submit and track incidents
+
+1. Sign in with role `user` and select **Report Incident** (`/incidents/new`).
+2. Enter **Incident Title** (1–200 characters) and **Description** (1–10,000), and select an active category. Use synthetic content only.
+3. Select **Submit Incident** once and wait for **Incident submitted successfully.** If no categories are available, ask an administrator to create or activate one.
+4. Select **My Incidents** (`/incidents`) to see your incident titles, statuses, and submission dates. Refresh to see review progress. This list does not display descriptions, comments, or a detail link. Other reporters' records are not available here.
+
+## Reviewer: classify, comment, and close
+
+1. Select **Reviewer Queue** (`/reviewer/incidents`). It contains open and under-review incidents; select an incident title to open its description and comments.
+2. Select an active **Incident Category**, then **Save Category** to classify it. Confirm **Category updated successfully.**
+3. Enter **Add Comment** (1–2,000 characters) and select **Post Comment**. Confirm the saved comment before retrying after a lost response.
+4. Select **Start Review** to move an open incident to `under_review`, then **Close Incident** when review is complete. Only these forward transitions are supported. Closing returns to the queue and removes the incident from reviewer access.
+
+Only reviewers can classify or change status. If another reviewer changed the status first, refresh and inspect the current state before retrying.
+
+## Administrator: incidents, audit, and settings
+
+Select **Incidents** (`/admin/incidents`) to view all incidents, including closed ones. Select a title to read its description and comments, and use **Add Comment** / **Post Comment** to add a comment (1–2,000 characters). Administrator incident pages have no classification or status controls; those actions require the reviewer role.
+
+Select **Audit history** (`/admin/audit`). Records are read-only, newest first, with timestamp, actor, action, and target. Choose **Action**, **From**, and **To** filters; results update automatically. Use **Clear filters**, **Previous**, and **Next** (25 records per page). The start date must be no later than the end date. Settings changes show permitted old/new values; incident descriptions, passwords, and tokens are excluded. Login and denied-access diagnostics are in protected server logs rather than this action history.
+
+Select **Settings** (`/admin/settings`), edit the fields below, and select **Save Changes**. The button is enabled only after a change. Confirm **Settings saved successfully.** Invalid values are rejected and successful changes are audited. Keep the status message free of sensitive information.
+
+Settings defaults and limits:
 
 | Setting | Default | Allowed |
 |---|---|---|
@@ -149,14 +165,26 @@ Planned settings limits (current defaults are enforced by `src/lib/auth/settings
 
 For support, provide the approximate time, page, action, generic error, and request ID if displayed. Never include passwords, cookies, tokens, environment files, or full incident descriptions. Operators should inspect protected server logs locally (NFR-2, SR-9, SR-12–13).
 
+## Live deployment
+
+The grading site is [https://107-23-118-127.sslip.io](https://107-23-118-127.sslip.io). The [deployment runbook](deployment.md) is the operator procedure for provisioning, encrypted configuration, SSM access, startup, migration, updates, verification, and teardown. Its Results table records checks performed on 2026-11-24; this manual update does not claim a fresh live test.
+
+Operators start or redeploy from the EC2 checkout with `SECRET_ID=incident-app/dotenvx-key AWS_REGION=us-east-1 make live-up`. Later commands needing the encrypted environment must use `scripts/live-run.sh`, for example `SECRET_ID=incident-app/dotenvx-key scripts/live-run.sh make logs`. Follow the runbook before operating the host. Local `.env.local` setup and CA trust steps above apply to local development.
+
+Grader credentials are delivered privately. New or reset temporary passwords expire after the configured lifetime (default 24 hours, maximum 72); coordinate account readiness before grading. The runbook records that the deployed grader accounts have already changed their temporary passwords. Do not reset working grader accounts merely to follow this manual.
+
 ## Demonstration and release checks
 
-Use synthetic `demo-admin`, `demo-reviewer`, `demo-reporter`, and a second reporter, created privately through the supported flows; generate unique passwords and keep them out of the recording.
+Use synthetic accounts with admin, reviewer, and two reporter roles, created privately through the supported flows. For the live demonstration, use the privately supplied grader accounts. Keep passwords and session cookies off screen.
 
-1. On the final integrated build, follow installation from a clean extracted source package and record the commit, OS, browser, and result.
-2. Show login, required password change, admin creation/role/deactivation/reset, and logout. Show self-role changes are refused.
-3. Once #54 lands, show reporter submission/own-record access, reviewer classification/status/comment, and admin visibility. Demonstrate denial of another reporter's record and unauthorized role actions using the [use/misuse plan](use-misuse-cases.md).
-4. Once #53 lands, show the immutable audit view and bounded settings updates. Demonstrate external database access is blocked without exposing credentials.
-5. Record actual outcomes in [security testing](security-testing.md), including failure recovery and 50-user testing. Do not label these steps passed without execution.
+1. Record the tested commit, OS, browser, and target. For release installation verification, start from a clean extracted source package and follow the local setup above.
+2. **Admin:** show login, password change, account creation, role changes, deactivation/reset, and logout using disposable demonstration accounts. Show that self-role changes are refused. Create an active category before submission.
+3. **Reporter:** submit an incident and open **My Incidents**. As the live `grader-user`, open `/admin/users` (404) and `/api/admin/users` (403 JSON) to demonstrate higher-privilege denial (T-17, T-19).
+4. **Reviewer:** open the queue, classify the incident, select **Start Review**, and post a comment. Try `/admin/settings` (denied). Leave closure until the admin has inspected the incident if demonstrating both views.
+5. **Admin:** open the incident and its comments; show that it has no status control (T-26). Show **Users**, **Categories**, **Settings**, and **Audit history**, including incident creation, classification, status, comment, and account actions with actor/time/action/target and no descriptions.
+6. **Reporter isolation:** using a second reporter's incident identifier, demonstrate the same not-found response as a missing record (T-24, T-25), following the [use/misuse plan](use-misuse-cases.md). The reporter UI provides only its own summary list.
+7. **Reviewer:** select **Close Incident**, confirm it leaves the queue, then show that an admin can still inspect the closed record. Sign out of each account when finished.
+8. **External database access (T-52):** from outside AWS, `nc -vz 107.23.118.127 5432` is refused or times out while `nc -vz 107.23.118.127 443` succeeds. For audit tampering (T-33), point to `tests/db/audit.test.ts` and its append-only/restricted-grant checks; do not modify the live audit log.
+9. Record actual outcomes in [security testing](security-testing.md), including failure recovery and 50-user testing. Do not label these steps passed without execution.
 
-The assignment still requires a video (AC-5). The delivery plan proposes an approved live-site substitute; retain the instructor's approval before relying on that substitution. Final screen instructions, supported-OS/browser checks, release packaging inspection, and the verification dependencies (#10, #13, #14) remain prerequisites to closing #20.
+The assignment requires a video (AC-5). The delivery plan proposes an approved live-site substitute; retain the instructor's approval before relying on that substitution. Supported-OS/browser checks, release packaging inspection, and the verification dependencies (#10, #13, #14) remain prerequisites to closing #20.
