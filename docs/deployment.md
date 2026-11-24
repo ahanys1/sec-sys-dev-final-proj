@@ -2,7 +2,7 @@
 
 One EC2 instance runs the same compose stack as local (`docker-compose.yml`, `Caddyfile`). Scope and accepted risk: AR-9 in [stride.md](stride.md). Requirements: SR-14, SR-16, ASVS V13.3.1, V12.1.1.
 
-**Status: runbook only. Nothing here has been run against AWS yet; the Results table at the bottom is empty until it is.**
+**Status:** section 1 done (Elastic IP allocated in us-east-1, encrypted `.env` committed, key stored in Secrets Manager as `incident-app/dotenvx-key`). Sections 2 to 5 are not run yet, so the Results table at the bottom is empty.
 
 ## 1. Encrypted env and key (one person, once)
 Do this on a clean checkout, not on a machine with a corporate CA in `.env.local`. Needs the AWS CLI configured with permission to allocate addresses and create secrets. No instance is needed yet.

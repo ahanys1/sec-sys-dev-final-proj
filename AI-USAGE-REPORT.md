@@ -391,3 +391,8 @@
 #### Liam's Agent
 - Rewrote runbook section 1 into 1a (Elastic IP, sslip.io hostname, `SITE_ADDRESS`) and 1b (encrypt, check, store key), and added the `associate-address` command to section 2.
 - Human change: the original step 1 was too terse for the person running it; rewritten after they asked what "pick the host address" meant. Commands are unrun; no AWS access used.
+
+### Commit `feat(deploy): add dotenvx-encrypted live env (SR-14)`
+#### Liam's Agent
+- Walked the developer through generating and encrypting `.env` with dotenvx and storing the private key in AWS Secrets Manager. The agent never read `.env.keys` or decrypted values; permissions blocked it from reading `.env`.
+- Human/security checks: the developer ran a masked check confirming every value is `encrypted:` ciphertext, chose the Local key store, stored the key in Secrets Manager, and committed only `.env` (`.env.keys` is gitignored).
