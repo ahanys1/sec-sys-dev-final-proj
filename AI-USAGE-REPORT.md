@@ -317,6 +317,7 @@
 - **Security considerations:** Reviewed role-based authorization, strict input validation, mass-assignment prevention, and preservation of existing incident-category relationships when categories are deactivated.
 - **Testing assistance:** Helped develop integration tests covering category renaming, deactivation/reactivation, duplicate names, unauthorized access, nonexistent categories, empty requests, unexpected fields, and audit behavior.
 - **Human verification:** Reviewed the implementation, executed integration tests (115/115 passing), and verified TypeScript compilation, ESLint, and Git whitespace checks.
+
 ### Commit `feat(admin): add category management UI`
 
 #### Jonathan's Agent
@@ -326,6 +327,7 @@
 - **Security considerations:** Preserved server-side administrator authorization, backend validation, duplicate-name handling, and audited category modifications.
 - **Human verification:** Manually tested category creation, duplicate rejection, renaming, deactivation, reactivation, and reviewer category availability. Verified `category.create` and `category.update` records in PostgreSQL.
 - **Validation:** TypeScript and ESLint checks completed successfully.
+
 ### Commit Claim Slice #5 — Audit View and Settings
 ### Jonathan's Agent
 - Assisted with local development environment setup using WSL2, Node.js 24, Docker Compose, PostgreSQL, and Prisma.
@@ -377,6 +379,61 @@
 - Helped identify and correct a mismatch between the `lockoutMinutes` minimum in `settings-schemas.ts` and the centralized `LIMITS` configuration.
 - Human validation: reviewed the documentation changes, confirmed the settings validation bounds, ran TypeScript, ESLint, and PostgreSQL-backed tests (56 passed), and verified the Git diff before committing.
 
+### Commit `docs: claim slice 6 and update threat model for live host (AR-9)`
+#### Liam's Agent
+- Surveyed open PRs and `docs/plan.md`, proposed Slice 6 scope, and drafted the T-06, T-51, T-52, T-63 and AR-5/AR-8 updates plus new AR-9 in `docs/stride.md`, `docs/threat-model.md`, `docs/sdl.md` and `docs/plan.md`.
+- Human decisions: chose AWS EC2 with SSM (no SSH) and Liam as dotenvx key holder. AR-9 is marked pending approval, not approved, because the agent can't approve risk on the team's behalf.
+
+### Commit `feat(deploy): add live-up script, make target, and deployment runbook`
+#### Liam's Agent
+- Drafted `scripts/live-up.sh`, the `make live-up` target and `docs/deployment.md` (EC2 + SSM + Secrets Manager runbook, verification table).
+- Human/security changes: the first plaintext-`.env` check misbehaved in an ad hoc shell test (the regex was right; the zsh test harness was misleading), so it was re-tested with the exact `sh` form against encrypted and plaintext fixtures before keeping it. The runbook's Results table is deliberately empty: nothing has run on AWS yet.
+
+### Commit `docs: clarify host address and key steps in deployment runbook`
+#### Liam's Agent
+- Rewrote runbook section 1 into 1a (Elastic IP, sslip.io hostname, `SITE_ADDRESS`) and 1b (encrypt, check, store key), and added the `associate-address` command to section 2.
+- Human change: the original step 1 was too terse for the person running it; rewritten after they asked what "pick the host address" meant. Commands are unrun; no AWS access used.
+
+### Commit `feat(deploy): add dotenvx-encrypted live env (SR-14)`
+#### Liam's Agent
+- Walked the developer through generating and encrypting `.env` with dotenvx and storing the private key in AWS Secrets Manager. The agent never read `.env.keys` or decrypted values; permissions blocked it from reading `.env`.
+- Human/security checks: the developer ran a masked check confirming every value is `encrypted:` ciphertext, chose the Local key store, stored the key in Secrets Manager, and committed only `.env` (`.env.keys` is gitignored).
+
+### Commit `feat(deploy): add AWS provisioning script for the live host`
+#### Liam's Agent
+- Drafted `scripts/aws-provision.sh` (security group 80/443, IAM role scoped to one secret, IMDSv2 hop limit 1, encrypted gp3, no key pair, Elastic IP attach) and runbook sections 2a/2b.
+- Human/security changes: the script is not run by CI or the agent and asks for confirmation; the developer reviews it first. Docker Compose, buildx and Node 24 on Amazon Linux 2023 are deliberately left as manual, checked steps because the agent could not verify package availability. Not run against AWS.
+
+### Commit `docs: record verified host setup steps in deployment runbook`
+#### Liam's Agent
+- Guided the developer through checking Amazon Linux 2023 for Compose and Node, and recorded the working commands in runbook section 2b.
+- Human/security changes: the developer chose the Compose version and ran the checksum verification (`sha256sum -c` printed OK); the agent did not guess versions. Docker-group access for `ssm-user` is root-equivalent and is accepted under AR-1.
+
+### Commit `docs: record live deployment and first verification results`
+#### Liam's Agent
+- Recorded the buildx upgrade step and the first live results (redirect, trusted certificate, security headers) in `docs/deployment.md`; ran the read-only `curl -I` checks against the live host.
+- Human/security changes: the developer ran the deployment on the host and chose and checksum-verified the buildx version. The agent reported only what was observed; port scan, TLS version scan and role checks are marked not run.
+
+### Commit `docs: add redeploy section and README note on the committed .env`
+#### Liam's Agent
+- Added runbook section 6 (redeploy from `main`: what must still exist, per-situation steps) and renumbered teardown to 7; rewrote the README "Team secrets" note.
+- Human/security changes: the README note warns that a plain `make up` now defaults to the live `.env`, which needs the key and targets the live hostname, so local work stays on `ENV_FILE=.env.local`. The redeploy steps are unrun.
+
+### Commit `fix(deploy): fail closed without the dotenvx key; add live-run wrapper`
+#### Liam's Agent
+- Diagnosed a failed `make create-admin` on the live host: the key was only exported inside `live-up.sh`, so dotenvx passed ciphertext through, recreated the db container with ciphertext env, and the CLI failed with `Invalid URL`. Added `--strict` to every `dotenvx run` in the Makefile and `scripts/live-run.sh` to supply the key for one-off commands; updated runbook section 3.
+- Human/security changes: tested `--strict` (exit 1 without the key, exit 0 with a plaintext `.env.local`). Fixing the runbook, which had told the operator to run `make create-admin` without the key.
+
+### Commit `docs: record outside port and TLS spot checks for the live host`
+#### Liam's Agent
+- Ran read-only `nc` and `openssl s_client` checks against the live host and recorded them in the runbook Results table.
+- Human/security changes: the first TLS 1.1 attempt failed inside the local client (`no protocols available`) and was not counted as a server result; it was retried with a lowered client security level, which showed the server's `protocol version` alert. The table says these are spot checks, not full `nmap`/`ssl-enum-ciphers` scans.
+
+### Commit `docs: use the app's role name "user" instead of "reporter"`
+#### Liam's Agent
+- Replaced "reporter" with "user" where it names a role in `docs/deployment.md` and `docs/plan.md`, after the developer found no "reporter" role in the admin screen. The schema roles are `user`, `reviewer`, `admin` (FR-2, SR-4).
+- Human/security changes: limited to role-name uses. "Reporter" as a plain word or as the `reporter_id` column in the design, threat-model, STRIDE and use/misuse documents was left as is.
+
 ### Commit `docs: record post-merge integration and security verification evidence`
 #### Jonathan's Agent
 
@@ -388,7 +445,68 @@
 - Assisted with reconciling GitHub issues #7, #8, #9, and #10 against implementation and verification evidence.
 - Assisted with updating `docs/asvs/assignment-mapping.md` and `docs/sdl.md` to record verified requirements, supporting evidence, partial verification results, and remaining security testing activities without overstating requirement coverage.
 - Human validation: manually executed browser-based integration and security tests, PostgreSQL queries, and application-log checks; reviewed automated test results and GitHub CI/security checks; reviewed and adjusted documentation changes and verified the Git diff before committing.
+
 ### Commit `feat(logging): log denied access as access.denied (SR-16, V16.3.2)`
 #### Liam's Agent
 - Added an `access.denied` warning log for 403 and 404 API responses in `route()` (with request ID, route, method, status), the caller's `userId` where `authenticate` knows it, and a page-level log for wrong-role 404s; unit tests in `tests/http.test.ts` and a database test in `tests/db/admin-users.test.ts`; marked ASVS V16.3.2 Done with evidence.
 - Human/security changes: stayed inside the logger's field allowlist (no role, path, body or cookie), kept denials out of the append-only audit table (FR-12), and added assertions that neither the cookie value nor the attempted username appears in the log. `make test-db` (125 tests) and lint, type check, unit tests and guards passed locally. The page-level log (`requirePageUser`) has no automated test because it needs the Next.js request runtime.
+
+### Commit `docs: use "user" for the role across design, threat-model and test docs`
+#### Liam's Agent
+- Replaced "reporter" with "user" wherever it names the role (FR-2, SR-4) in `docs/design.md`, `docs/threat-model.md`, `docs/use-misuse-cases.md`, `docs/sdl.md` and `docs/asvs/assignment-mapping.md`; "its reporter" (the incident's owner) became "its owner".
+- Human/security changes: the developer set the rule (change it only where it means the role). The `reporter_id` column, "reporter reference" in the data table and the STRIDE/threat-model `reporter_id` mentions were left unchanged so they still match the schema. Also merged `main` into the branch and kept both sides' entries in this file.
+
+### Commit `docs: warn that grader temporary passwords expire`
+#### Liam's Agent
+- Read `LIMITS`, the Prisma default and `app/api/auth/login/route.ts` to confirm that temporary passwords expire (default 24 h, maximum 72 h) and are refused at login after expiry; added the warning and the grader-account result to `docs/deployment.md`.
+- Human/security changes: the developer created the accounts and chose to leave them on temporary passwords for the instructor; the agent recommended resetting them shortly before submission. No credentials were seen by the agent.
+
+### Commit `docs: record grader accounts with final passwords`
+#### Liam's Agent
+- Updated the runbook Results row: the developer logged in to each grader account and replaced its temporary password, so the 24 to 72 hour expiry no longer applies.
+- Human/security changes: the developer chose to set the final passwords themselves after the agent explained the expiry. No credentials were seen by the agent.
+
+### Commit `docs: add the category setup step to the deployment runbook`
+#### Liam's Agent
+- Found that categories are created at `/admin/categories` and that a fresh live database has none, and added the step to runbook section 4.
+- Human/security changes: categories are created by the admin on the live site, not seeded, to keep T-63 (no seed data in the deployed start path).
+
+### Commit `docs: correct audit expectations in the live verification table`
+#### Liam's Agent
+- Told the developer to look for login and denied-access entries in the audit view; that was wrong, because FR-11 and `AUDIT_ACTIONS` do not include them. After the developer's screenshot, read `src/lib/audit.ts` and the login route, corrected the runbook row and recorded the result.
+- Human/security changes: the developer ran the role checks and caught the discrepancy. ASVS V16.3.2 (log failed authorization) is flagged as not found in the code and left for the team to decide.
+
+### Commit `docs: record approval of AR-9 (live grading host)`
+#### Liam's Agent
+- Changed AR-9 from pending to approved in `docs/stride.md`, `docs/threat-model.md` and `docs/sdl.md`, dated 2026-11-24.
+- Human/security changes: the developer made the approval decision; the agent only recorded it and did not approve it. Team member names stay out of the record (team number only).
+
+### Commit `docs: add demo script and record host checks`
+#### Liam's Agent
+- Added a per-role demo script with misuse scenes to `docs/deployment.md` and recorded the two host checks (no `.env.keys`, no `DOTENV_PRIVATE_KEY` in image history) in the Results table.
+- Human/security changes: the developer ran the host checks. The agent's first draft of demo step 4 claimed the admin incident view has no status control without checking; it was verified in `app/` (only the reviewer page uses `StatusControls`; the status API allows reviewers only) and reworded. Audit tampering (T-33) is deliberately not shown live and points to `tests/db/audit.test.ts`.
+
+### Commit `docs: record the full TCP scan of the live host`
+#### Liam's Agent
+- Recorded the developer's `nmap -p-` result (only 80 and 443 open) in the runbook Results table.
+- Human/security changes: the agent noticed that most ports reported "closed (connection refused)" and a 2 ms latency, which an AWS security group would not produce, and recorded that caveat instead of presenting the scan as clean evidence of the security group.
+
+### Commit `docs: update tracking docs and correct the scan caveat`
+#### Liam's Agent
+- Set ASVS V12.2.1, V13.3.1 and SR-14 to Done with evidence, V12.1.1, V13.3.2 and SR-16 to In progress, and slice 6 to In review (`docs/asvs/*`, `docs/plan.md`).
+- Human/security changes: the developer ran the scan, then corrected the agent's guess that a corporate network caused the odd results (it was a personal laptop off VPN). The caveat now says the cause is unknown instead of asserting one. SR-16 and V12.1.1 were deliberately not marked Done because SAST/DAST (#56) and the full cipher scan are outstanding.
+
+### Commit `docs: record TLS evidence and refresh the runbook status`
+#### Liam's Agent
+- Recorded the developer's `nmap ssl-enum-ciphers` result and the agent's direct TLS 1.2 and 1.3 handshakes in `docs/deployment.md`; set ASVS V12.1.1 to Done; refreshed the stale runbook status line.
+- Human/security changes: nmap listed only TLS 1.3, which conflicted with an earlier note that TLS 1.2 is accepted. The agent re-tested directly (TLS 1.2 handshake and a TLS 1.2-only `curl` succeeded) and recorded nmap's list as incomplete rather than changing the finding. An earlier `openssl` line (`Protocol: TLSv1.1`) printed even for refused handshakes, so refusals are judged by the `protocol version` alert, not that line.
+
+### Commit `docs: record port sweep and add update-in-place steps`
+#### Liam's Agent
+- Recorded a second-machine port sweep (only 80 and 443 open) and added an "update the running host" section to `docs/deployment.md` for deploying `main` after PRs #57 and #59 merge.
+- Human/security changes: the developer chose to deploy `main` after both PRs merge. The sweep is labelled as not a full 65,535-port scan, and the section tells the operator to verify denial logging after deploy. The update steps are unrun.
+
+### Commit `Merge main into fix/log-authz-denials`
+#### Liam's Agent
+- Resolved the `AI-USAGE-REPORT.md` conflict by keeping both sides' entries, fixed missing blank lines between entries, and replaced a stale "PR #59" reference in the SR-16 row with the evidence paths now that #57 is merged.
+- Human/security changes: none to the code. Lint, type check, unit tests (90) and the CI guards pass on the merged tree; database tests were run before the merge and are re-run by CI.

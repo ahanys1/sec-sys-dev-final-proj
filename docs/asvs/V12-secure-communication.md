@@ -6,7 +6,7 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V12.1.1 | 1 | Verify that only the latest recommended versions of the TLS protocol are enabled, such as TLS 1.2 and TLS 1.3. The latest version of the TLS protocol must be the preferred option. | TODO | |
+| V12.1.1 | 1 | Verify that only the latest recommended versions of the TLS protocol are enabled, such as TLS 1.2 and TLS 1.3. The latest version of the TLS protocol must be the preferred option. | Done | Live host: TLS 1.2 and 1.3 handshakes succeed, TLS 1.0 and 1.1 are refused, and a client offering both negotiates TLS 1.3 (`openssl s_client`, `docs/deployment.md` Results); `nmap ssl-enum-ciphers` lists TLS 1.3 only, all grade A. |
 | V12.1.2 | 2 | Verify that only recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must only support cipher suites which provide forward secrecy. | TODO | |
 | V12.1.3 | 2 | Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authorization. | TODO | |
 
@@ -14,7 +14,7 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
-| V12.2.1 | 1 | Verify that TLS is used for all connectivity between a client and external facing, HTTP-based services, and does not fall back to insecure or unencrypted communications. | TODO | |
+| V12.2.1 | 1 | Verify that TLS is used for all connectivity between a client and external facing, HTTP-based services, and does not fall back to insecure or unencrypted communications. | Done | Live host: `http://` returns a 308 redirect to `https://`, HTTPS has a trusted certificate and HSTS (`docs/deployment.md` Results). |
 | V12.2.2 | 1 | Verify that external facing services use publicly trusted TLS certificates. | TODO | |
 
 ## V12.3 General Service to Service Communication Security

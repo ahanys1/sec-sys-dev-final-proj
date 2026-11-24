@@ -78,7 +78,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 6. Every AI-assisted change is in `AI-USAGE-REPORT.md` (AC-4).
 7. Gitleaks is clean, and CI rejects Server Actions and a published database port.
 
-Approved tools are Semgrep CE and CodeQL for SAST, ZAP baseline in CI plus authenticated per-role scans, Dependabot, and gitleaks. `make check` remains a gate. Residual risks AR-1 through AR-8 are approved in `docs/stride.md`.
+Approved tools are Semgrep CE and CodeQL for SAST, ZAP baseline in CI plus authenticated per-role scans, Dependabot, and gitleaks. `make check` remains a gate. Residual risks AR-1 through AR-9 are approved in `docs/stride.md` (AR-9, the live grading host, on 2026-11-24).
 
 **Bug bar.** Rate threats and findings with DREAD (average of the five 1 to 10 scores):
 
@@ -177,7 +177,7 @@ stack on the `test/integration-verification` branch.
 
 | Control | Verification evidence | Result |
 |---|---|---|
-| Server-side authorization (SR-4, SR-5) | Direct reporter access to administrative settings and audit history denied; reviewer access to closed incidents denied. | Pass |
+| Server-side authorization (SR-4, SR-5) | Direct user access to administrative settings and audit history denied; reviewer access to closed incidents denied. | Pass |
 | Input validation and safe rendering (SR-7) | Duplicate category rejected; required-field validation enforced; stored XSS test comment rendered as inert text without execution. | Pass |
 | Sensitive-data exclusion (SR-9) | Tested incident description absent from application logs and audit records; targeted audit-details keyword screening returned zero matches. | Partial |
 | Audit metadata (SR-10) | Required metadata verified through administrator audit history and PostgreSQL queries. | Pass |

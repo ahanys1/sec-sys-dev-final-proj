@@ -54,7 +54,7 @@ Day to day:
 
 Passwords are baked into the database on its **first start**. If you regenerate `.env.local`, run `make reset`.
 
-**Team secrets:** the shared `.env` is dotenvx-encrypted (SR-14) and not created yet. Once it exists, put `.env.keys` from the team password manager in the repo root and drop `ENV_FILE=...`. Never commit `.env.keys` or a plaintext `.env`.
+**Team secrets:** the committed `.env` is the **live deployment's** config, dotenvx-encrypted (SR-14); see [docs/deployment.md](docs/deployment.md). Keep using `ENV_FILE=.env.local` for local work: a plain `make up` defaults to `.env`, which needs the private key and points Caddy at the live hostname, so it fails locally. Never commit `.env.keys` or a plaintext `.env`.
 
 ## Everyday commands
 

@@ -18,7 +18,7 @@ SDL mapping: Part 1 is **Practice #6, Attack Surface Reduction** (Design phase).
 |---|---|---|
 | A-1 | Next.js (App Router) + TypeScript, single container. | One app process holds the UI and the backend. |
 | A-2 | **PostgreSQL in Docker** for development and the course demo. | Adds a DB network port, which must stay internal. |
-| A-3 | **Future deployment to AWS, reachable from the internet** (e.g. ALB + ECS/EC2 + RDS). This analysis treats the internet-facing case as the design target, so nothing has to be redesigned later. | Adds an edge tier, cloud IAM, a managed secrets store and managed logging. |
+| A-3 | **Future deployment to AWS, reachable from the internet** (e.g. ALB + ECS/EC2 + RDS). This analysis treats the internet-facing case as the design target, so nothing has to be redesigned later. | Adds an edge tier, cloud IAM, a managed secrets store and managed logging. Slice 6 deploys the same compose stack to one EC2 host for grading: security group 80/443 only, SSM instead of SSH, dotenvx key in Secrets Manager (T-06, T-51, T-52, T-63, AR-9). No new entry points. |
 | A-4 | **Server-side sessions in the database.** The browser holds only an opaque random token in a `__Host-` cookie (`HttpOnly`, `Secure`, `SameSite=Strict`); the DB stores a hash of the token. | Logout (FR-5) and deactivation (FR-3) revoke access at once. No signing key or JWT to protect (ASVS V9 N/A). |
 | A-5 | **Route Handlers only** (`app/api/**/route.ts`) for every write. **No Server Actions.** | Every write is an explicit, enumerable endpoint that DAST can reach. |
 | A-6 | **Password flow:** admin creates a user or resets a password with a one-time temporary password; the user must change it at next login. Users change their own password with their current password. | Adds one self-service endpoint; removes any email/"forgot password" flow. |
@@ -181,7 +181,7 @@ These exist because of Next.js, not because we wrote a route.
 |---|---|---|---|
 | `users` | id, username, role, active, must_change_password, password_hash (argon2id), temp_password_expires_at | HS (hash) | Admin (never the hash) |
 | `sessions` | token_hash, user_id, created_at, last_seen_at, expires_at | HS | Nobody through an endpoint |
-| `incidents` | id, title, description, status, category_id, reporter_id, timestamps | Sensitive (description) | Reviewer, Admin; the reporter sees only title, status, and date of their own reports (EP-19) |
+| `incidents` | id, title, description, status, category_id, reporter_id, timestamps | Sensitive (description) | Reviewer, Admin; the user sees only title, status, and date of their own reports (EP-19) |
 | `comments` | id, incident_id, author_id, body, created_at | Sensitive (classified like descriptions) | Reviewer, Admin |
 | `audit_log` | id, user_id, action, target_id, created_at (UTC) | Sensitive; **integrity-critical** | Admin (read-only) |
 | `login_attempts` | scope (ip or username), key, window_start, count, locked_until (unique scope/key/window_start) | Internal | Nobody through an endpoint |
@@ -389,7 +389,7 @@ Each threat in [stride.md](stride.md) lists its mitigations (C-x, SR/FR, ASVS) a
 | T-43 | Middleware bypass (CVE-2025-29927, `x-middleware-subrequest`) skips authentication or headers. | 6.6* | No auth in middleware (C-2); see [stride.md](stride.md) |
 | T-18 | An admin changes their own role or deactivates themself, or removes or deactivates the last active admin. | 6.0* | Target must differ from the caller (SR-6); see [stride.md](stride.md) |
 
-Medium and Low threats are in [stride.md](stride.md). Developer-approved residual risks AR-1 to AR-8 are listed there. Six design changes (DC-1 to DC-6) came out of this pass and are applied to Part 1.
+Medium and Low threats are in [stride.md](stride.md). Residual risks AR-1 to AR-9 are developer-approved (AR-9, the live grading host, on 2026-11-24). All are listed there. Six design changes (DC-1 to DC-6) came out of this pass and are applied to Part 1.
 
 **D-4 resolved (SR-14): dotenvx.** The encrypted `.env` is committed. The private key lives in a gitignored `.env.keys` locally, or is injected as `DOTENV_PRIVATE_KEY` at runtime; it is never in the repo, the image, or a build argument. `.env.example` keeps placeholders. Secret scanning runs in CI. On AWS, credentials come from Secrets Manager through the task's IAM role. Owner and app database credentials are separate. Residual risk: AR-5. The `AGENTS.md` rule is updated.
 
@@ -420,7 +420,7 @@ Another engineer is writing [use-misuse-cases.md](use-misuse-cases.md) and [secu
 | T-21 (Medium) | Admin submits an out-of-range setting | Automated test |
 | T-24 (High) | User reads another user's incident by ID | Automated test + DAST authz scan + manual |
 | T-26 (Medium) | Admin tries to close an incident | Automated test |
-| T-29 (High) | Reporter plants a script in an incident description | SAST (lint ban) + DAST + manual |
+| T-29 (High) | User plants a script in an incident description | SAST (lint ban) + DAST + manual |
 | T-33 (High) | Admin tries to edit or delete audit entries | Automated DB test + DAST + manual |
 | T-38 (High) | Attacker injects SQL through the status filter | SAST + DAST (ZAP SQLi) + manual |
 | T-43 (High) | Attacker sends the middleware-bypass header | DAST + automated test |
