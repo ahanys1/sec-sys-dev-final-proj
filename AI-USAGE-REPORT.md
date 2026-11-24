@@ -376,3 +376,9 @@
 - Assisted with reviewing and updating Slice #5 documentation in `docs/asvs/assignment-mapping.md` and `docs/sdl.md`, including implementation evidence, verification status, and remaining security testing.
 - Helped identify and correct a mismatch between the `lockoutMinutes` minimum in `settings-schemas.ts` and the centralized `LIMITS` configuration.
 - Human validation: reviewed the documentation changes, confirmed the settings validation bounds, ran TypeScript, ESLint, and PostgreSQL-backed tests (56 passed), and verified the Git diff before committing.
+
+
+### Commit docs: claim SAST and DAST verification (SR-16, AC-3)
+#### Alex's Agent
+- Claimed issues #16 and #17 with a dedicated verification branch and draft PR.
+- Human direction: start DAST and SAST security testing after the incident and audit/settings PRs merged. Testing will use an isolated local stack and synthetic accounts; no live target is assumed.
