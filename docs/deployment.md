@@ -84,6 +84,8 @@ Every later `make` command that reads `.env` (`create-admin`, `logs`, `down`, `u
 ## 4. Grader accounts (ASSUMP-2)
 Create a reviewer, a user (the role that submits incidents) and a grader admin on the admin screen. Each gets a one-time temporary password and must change it at first login. Send the credentials to the instructor privately; never commit them.
 
+**Temporary passwords expire** after `tempPasswordHours` (default 24, maximum 72, set on the admin settings page). An expired one is refused at login (`app/api/auth/login/route.ts`), so an instructor who logs in late is locked out until an admin resets the account. Before submitting, raise the setting to 72 and reset the grader accounts so the clock starts then, or set the final passwords yourself and share those. The users page shows each account's expiry.
+
 ## 5. Verify (run from outside AWS)
 | Check | Command | Expect | Threat |
 |---|---|---|---|
@@ -119,4 +121,5 @@ Terminate the instance, release the Elastic IP, delete the secret. The data is d
 | Port spot check from outside with `nc` (not a full `nmap -p-`): 22, 3000, 5432, 2375 | 2026-11-24 | Closed or filtered; 80 and 443 open |
 | TLS versions with `openssl s_client`: 1.2 and 1.3 accepted; 1.0 and 1.1 refused with a `protocol version` alert | 2026-11-24 | Pass (not a full cipher scan) |
 | First administrator created; site loads and login works | 2026-11-24 | Pass (reported by the operator) |
+| Accounts created on the live site: own admin, `grader-admin`, `grader-reviewer`, `grader-user` (temporary passwords, not yet changed) | 2026-11-24 | Done (reported by the operator) |
 | Full `nmap -p-` and `ssl-enum-ciphers` scans, `psql` refusal, role and misuse checks, `.env.keys` and image-history checks | | Not run yet |

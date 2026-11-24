@@ -448,3 +448,8 @@
 #### Liam's Agent
 - Replaced "reporter" with "user" wherever it names the role (FR-2, SR-4) in `docs/design.md`, `docs/threat-model.md`, `docs/use-misuse-cases.md`, `docs/sdl.md` and `docs/asvs/assignment-mapping.md`; "its reporter" (the incident's owner) became "its owner".
 - Human/security changes: the developer set the rule (change it only where it means the role). The `reporter_id` column, "reporter reference" in the data table and the STRIDE/threat-model `reporter_id` mentions were left unchanged so they still match the schema. Also merged `main` into the branch and kept both sides' entries in this file.
+
+### Commit `docs: warn that grader temporary passwords expire`
+#### Liam's Agent
+- Read `LIMITS`, the Prisma default and `app/api/auth/login/route.ts` to confirm that temporary passwords expire (default 24 h, maximum 72 h) and are refused at login after expiry; added the warning and the grader-account result to `docs/deployment.md`.
+- Human/security changes: the developer created the accounts and chose to leave them on temporary passwords for the instructor; the agent recommended resetting them shortly before submission. No credentials were seen by the agent.
