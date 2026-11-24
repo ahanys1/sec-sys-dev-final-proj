@@ -411,3 +411,8 @@
 #### Liam's Agent
 - Recorded the buildx upgrade step and the first live results (redirect, trusted certificate, security headers) in `docs/deployment.md`; ran the read-only `curl -I` checks against the live host.
 - Human/security changes: the developer ran the deployment on the host and chose and checksum-verified the buildx version. The agent reported only what was observed; port scan, TLS version scan and role checks are marked not run.
+
+### Commit `docs: add redeploy section and README note on the committed .env`
+#### Liam's Agent
+- Added runbook section 6 (redeploy from `main`: what must still exist, per-situation steps) and renumbered teardown to 7; rewrote the README "Team secrets" note.
+- Human/security changes: the README note warns that a plain `make up` now defaults to the live `.env`, which needs the key and targets the live hostname, so local work stays on `ENV_FILE=.env.local`. The redeploy steps are unrun.

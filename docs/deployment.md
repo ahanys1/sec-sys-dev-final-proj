@@ -95,8 +95,19 @@ Create a reviewer, a reporter and a grader admin on the admin screen. Each gets 
 | Key in image | `docker history --no-trunc <app image> \| grep -c DOTENV_PRIVATE_KEY` | `0` | AR-5 |
 | Roles | log in as each role; try an admin API as reporter, another user's incident | 403 or 404, audit row written | T-17, T-19, T-24 |
 
-## 6. Teardown (after grading)
-Terminate the instance, release the Elastic IP, delete the secret. The data is demo data only.
+## 6. Redeploy from `main`
+Works once this branch is merged. It needs three things to still exist: the encrypted `.env` on `main`, the key (secret `incident-app/dotenvx-key`, or the `.env.keys` backup in the password manager), and the Elastic IP, because `SITE_ADDRESS` in `.env` is tied to it. If the IP was released, redo 1a and re-encrypt with a new `SITE_ADDRESS`.
+
+| Situation | Do |
+|---|---|
+| Instance stopped | Start it. Docker starts at boot and the containers restart themselves; data is kept. |
+| Instance terminated | Delete the old security group, role and instance profile named `incident-app`, then run `scripts/aws-provision.sh` (2a), the installs in 2b, and `git clone` + `git checkout main`, then `make live-up` (3). Grader accounts and incidents are gone with the disk: redo section 4. |
+| Secret deleted | Recreate it from the `.env.keys` backup (1b, last command). With no backup, regenerate `.env` and re-encrypt (1b). |
+
+Budget about half an hour. Re-run the section 5 checks afterwards.
+
+## 7. Teardown (after grading)
+Terminate the instance, release the Elastic IP, delete the secret. The data is demo data only. Keep the secret and the IP until grading ends if you may need a redeploy (section 6).
 
 ## Results
 | Check | Date | Result |
