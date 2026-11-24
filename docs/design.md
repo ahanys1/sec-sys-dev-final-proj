@@ -6,7 +6,7 @@ This document describes the planned secure incident-reporting application and su
 
 ## 1. Scope and decisions
 
-The application provides a reporter workflow, a reviewer workflow, and administrator controls for accounts, incident visibility, comments, bounded settings, and categories. It uses Next.js App Router with TypeScript and PostgreSQL. The course deployment runs in Docker. AWS remains a future deployment target. The existing threat model defines the role permissions and entry points used throughout this design. [Architecture decisions and entry points](threat-model.md)
+The application provides a user workflow, a reviewer workflow, and administrator controls for accounts, incident visibility, comments, bounded settings, and categories. It uses Next.js App Router with TypeScript and PostgreSQL. The course deployment runs in Docker. AWS remains a future deployment target. The existing threat model defines the role permissions and entry points used throughout this design. [Architecture decisions and entry points](threat-model.md)
 
 Prisma ORM is selected for database access under the delegated ORM decision. Its typed query interface fits the TypeScript application, and transactions support atomic business changes with audit records. Queries must use ORM calls or bound parameters. Ban `$queryRawUnsafe` and `$executeRawUnsafe` through lint or CI checks (SR-8, ASVS V1.2.4). Authorization remains explicit in the application, including filters on records and selected response fields. Reviewed migration SQL will be needed for PostgreSQL audit permissions and triggers. The runtime target is Node 24 LTS, recorded in package engines and `.nvmrc`. Use the latest supported Prisma 7.x release with `@prisma/adapter-pg` and `pg`, pinned to exact versions when implemented. Confirm package releases with `npm view`. Pin the Node 24 container image and `postgres:18-alpine` image by digest. Record the resolved versions and digests with the implementation. [Prisma query safety](https://www.prisma.io/docs/orm/v7/prisma-client/using-raw-sql/raw-queries) · [Prisma transactions](https://www.prisma.io/docs/orm/v7/prisma-client/queries/transactions)
 
@@ -93,7 +93,7 @@ Account creation generates a one-time temporary password, displays it once, and 
 
 Login uses a new 256-bit CSPRNG session token whose SHA-256 hash is stored server-side. The session hash is stored in PostgreSQL (ASVS V7.2.3). The cookie uses the `__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`, and `Path=/`. The design limits accounts to five sessions and ends the oldest at the limit. Default inactivity and maximum lifetimes are 30 minutes and eight hours. Logout deletes the server session and expires the browser cookie. [Session policy D-5](threat-model.md#step-3-what-can-be-done-about-it-mitigations-and-ranking)
 
-An incident begins open and is attributed to the authenticated reporter. Reviewers classify it with an active category, comment, and move it through open → under-review → closed. Each mutation checks the current role and record permissions. Status changes use the expected existing status to reject conflicting updates.
+An incident begins open and is attributed to the authenticated user. Reviewers classify it with an active category, comment, and move it through open → under-review → closed. Each mutation checks the current role and record permissions. Status changes use the expected existing status to reject conflicting updates.
 
 FR-11 actions and the additional settings/category actions commit with their audit record in one transaction. Audit failure rolls back the business mutation. Last-administrator protections must remain correct under concurrent requests. Use interactive Serializable transactions for role changes, deactivation, and session-cap eviction. Read the relevant account/session state and perform the guarded mutation and audit insert in that transaction. Retry the entire transaction at most three times on Prisma P2034 with jitter, then return a generic 409. Temporary-password consumption uses a conditional `updateMany` whose affected count must be exactly one. The required-password-change gate remains active until replacement succeeds. Expected-status checks and uniqueness constraints reject conflicting repeated writes. Repeated creates and comments can produce visible duplicates because the approved design omits idempotency keys (NFR-5, ASVS V2.3.3, V2.3.4).
 
@@ -147,7 +147,7 @@ All entries describe design coverage. Passing evidence belongs in the security t
 |---|---|---|---|
 | FR-1, FR-2, FR-3 | Account administration in §§3–5 | UC-02, UC-07; MC-05, MC-06 | V8.2.1, V15.3.3 |
 | FR-4, FR-5 | Login and session lifecycle in §5 | UC-01; MC-01, MC-02 | V6.3.1, V7.4.1 |
-| FR-6 | Reporter submission in §§3, 5 | UC-04 | V2.2.1, V8.2.1 |
+| FR-6 | User submission in §§3, 5 | UC-04 | V2.2.1, V8.2.1 |
 | FR-7, FR-8 | Reviewer queue and transitions in §§3, 5 | UC-05; MC-07, MC-08 | V8.2.2, V2.3.1 |
 | FR-9, FR-10 | Comments and admin visibility in §3 | UC-05, UC-06 | V8.2.1, V8.2.2 |
 | FR-11, FR-12 | Transactional, append-only audit in §§4–6 | UC-09; MC-11 | V16.3.1, V16.3.3, V16.4.2 |

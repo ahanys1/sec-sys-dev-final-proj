@@ -177,7 +177,7 @@ stack on the `test/integration-verification` branch.
 
 | Control | Verification evidence | Result |
 |---|---|---|
-| Server-side authorization (SR-4, SR-5) | Direct reporter access to administrative settings and audit history denied; reviewer access to closed incidents denied. | Pass |
+| Server-side authorization (SR-4, SR-5) | Direct user access to administrative settings and audit history denied; reviewer access to closed incidents denied. | Pass |
 | Input validation and safe rendering (SR-7) | Duplicate category rejected; required-field validation enforced; stored XSS test comment rendered as inert text without execution. | Pass |
 | Sensitive-data exclusion (SR-9) | Tested incident description absent from application logs and audit records; targeted audit-details keyword screening returned zero matches. | Partial |
 | Audit metadata (SR-10) | Required metadata verified through administrator audit history and PostgreSQL queries. | Pass |

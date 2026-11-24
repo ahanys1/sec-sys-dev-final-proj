@@ -443,3 +443,8 @@
 - Assisted with reconciling GitHub issues #7, #8, #9, and #10 against implementation and verification evidence.
 - Assisted with updating `docs/asvs/assignment-mapping.md` and `docs/sdl.md` to record verified requirements, supporting evidence, partial verification results, and remaining security testing activities without overstating requirement coverage.
 - Human validation: manually executed browser-based integration and security tests, PostgreSQL queries, and application-log checks; reviewed automated test results and GitHub CI/security checks; reviewed and adjusted documentation changes and verified the Git diff before committing.
+
+### Commit `docs: use "user" for the role across design, threat-model and test docs`
+#### Liam's Agent
+- Replaced "reporter" with "user" wherever it names the role (FR-2, SR-4) in `docs/design.md`, `docs/threat-model.md`, `docs/use-misuse-cases.md`, `docs/sdl.md` and `docs/asvs/assignment-mapping.md`; "its reporter" (the incident's owner) became "its owner".
+- Human/security changes: the developer set the rule (change it only where it means the role). The `reporter_id` column, "reporter reference" in the data table and the STRIDE/threat-model `reporter_id` mentions were left unchanged so they still match the schema. Also merged `main` into the branch and kept both sides' entries in this file.

@@ -181,7 +181,7 @@ These exist because of Next.js, not because we wrote a route.
 |---|---|---|---|
 | `users` | id, username, role, active, must_change_password, password_hash (argon2id), temp_password_expires_at | HS (hash) | Admin (never the hash) |
 | `sessions` | token_hash, user_id, created_at, last_seen_at, expires_at | HS | Nobody through an endpoint |
-| `incidents` | id, title, description, status, category_id, reporter_id, timestamps | Sensitive (description) | Reviewer, Admin; the reporter sees only title, status, and date of their own reports (EP-19) |
+| `incidents` | id, title, description, status, category_id, reporter_id, timestamps | Sensitive (description) | Reviewer, Admin; the user sees only title, status, and date of their own reports (EP-19) |
 | `comments` | id, incident_id, author_id, body, created_at | Sensitive (classified like descriptions) | Reviewer, Admin |
 | `audit_log` | id, user_id, action, target_id, created_at (UTC) | Sensitive; **integrity-critical** | Admin (read-only) |
 | `login_attempts` | scope (ip or username), key, window_start, count, locked_until (unique scope/key/window_start) | Internal | Nobody through an endpoint |
@@ -420,7 +420,7 @@ Another engineer is writing [use-misuse-cases.md](use-misuse-cases.md) and [secu
 | T-21 (Medium) | Admin submits an out-of-range setting | Automated test |
 | T-24 (High) | User reads another user's incident by ID | Automated test + DAST authz scan + manual |
 | T-26 (Medium) | Admin tries to close an incident | Automated test |
-| T-29 (High) | Reporter plants a script in an incident description | SAST (lint ban) + DAST + manual |
+| T-29 (High) | User plants a script in an incident description | SAST (lint ban) + DAST + manual |
 | T-33 (High) | Admin tries to edit or delete audit entries | Automated DB test + DAST + manual |
 | T-38 (High) | Attacker injects SQL through the status filter | SAST + DAST (ZAP SQLi) + manual |
 | T-43 (High) | Attacker sends the middleware-bypass header | DAST + automated test |
