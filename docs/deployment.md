@@ -116,4 +116,7 @@ Terminate the instance, release the Elastic IP, delete the secret. The data is d
 | Stack up via `make live-up` (migrations applied; script's db-port and key-in-container checks passed) | 2026-11-24 | Pass |
 | Redirect: `curl -I http://107-23-118-127.sslip.io` | 2026-11-24 | 308 to `https://` (Caddy) |
 | HTTPS with a trusted certificate (curl without `-k`), HSTS, CSP, nosniff, frame-deny headers | 2026-11-24 | Pass |
-| Port scan, TLS version scan, role and misuse checks, `.env.keys` and image-history checks | | Not run yet |
+| Port spot check from outside with `nc` (not a full `nmap -p-`): 22, 3000, 5432, 2375 | 2026-11-24 | Closed or filtered; 80 and 443 open |
+| TLS versions with `openssl s_client`: 1.2 and 1.3 accepted; 1.0 and 1.1 refused with a `protocol version` alert | 2026-11-24 | Pass (not a full cipher scan) |
+| First administrator created; site loads and login works | 2026-11-24 | Pass (reported by the operator) |
+| Full `nmap -p-` and `ssl-enum-ciphers` scans, `psql` refusal, role and misuse checks, `.env.keys` and image-history checks | | Not run yet |

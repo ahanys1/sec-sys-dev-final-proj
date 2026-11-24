@@ -421,3 +421,8 @@
 #### Liam's Agent
 - Diagnosed a failed `make create-admin` on the live host: the key was only exported inside `live-up.sh`, so dotenvx passed ciphertext through, recreated the db container with ciphertext env, and the CLI failed with `Invalid URL`. Added `--strict` to every `dotenvx run` in the Makefile and `scripts/live-run.sh` to supply the key for one-off commands; updated runbook section 3.
 - Human/security changes: tested `--strict` (exit 1 without the key, exit 0 with a plaintext `.env.local`). Fixing the runbook, which had told the operator to run `make create-admin` without the key.
+
+### Commit `docs: record outside port and TLS spot checks for the live host`
+#### Liam's Agent
+- Ran read-only `nc` and `openssl s_client` checks against the live host and recorded them in the runbook Results table.
+- Human/security changes: the first TLS 1.1 attempt failed inside the local client (`no protocols available`) and was not counted as a server result; it was retried with a lowered client security level, which showed the server's `protocol version` alert. The table says these are spot checks, not full `nmap`/`ssl-enum-ciphers` scans.
