@@ -82,6 +82,8 @@ Every later `make` command that reads `.env` (`create-admin`, `logs`, `down`, `u
 `scripts/live-up.sh` checks `.env` is encrypted, runs `npm ci --ignore-scripts`, reads the key from Secrets Manager into the process environment only, runs `make migrate` then `make up`, and fails if the database publishes a port or any container has `DOTENV_PRIVATE_KEY` in its environment.
 
 ## 4. Grader accounts (ASSUMP-2)
+First, as an admin, add incident categories at `/admin/categories`. A fresh database has none (no seed data on the live host, T-63), and without one a user can't submit an incident. Use generic names, for example Phishing, Malware, Data exposure, Physical security, Other.
+
 Create a reviewer, a user (the role that submits incidents) and a grader admin on the admin screen. Each gets a one-time temporary password and must change it at first login. Send the credentials to the instructor privately; never commit them.
 
 **Temporary passwords expire** after `tempPasswordHours` (default 24, maximum 72, set on the admin settings page). An expired one is refused at login (`app/api/auth/login/route.ts`), so an instructor who logs in late is locked out until an admin resets the account. Before submitting, raise the setting to 72 and reset the grader accounts so the clock starts then, or set the final passwords yourself and share those. The users page shows each account's expiry.

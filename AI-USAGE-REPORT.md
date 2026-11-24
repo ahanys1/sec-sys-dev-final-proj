@@ -458,3 +458,8 @@
 #### Liam's Agent
 - Updated the runbook Results row: the developer logged in to each grader account and replaced its temporary password, so the 24 to 72 hour expiry no longer applies.
 - Human/security changes: the developer chose to set the final passwords themselves after the agent explained the expiry. No credentials were seen by the agent.
+
+### Commit `docs: add the category setup step to the deployment runbook`
+#### Liam's Agent
+- Found that categories are created at `/admin/categories` and that a fresh live database has none, and added the step to runbook section 4.
+- Human/security changes: categories are created by the admin on the live site, not seeded, to keep T-63 (no seed data in the deployed start path).
