@@ -30,7 +30,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex w-80 flex-col gap-3">
+    <form method="post" onSubmit={submit} className="flex w-80 flex-col gap-3">
       <label className="flex flex-col gap-1 text-sm">
         Username
         <input name="username" autoComplete="username" required maxLength={128} className="rounded border px-2 py-1" />

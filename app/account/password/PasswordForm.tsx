@@ -36,7 +36,7 @@ export function PasswordForm() {
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-col gap-3">
+    <form method="post" onSubmit={submit} className="flex flex-col gap-3">
       <label className="flex flex-col gap-1 text-sm">
         Current password
         <input name="currentPassword" type="password" autoComplete="current-password" required maxLength={128} className="rounded border px-2 py-1" />

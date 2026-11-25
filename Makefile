@@ -1,4 +1,5 @@
 .DEFAULT_GOAL := help
+.PHONY: verify-local verify-http verify-load verify-recovery verify-zap verify-sast
 .PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate live-up clean package-source
 
 ENV_FILE ?= .env
@@ -78,3 +79,21 @@ clean: ## Remove build output and coverage
 
 package-source: ## Export committed source and SHA-256 checksum to out/ (requires Git)
 	sh scripts/package-source.sh
+
+verify-local: ## Build and seed an isolated local Slice 7 stack (port 8443)
+	scripts/verification/start.sh
+
+verify-http: ## Synthetic HTTP misuse/input probes against the isolated stack
+	python3 scripts/verification/probes.py
+
+verify-load: ## Six-minute 50-user k6 baseline on the isolated stack
+	scripts/verification/distributed-load.sh
+
+verify-recovery: ## Encrypted backup, fresh-DB restore and isolated DB outage drill
+	python3 scripts/verification/recovery.py
+
+verify-zap: ## Authenticated ZAP passive/spider scans for all three synthetic roles
+	python3 scripts/verification/zap-roles.py
+
+verify-sast: ## Pinned local Semgrep scan; private raw results in /tmp/team13-slice7
+	scripts/verification/sast.sh

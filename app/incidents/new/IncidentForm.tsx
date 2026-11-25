@@ -62,7 +62,7 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <label htmlFor="title" className="font-medium">
           Incident Title

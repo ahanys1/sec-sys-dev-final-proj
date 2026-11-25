@@ -106,7 +106,7 @@ export function SettingsAdmin({
         </p>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-5">
         <label className="flex flex-col gap-1 text-sm">
           Status message
           <textarea

@@ -52,7 +52,7 @@ export function CommentForm({
 }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form method="post" onSubmit={handleSubmit} className="flex flex-col gap-3">
       <label htmlFor="comment-body">Add Comment</label>
 
       <textarea
