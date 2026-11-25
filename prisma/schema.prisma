@@ -39,6 +39,7 @@ model User {
   passwordHash          String    @map("password_hash")
   mustChangePassword    Boolean   @default(true) @map("must_change_password")
   tempPasswordExpiresAt DateTime? @map("temp_password_expires_at") @db.Timestamptz(3)
+  tempPasswordUsedAt    DateTime? @map("temp_password_used_at") @db.Timestamptz(3)
   createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 

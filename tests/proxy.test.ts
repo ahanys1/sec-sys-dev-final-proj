@@ -24,6 +24,10 @@ describe("proxy (FW-1, T-43, T-49)", () => {
   it("rejects requests carrying x-middleware-subrequest (CVE-2025-29927)", () => {
     const res = proxy(req("/api/health", { "x-middleware-subrequest": "middleware:middleware:middleware" }));
     expect(res.status).toBe(400);
+    expect(res.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+    expect(res.headers.get("strict-transport-security")).toContain("includeSubDomains");
+    expect(res.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(res.headers.get("cache-control")).toBe("no-store");
   });
 
   it("does not authenticate or redirect", () => {

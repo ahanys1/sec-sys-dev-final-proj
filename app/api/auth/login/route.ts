@@ -44,7 +44,8 @@ export const POST = route("auth.login", async (requestId, request) => {
 
   const user = await db.user.findUnique({ where: { username } });
   const tempExpired =
-    user?.mustChangePassword && user.tempPasswordExpiresAt !== null && user.tempPasswordExpiresAt.getTime() < Date.now();
+    user?.mustChangePassword && (user.tempPasswordUsedAt !== null ||
+      (user.tempPasswordExpiresAt !== null && user.tempPasswordExpiresAt.getTime() <= Date.now()));
   const ok = user && user.active && !tempExpired ? await verifyPassword(user.passwordHash, password) : await verifyAgainstDummy(password);
 
   if (!user || !ok) {
@@ -61,7 +62,10 @@ export const POST = route("auth.login", async (requestId, request) => {
   if (existing) await destroySession(db, existing.sessionId);
   await cleanupExpired(db);
   await clearAttempts(db, username);
-  const token = await createSession(db, user.id, settings);
+  const token = await createSession(db, user.id, settings, {
+    passwordHash: user.passwordHash,
+    mustChangePassword: user.mustChangePassword,
+  });
 
   logger.info("auth.login.ok", { requestId, ip, userId: user.id });
   const response = jsonResponse({ user: { username: user.username, role: user.role }, mustChangePassword: user.mustChangePassword });
@@ -69,5 +73,15 @@ export const POST = route("auth.login", async (requestId, request) => {
   return response;
 });
 
-// T-48: Next answers OPTIONS itself; refuse it. Other methods get 405 from Next.
+// NFR-2, ASVS V16.5.1: unsupported methods use the same JSON error and Allow header.
 export const OPTIONS = () => methodNotAllowed(["POST"]);
+
+export const GET = () => methodNotAllowed(["POST"]);
+
+export const HEAD = () => methodNotAllowed(["POST"]);
+
+export const PUT = () => methodNotAllowed(["POST"]);
+
+export const PATCH = () => methodNotAllowed(["POST"]);
+
+export const DELETE = () => methodNotAllowed(["POST"]);

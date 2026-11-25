@@ -89,7 +89,7 @@ Create indexes on `sessions(user_id)`, `sessions(expires_at)`, `incidents(status
 
 ## 5. Main workflows and consistency
 
-Account creation generates a one-time temporary password, displays it once, and records account creation. First login requires a password change. The temporary-password session is restricted to the password flow, logout, and static assets. Self-service password change requires the current password and offers to end other sessions, selected by default. Admin reset and account deactivation end all target sessions.
+Account creation generates a one-time temporary password, displays it once, and records account creation. The first successful login atomically consumes the credential while creating its restricted session; reuse is rejected, including competing logins. First login requires a password change. If that session is lost before the change, an admin reset is required. The temporary-password session is restricted to the password flow, logout, and static assets. Self-service password change requires the current password and offers to end other sessions, selected by default. Admin reset and account deactivation end all target sessions.
 
 Login uses a new 256-bit CSPRNG session token whose SHA-256 hash is stored server-side. The session hash is stored in PostgreSQL (ASVS V7.2.3). The cookie uses the `__Host-` prefix, `HttpOnly`, `Secure`, `SameSite=Strict`, and `Path=/`. The design limits accounts to five sessions and ends the oldest at the limit. Default inactivity and maximum lifetimes are 30 minutes and eight hours. Logout deletes the server session and expires the browser cookie. [Session policy D-5](threat-model.md#step-3-what-can-be-done-about-it-mitigations-and-ranking)
 
@@ -178,3 +178,9 @@ The use and misuse plan supplies the referenced cases. SAST, DAST, and manual te
 | 2026-11-18 | Addressed design review, added ASVS traceability, recorded Node 24, and synchronized unresolved questions with PR #30. |
 | 2026-11-18 | Recorded the developer-approved reviewer answers, removed answered questions, and recorded the approved decisions. |
 | 2026-11-18 | Removed the remaining evidence question at developer direction. Copilot usage is tracked in the AI usage report. |
+
+### Implemented list and error bounds (PR #61)
+
+Incident pages and list APIs share strict `page`/`limit` parsing: defaults 1/25, at most 100 rows per page and page 10,000. Database queries fetch only the requested window plus one row for the Next link; responses expose `pagination: {page, limit, hasNext}`. The user query remains scoped by the authenticated owner, reviewer queries exclude closed incidents, and administrator pages include all statuses. Empty or invalid page input never disables limits. The API rejects malformed query input with 400; pages use generic Not Found for invalid page URLs.
+
+All API routes explicitly refuse unsupported methods with the shared 405 error and Allow header. HEAD is supported wherever GET is supported. Caddy's internal-subrequest rejection has a restrictive CSP and the same static security headers/no-store policy; app-level rejections retain the nonce-based policy. UUID path validation precedes database conversion (SR-7, ASVS V2.2.1). R-14 denies all user incident-detail access, including own/closed reports; closed reviewer status targets use the same 404 as missing targets (SR-4/5, ASVS V8.2.2).

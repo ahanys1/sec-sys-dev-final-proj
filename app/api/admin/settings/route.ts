@@ -25,6 +25,8 @@ export const PATCH = route("admin.settings.update", async (_requestId, request) 
   return jsonResponse({ settings });
 });
 
-export const POST = () => methodNotAllowed(["GET", "PATCH"]);
-export const PUT = () => methodNotAllowed(["GET", "PATCH"]);
-export const DELETE = () => methodNotAllowed(["GET", "PATCH"]);
+export const POST = () => methodNotAllowed(["GET", "HEAD", "PATCH"]);
+export const PUT = () => methodNotAllowed(["GET", "HEAD", "PATCH"]);
+export const DELETE = () => methodNotAllowed(["GET", "HEAD", "PATCH"]);
+
+export const OPTIONS = () => methodNotAllowed(["GET", "HEAD", "PATCH"]);

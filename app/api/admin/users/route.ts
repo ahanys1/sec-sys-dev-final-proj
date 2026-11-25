@@ -21,4 +21,10 @@ export const POST = route("admin.users.create", async (requestId, request) => {
   return jsonResponse({ user, temporaryPassword }, { status: 201 });
 });
 
-export const OPTIONS = () => methodNotAllowed(["GET", "POST"]);
+export const OPTIONS = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+
+export const PUT = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+
+export const PATCH = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+
+export const DELETE = () => methodNotAllowed(["GET", "HEAD", "POST"]);

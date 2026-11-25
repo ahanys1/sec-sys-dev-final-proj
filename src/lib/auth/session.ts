@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { PrismaClient, Role } from "../../generated/prisma/client";
 import { serializable, type Db } from "../tx";
+import { ApiError } from "../http";
 import type { Settings } from "./settings";
 
 // SR-3, ASVS V7.2.1 to V7.2.4, V7.3.1, V7.3.2, V7.4.1, V7.4.2, V3.3.1: server-side sessions. The cookie holds
@@ -33,10 +34,33 @@ export function tokenFromCookieHeader(header: string | null): string | null {
 }
 
 /** Create a session for a user, ending their oldest ones past the cap (V7.2.4: always a new token). */
-export async function createSession(db: PrismaClient, userId: string, settings: Settings): Promise<string> {
+export async function createSession(
+  db: PrismaClient,
+  userId: string,
+  settings: Settings,
+  credential?: { passwordHash: string; mustChangePassword: boolean },
+): Promise<string> {
   const token = newToken();
   const now = Date.now();
   await serializable(db, async (tx) => {
+    if (credential) {
+      // SR-2/3, ASVS V6.4.1/V2.3.3: only one concurrent login may consume a temporary password.
+      // Match the verified hash too, so a concurrent admin reset cannot authenticate an old credential.
+      const where = { id: userId, active: true, ...credential };
+      if (credential.mustChangePassword) {
+        const consumed = await tx.user.updateMany({
+          where: {
+            ...where,
+            tempPasswordUsedAt: null,
+            OR: [{ tempPasswordExpiresAt: null }, { tempPasswordExpiresAt: { gt: new Date(now) } }],
+          },
+          data: { tempPasswordUsedAt: new Date(now) },
+        });
+        if (consumed.count !== 1) throw new ApiError("invalid_credentials");
+      } else if (!(await tx.user.findFirst({ where, select: { id: true } }))) {
+        throw new ApiError("invalid_credentials");
+      }
+    }
     const existing = await tx.session.findMany({ where: { userId }, orderBy: { createdAt: "asc" }, select: { id: true } });
     const evict = existing.slice(0, Math.max(0, existing.length - (MAX_SESSIONS - 1)));
     if (evict.length > 0) await tx.session.deleteMany({ where: { id: { in: evict.map((s) => s.id) } } });

@@ -4,6 +4,18 @@
 	tls {$CADDY_TLS:internal}
 	# T-43, CVE-2025-29927: refuse the internal subrequest header at the edge (also checked in the proxy and handlers).
 	@subrequest header x-middleware-subrequest *
+	# SR-16, ASVS V3.4.1/V3.4.3/V3.4.4: edge rejections need security headers too.
+	header @subrequest {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-origin"
+		Content-Security-Policy "default-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+		Cache-Control "no-store"
+	}
 	respond @subrequest 400
 	encode zstd gzip
 	request_body {

@@ -28,7 +28,8 @@ export const GET = route(
   },
 );
 
-export const POST = () => methodNotAllowed(["GET"]);
-export const PUT = () => methodNotAllowed(["GET"]);
-export const PATCH = () => methodNotAllowed(["GET"]);
-export const DELETE = () => methodNotAllowed(["GET"]);
+export const POST = () => methodNotAllowed(["GET", "HEAD"]);
+export const PUT = () => methodNotAllowed(["GET", "HEAD"]);
+export const PATCH = () => methodNotAllowed(["GET", "HEAD"]);
+export const DELETE = () => methodNotAllowed(["GET", "HEAD"]);
+export const OPTIONS = () => methodNotAllowed(["GET", "HEAD"]);

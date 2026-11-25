@@ -70,6 +70,7 @@ export async function createUser(db: PrismaClient, actorId: string, input: { use
             role: input.role,
             passwordHash,
             mustChangePassword: true,
+            tempPasswordUsedAt: null,
             tempPasswordExpiresAt: new Date(Date.now() + settings.tempPasswordHours * 3_600_000),
           },
           select: USER_SELECT,
@@ -153,6 +154,7 @@ export async function resetPassword(db: PrismaClient, actorId: string, targetId:
           data: {
             passwordHash,
             mustChangePassword: true,
+            tempPasswordUsedAt: null,
             tempPasswordExpiresAt: new Date(Date.now() + settings.tempPasswordHours * 3_600_000),
           },
           select: USER_SELECT,

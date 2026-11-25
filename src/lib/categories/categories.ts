@@ -2,6 +2,7 @@
 import { Prisma, type PrismaClient, type Role } from "@/src/generated/prisma/client";
 import { runAudited } from "../audit";
 import { ApiError } from "../http";
+import { idSchema } from "../admin/schemas";
 import type { CreateCategoryInput, UpdateCategoryInput} from "./schemas";
 
 
@@ -84,6 +85,9 @@ export async function updateCategory(
   if (admin.role !== "admin") {
     throw new ApiError("forbidden");
   }
+
+  // SR-7, ASVS V2.2.1: invalid identifiers must never reach the UUID database column.
+  if (!idSchema.safeParse(categoryId).success) throw new ApiError("not_found");
 
   try {
     return await runAudited(

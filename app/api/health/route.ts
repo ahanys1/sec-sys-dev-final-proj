@@ -5,7 +5,15 @@ export function GET() {
   return jsonResponse({ status: "ok" });
 }
 
-// T-48: Next answers OPTIONS itself; refuse it explicitly. Other methods get 405 from Next.
+// NFR-2, ASVS V16.5.1: unsupported methods use the same JSON error and Allow header.
 export function OPTIONS() {
-  return methodNotAllowed(["GET"]);
+  return methodNotAllowed(["GET", "HEAD"]);
 }
+
+export const POST = () => methodNotAllowed(["GET", "HEAD"]);
+
+export const PUT = () => methodNotAllowed(["GET", "HEAD"]);
+
+export const PATCH = () => methodNotAllowed(["GET", "HEAD"]);
+
+export const DELETE = () => methodNotAllowed(["GET", "HEAD"]);

@@ -29,6 +29,7 @@ export const POST = route("category.create", async (_requestId, request) => {
   return jsonResponse({ category }, { status: 201 });
 });
 
-export const PATCH = () => methodNotAllowed(["GET", "POST"]);
-export const PUT = () => methodNotAllowed(["GET", "POST"]);
-export const DELETE = () => methodNotAllowed(["GET", "POST"]);
+export const PATCH = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+export const PUT = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+export const DELETE = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+export const OPTIONS = () => methodNotAllowed(["GET", "HEAD", "POST"]);

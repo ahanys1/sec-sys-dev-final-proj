@@ -14,7 +14,7 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 | ID | L | Requirement | Status | Evidence |
 |---|---|---|---|---|
 | V8.2.1 | 1 | Verify that the application ensures that function-level access is restricted to consumers with explicit permissions. | TODO | |
-| V8.2.2 | 1 | Verify that the application ensures that data-specific access is restricted to consumers with explicit permissions to specific data items to mitigate insecure direct object reference (IDOR) and broken object level authorization (BOLA). | TODO | |
+| V8.2.2 | 1 | Verify that the application ensures that data-specific access is restricted to consumers with explicit permissions to specific data items to mitigate insecure direct object reference (IDOR) and broken object level authorization (BOLA). | Done | `src/lib/incidents/incidents.ts` (R-14 and closed/missing 404), admin target guards and owner-scoped queries; `tests/db/incidents.test.ts`, `tests/db/admin-users.test.ts`. No user detail access, including own/closed reports. |
 | V8.2.3 | 2 | Verify that the application ensures that field-level access is restricted to consumers with explicit permissions to specific fields to mitigate broken object property level authorization (BOPLA). | TODO | |
 
 ## V8.3 Operation Level Authorization

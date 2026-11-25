@@ -31,3 +31,6 @@ export const GET = () => methodNotAllowed(["PATCH"]);
 export const POST = () => methodNotAllowed(["PATCH"]);
 export const PUT = () => methodNotAllowed(["PATCH"]);
 export const DELETE = () => methodNotAllowed(["PATCH"]);
+export const HEAD = () => methodNotAllowed(["PATCH"]);
+
+export const OPTIONS = () => methodNotAllowed(["PATCH"]);
