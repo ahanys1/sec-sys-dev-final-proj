@@ -560,3 +560,10 @@
 #### Team #13's Agent
 - Started a fresh local verification branch from current main at the developer's direction, independently of PR #56. Planned isolated synthetic-data SAST, DAST, load and recovery runs.
 - Human/security changes: developer explicitly requested restarting Slice 7 using the local build. Existing untracked security scripts and the existing local database are preserved. No results are claimed in this planning commit.
+
+### Commit test: add isolated local verification and safe form fallbacks (SR-16, NFR-3–6)
+#### Team #13's Agent
+- Produced a separate production-build Compose project, synthetic fixtures, local Semgrep/ZAP runners, HTTP permission/input probes, k6 load scripts, and a fresh-database encrypted backup/restore and outage drill. Existing untracked `scripts/security/` work was not reused or changed.
+- Corrected a DAST finding: native HTML form fallback defaulted to GET; six forms now explicitly POST to keep credentials and report content out of URLs (ASVS V14.2.1).
+- Human/security changes: the developer requested a complete local restart of Slice 7. No human code edits have been reported. The agent corrected fixture typing and TLS SNI in the harness. A shared-IP diagnostic load run hit the existing login limit; the baseline uses 50 actual source IPs without weakening application rate limits or trusting spoofed forwarding headers. Raw credentials/reports/backups remain in a private temporary directory, and restore targets a new database only.
+- Results are recorded in `docs/evidence/slice7/`; no live deployment or final release acceptance is claimed.

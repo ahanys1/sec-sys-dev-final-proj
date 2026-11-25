@@ -83,7 +83,7 @@ export function UsersAdmin({ users, currentUserId }: { users: Row[]; currentUser
         </p>
       ) : null}
 
-      <form onSubmit={create} className="flex flex-wrap items-end gap-3">
+      <form method="post" onSubmit={create} className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
           Username
           <input name="username" required minLength={3} maxLength={32} autoComplete="off" className="rounded border px-2 py-1" />
