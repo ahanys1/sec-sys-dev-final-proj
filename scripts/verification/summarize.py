@@ -2,10 +2,10 @@
 import json,pathlib
 root=pathlib.Path('/tmp/team13-slice7');out=pathlib.Path('docs/evidence/slice7');out.mkdir(parents=True,exist_ok=True)
 result={}
-for name in ['http-results','recovery-results','log-results']:
+for name in ['http-results','recovery-results','log-results','surface-results']:
  p=root/(name+'.json')
  if p.exists():result[name]=json.loads(p.read_text())
-for name in ['k6-summary','k6-single-ip-summary']:
+for name in ['k6-summary','k6-single-ip-summary','k6-before-retry-summary']:
  p=root/(name+'.json')
  if p.exists():
   data=json.loads(p.read_text());result[name]={k:v for k,v in data['metrics'].items() if k in ['read_ms','write_ms','login_ms','action_errors','rate_limited','http_reqs','iterations','vus','vus_max','http_req_failed']}

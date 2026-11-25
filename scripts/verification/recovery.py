@@ -17,20 +17,21 @@ dump=run(['docker','exec',container,'pg_dump','-U','app_owner','-d','incidents',
 enc=run(['openssl','enc','-aes-256-cbc','-salt','-pbkdf2','-iter','200000','-pass',f'file:{key}'],input=dump)
 backup=root/'synthetic-backup.dump.enc';backup.write_bytes(enc);backup.chmod(0o600)
 # Fresh restore database; abort if it already exists.
-sql('CREATE DATABASE slice7_restore OWNER app_owner;',db='postgres',role='bootstrap_admin')
+restore_db='slice7_restore_'+secrets.token_hex(4)
+sql(f'CREATE DATABASE {restore_db} OWNER app_owner;',db='postgres',role='bootstrap_admin')
 plain=run(['openssl','enc','-d','-aes-256-cbc','-pbkdf2','-iter','200000','-pass',f'file:{key}'],input=enc)
-run(['docker','exec','-i',container,'pg_restore','--exit-on-error','-U','app_owner','-d','slice7_restore'],input=plain)
-after=fingerprint('slice7_restore')
+run(['docker','exec','-i',container,'pg_restore','--exit-on-error','-U','app_owner','-d',restore_db],input=plain)
+after=fingerprint(restore_db)
 restore_seconds=time.monotonic()-started
 checks=[]
 for statement in ['UPDATE audit_log SET action=action','DELETE FROM audit_log','TRUNCATE audit_log']:
- try: sql(statement,db='slice7_restore',role='app_user');checks.append(False)
+ try: sql(statement,db=restore_db,role='app_user');checks.append(False)
  except subprocess.CalledProcessError:checks.append(True)
 # Outage only the disposable verification DB; ensure it is restarted even on assertion failure.
 a=json.loads((root/'accounts.json').read_text())['accounts'][51]
 def request():
- c=http.client.HTTPSConnection('verify.local',8443,context=ssl._create_unverified_context(),timeout=40)
- c.sock=ssl._create_unverified_context().wrap_socket(socket.create_connection(('127.0.0.1',8443),timeout=40),server_hostname='verify.local')
+ c=http.client.HTTPSConnection('verify.local',8443,context=ssl.create_default_context(cafile=str(root/'local-ca.crt')),timeout=40)
+ c.sock=ssl.create_default_context(cafile=str(root/'local-ca.crt')).wrap_socket(socket.create_connection(('127.0.0.1',8443),timeout=40),server_hostname='verify.local')
  c.request('GET','/api/admin/settings',headers={'Host':'verify.local','Cookie':a['cookie']})
  r=c.getresponse();body=r.read().decode();c.close();return r.status,body
 outage_start=time.monotonic()

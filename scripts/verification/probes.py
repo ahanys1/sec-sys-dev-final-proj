@@ -3,8 +3,8 @@ import http.client,ssl,json,pathlib,socket
 root=pathlib.Path('/tmp/team13-slice7')
 f=json.loads((root/'accounts.json').read_text()); users=f['accounts']; results=[]
 def req(method,path,body=None,account=None,headers=None):
- c=http.client.HTTPSConnection('verify.local',8443,context=ssl._create_unverified_context(),timeout=20)
- c.sock=ssl._create_unverified_context().wrap_socket(socket.create_connection(('127.0.0.1',8443),timeout=20),server_hostname='verify.local')
+ c=http.client.HTTPSConnection('verify.local',8443,context=ssl.create_default_context(cafile=str(root/'local-ca.crt')),timeout=20)
+ c.sock=ssl.create_default_context(cafile=str(root/'local-ca.crt')).wrap_socket(socket.create_connection(('127.0.0.1',8443),timeout=20),server_hostname='verify.local')
  h={'Host':'verify.local','Origin':'https://verify.local','Content-Type':'application/json'}
  if account:h['Cookie']=account['cookie']
  h.update(headers or {})

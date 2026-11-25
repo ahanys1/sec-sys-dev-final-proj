@@ -18,3 +18,6 @@ scripts/verification/compose.sh up -d db
 scripts/verification/compose.sh run --rm migrate
 scripts/verification/compose.sh run --rm create-admin npx tsx scripts/verification/seed.ts
 scripts/verification/compose.sh up -d app caddy
+
+# Trust the isolated Caddy issuer explicitly in Python verification clients.
+docker cp team13-slice7-caddy-1:/data/caddy/pki/authorities/local/root.crt /tmp/team13-slice7/local-ca.crt

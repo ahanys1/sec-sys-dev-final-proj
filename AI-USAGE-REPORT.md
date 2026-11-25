@@ -567,3 +567,9 @@
 - Corrected a DAST finding: native HTML form fallback defaulted to GET; six forms now explicitly POST to keep credentials and report content out of URLs (ASVS V14.2.1).
 - Human/security changes: the developer requested a complete local restart of Slice 7. No human code edits have been reported. The agent corrected fixture typing and TLS SNI in the harness. A shared-IP diagnostic load run hit the existing login limit; the baseline uses 50 actual source IPs without weakening application rate limits or trusting spoofed forwarding headers. Raw credentials/reports/backups remain in a private temporary directory, and restore targets a new database only.
 - Results are recorded in `docs/evidence/slice7/`; no live deployment or final release acceptance is claimed.
+
+### Commit fix: retry adapter transaction conflicts found under load (NFR-5, NFR-6)
+#### Team #13's Agent
+- Investigated six `DriverAdapterError: TransactionWriteConflict` login failures in the first complete 50-source-IP load run. The existing helper recognized only Prisma P2034. Extended the same bounded whole-transaction retry to the adapter's structured conflict kind; unrelated errors still propagate and exhaustion returns a generic 409.
+- Added six regression cases for both conflict forms, successful retry, bounded exhaustion, null/unrelated errors and message-only lookalikes. Local lint, TypeScript and all 110 unit tests passed before the repeat production load run.
+- Corrected scanner findings in the test harness by trusting the isolated Caddy CA instead of using unverified Python TLS contexts. Added richer HTTP coverage and retained pre-fix load evidence. No human edits reported; no security control or rate limit was weakened.
