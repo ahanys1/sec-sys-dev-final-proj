@@ -555,3 +555,15 @@
 - Replaced pending workflow text with current role-specific screen instructions; added mandatory initial category setup, live deployment guidance, and moved the deployment demo script into the manual. Expanded the component inventory for incidents, categories, audit/settings, and deployment scripts.
 - Human direction: address PR #55 review comments. No subsequent human edits at authoring time. AI review corrected the draft's reporter-detail promise, comment limit (2,000), reviewer-only status/classification, and local/live secret distinction to match the integrated implementation. Submission identity sanitization remains a documented release task, including the clone URL; no historical provenance was removed.
 - Validation: documentation file links, shell syntax, Make target discovery, and whitespace checks passed. Database checks passed all 125 tests and image hardening checks passed after integration. Lint, 90 unit tests, and CI guards passed; the native macOS build remained blocked by a Turbopack worker port permission error, while the Docker production build passed. Dependency audit, committed-source export and fresh CI results will be recorded on the PR. No new browser/live session, clean-OS installation, or final release certification is claimed.
+
+### Commit docs: record manual security testing results and traceability
+
+#### Jonathan's Agent
+
+- Assisted in developing and executing the manual security testing methodology based on the documented STRIDE threats, security requirements, and use/misuse cases.
+- Assisted in constructing HTTP requests and command-line checks for the 13 planned manual security test cases, including authorization, session replay, input validation, stored XSS, SQL injection, audit integrity, middleware bypass, database isolation, and container secret exposure.
+- Assisted in troubleshooting the local Docker build and database migration issues encountered before manual testing.
+- Assisted in interpreting observed test results, identifying additional verification checks, and distinguishing confirmed security behavior from testing assumptions and limitations.
+- Assisted in updating `docs/security-testing.md` to document the completed manual testing methodology, results matrix, testing limitations, and misuse-case verification coverage.
+- All manual tests were executed by the human developer using browser developer tools, Docker CLI, WSL, and Windows PowerShell. HTTP responses, application state, audit records, and terminal output were manually inspected to verify the observed results.
+- AI-assisted documentation was reviewed and revised by the human developer to ensure accuracy, appropriate testing scope, and consistency with the implemented security controls.
