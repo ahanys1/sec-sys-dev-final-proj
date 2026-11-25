@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate live-up clean
+.PHONY: help install dev build start lint test test-db check-image guards audit check env-local ca-bundle create-admin up down reset logs migrate live-up clean package-source
 
 ENV_FILE ?= .env
 
@@ -75,3 +75,6 @@ live-up: ## Start the live stack on the EC2 host (needs SECRET_ID; docs/deployme
 
 clean: ## Remove build output and coverage
 	rm -rf .next out coverage
+
+package-source: ## Export committed source and SHA-256 checksum to out/ (requires Git)
+	sh scripts/package-source.sh

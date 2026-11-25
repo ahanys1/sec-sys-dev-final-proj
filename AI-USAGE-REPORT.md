@@ -245,6 +245,19 @@
 - Config changes so PRs stop failing: group `react` with `react-dom`, group the CodeQL `init` and `analyze` actions, and ignore the three major bumps above.
 - Also set slice 3 to Done in `docs/plan.md`.
 
+### Commit docs: claim user manual and source packaging (NFR-8, NFR-9)
+#### Alex's Agent
+- Claimed issue #20 on a feature branch and marked release documentation in progress in the slice tracker.
+- Human direction: begin #20 and open a PR; dependent incident, audit, and settings interfaces remain in other PRs, so this work must not claim final release verification.
+
+### Commit docs: add user manual and source export (NFR-8, NFR-9, SR-14)
+#### Alex's Agent
+- Produced the user manual, component/packaging guide, committed-source export target with SHA-256 checksum and export exclusions, README corrections, and SDL/plan evidence for PR #55.
+- Human direction: begin issue #20 on a new branch and push a PR in the existing format. No subsequent human edits to this output at authoring time.
+- Security corrections during AI review: removed certificate-bypass and routine destructive-reset advice; documented local plaintext configuration as development-only; kept pending incident/audit/settings workflows and final release evidence explicitly unverified; excluded environment/key/generated files from exports while retaining placeholder configuration. Did not mark broad ASVS requirements Done based on documentation alone.
+- Identified the existing conflict between named AI-log headings and submission anonymity; retained provenance and documented a separate submission-rendering gate instead of silently rewriting historical records.
+- Validation: shell syntax, documentation links, Make target discovery, and source export checks (repeatability, dirty-tree refusal, and exclusion of synthetic secret-file fixtures). Full application checks require Node 24 and Docker, unavailable in this environment; browser/HTTPS and final integrated release verification remain pending.
+
 ### Commit `feat(incidents): add reporter incident creation API and tests`
 
 #### Jonathan's Agent
@@ -515,3 +528,10 @@
 #### Liam's Agent
 - Recorded the redeploy of `main` and the live denial-logging check in `docs/deployment.md`, marked ASVS V16.3.2 verified on the live host and slice 6 Done in `docs/plan.md`, and replaced an out-of-date "create the first admin" message at the end of `scripts/live-up.sh`.
 - Human/security changes: the developer ran the redeploy and the denial test on the instance and pasted the log lines; the agent confirmed they carry a user ID and request ID and no cookie, password or incident text before recording the result.
+
+### Commit docs: resolve PR 55 review and integrate main (NFR-8, NFR-9, SR-14)
+#### Alex's Agent
+- Merged current main into the user-manual/source-packaging branch, preserving both sides of the AI usage history, live deployment targets, encrypted-env guidance, and current delivery/SDL evidence.
+- Replaced pending workflow text with current role-specific screen instructions; added mandatory initial category setup, live deployment guidance, and moved the deployment demo script into the manual. Expanded the component inventory for incidents, categories, audit/settings, and deployment scripts.
+- Human direction: address PR #55 review comments. No subsequent human edits at authoring time. AI review corrected the draft's reporter-detail promise, comment limit (2,000), reviewer-only status/classification, and local/live secret distinction to match the integrated implementation. Submission identity sanitization remains a documented release task, including the clone URL; no historical provenance was removed.
+- Validation: documentation file links, shell syntax, Make target discovery, and whitespace checks passed. Database checks passed all 125 tests and image hardening checks passed after integration. Lint, 90 unit tests, and CI guards passed; the native macOS build remained blocked by a Turbopack worker port permission error, while the Docker production build passed. Dependency audit, committed-source export and fresh CI results will be recorded on the PR. No new browser/live session, clean-OS installation, or final release certification is claimed.
