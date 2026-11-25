@@ -100,19 +100,12 @@ Create a reviewer, a user (the role that submits incidents) and a grader admin o
 | Key in image | `docker history --no-trunc <app image> \| grep -c DOTENV_PRIVATE_KEY` | `0` | AR-5 |
 | Roles | log in as each role; try an admin API as a user, another user's incident | 403 or 404. Denials are not audit events (FR-11 lists none); logins appear in the server log (`auth.login.ok`, `auth.login.failed`) | T-17, T-19, T-24 |
 
-### Demo script (for the video; move to `docs/user-manual.md` once #55 merges)
-Use the grader accounts. Never show a password or session cookie on screen.
-1. **User:** log in as `grader-user`, submit an incident (pick a category), open the own-incident list.
-2. **Misuse, higher-privilege access (T-17, T-19):** still as `grader-user`, open `/admin/users` (404 page) and `/api/admin/users` (403 JSON).
-3. **Reviewer:** log in as `grader-reviewer`, open the queue, move the incident to under review, add a comment, classify it. Open an admin page (denied).
-4. **Misuse, unauthorized action (T-26):** as `grader-reviewer`, try the admin settings page (denied). As `grader-admin`, open `/admin/incidents/<id>`: it has no status control, because only reviewers may change status (`app/reviewer/incidents/[id]/StatusControls.tsx`; the status API allows the reviewer role only, design §3).
-5. **Misuse, another user's record (T-24):** as `grader-user`, open another user's incident ID: same 404 as a missing one (T-25).
-6. **Admin:** log in as `grader-admin`, show the users page (create a user, role change), categories, settings, and the audit view listing the actions from steps 1 to 3 (actor, time, action, target; no descriptions).
-7. **External database access (T-52):** from a laptop outside AWS, `nc -vz 107.23.118.127 5432` (or `psql -h ...`) is refused or times out; `nc -vz 107.23.118.127 443` succeeds.
-8. **Audit tampering (T-33):** not shown live. Point to `tests/db/audit.test.ts` (append-only trigger and restricted `app_user` grants).
+### Demo script
+
+The role-by-role demonstration and misuse checks are in the [user manual](user-manual.md#demonstration-and-release-checks). Use privately supplied grader credentials and keep passwords and session cookies off screen.
 
 ## 6. Redeploy from `main`
-Works once this branch is merged. It needs three things to still exist: the encrypted `.env` on `main`, the key (secret `incident-app/dotenvx-key`, or the `.env.keys` backup in the password manager), and the Elastic IP, because `SITE_ADDRESS` in `.env` is tied to it. If the IP was released, redo 1a and re-encrypt with a new `SITE_ADDRESS`.
+Requires three things to still exist: the encrypted `.env` on `main`, the key (secret `incident-app/dotenvx-key`, or the `.env.keys` backup in the password manager), and the Elastic IP, because `SITE_ADDRESS` in `.env` is tied to it. If the IP was released, redo 1a and re-encrypt with a new `SITE_ADDRESS`.
 
 | Situation | Do |
 |---|---|

@@ -33,7 +33,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 13 | Verification | Threat Model and Attack Surface Review | Compare built routes and pages with the threat-model §1.4 inventory; update STRIDE for any change. | In progress: EP-08/09/19 reconciled in #61; full review remains pending | `docs/threat-model.md` local remediation review; paging and role regression tests |
 | 14 | Release | Incident Response Plan | Short plan for a vulnerability or breach in this app. | TODO | [Outline below](#incident-response-plan-practice-14) |
 | 15 | Release | Final Security Review | Team-internal review against the #3 gates before submission. | TODO | [Checklist below](#final-security-review-practice-15) |
-| 16 | Release | Release / Archive | Tagged release and archived submission. | TODO | [Plan below](#release-and-archive-practice-16) |
+| 16 | Release | Release / Archive | Tagged release and archived submission. | In progress: manual refreshed for integrated roles, categories and live deployment; source export prepared; final release pending | `docs/user-manual.md`; `docs/source-packaging.md`; `make package-source` (#55); [Plan below](#release-and-archive-practice-16) |
 | 17 | Response | Execute the Incident Response Plan | Only if an incident happens after release. | N/A: no production release in the course. Applies if the app is deployed to AWS later. | |
 
 ## Deliverables mapped to SDL practices
