@@ -556,7 +556,6 @@
 - Human direction: address PR #55 review comments. No subsequent human edits at authoring time. AI review corrected the draft's reporter-detail promise, comment limit (2,000), reviewer-only status/classification, and local/live secret distinction to match the integrated implementation. Submission identity sanitization remains a documented release task, including the clone URL; no historical provenance was removed.
 - Validation: documentation file links, shell syntax, Make target discovery, and whitespace checks passed. Database checks passed all 125 tests and image hardening checks passed after integration. Lint, 90 unit tests, and CI guards passed; the native macOS build remained blocked by a Turbopack worker port permission error, while the Docker production build passed. Dependency audit, committed-source export and fresh CI results will be recorded on the PR. No new browser/live session, clean-OS installation, or final release certification is claimed.
 
-<<<<<<< HEAD
 ### Commit docs: record manual security testing results and traceability
 
 #### Jonathan's Agent
@@ -568,7 +567,6 @@
 - Assisted in updating `docs/security-testing.md` to document the completed manual testing methodology, results matrix, testing limitations, and misuse-case verification coverage.
 - All manual tests were executed by the human developer using browser developer tools, Docker CLI, WSL, and Windows PowerShell. HTTP responses, application state, audit records, and terminal output were manually inspected to verify the observed results.
 - AI-assisted documentation was reviewed and revised by the human developer to ensure accuracy, appropriate testing scope, and consistency with the implemented security controls.
-=======
 ### Commit test: restart local slice 7 verification (SR-16, NFR-3–6)
 #### Team #13's Agent
 - Started a fresh local verification branch from current main at the developer's direction, independently of PR #56. Planned isolated synthetic-data SAST, DAST, load and recovery runs.
@@ -592,4 +590,12 @@
 - Recorded sanitized SAST/ZAP, 151 HTTP checks, load, integrity, encrypted restore/outage, log-sentinel and entry-point evidence; updated plan, SDL and only the ASVS/assignment rows supported by code and executed checks. Added rejection checks for missing/null origins and form encoding, and exercised audit pagination over 25 records. Removed the one-off orchestration helper after its run.
 - Final application load on `f53b465`: 7,960 actions, zero errors, p95 read/write/login 12.91/16.52/75.20 ms. Restore fingerprints matched; recovery took 6.41 seconds. Local 110 unit/131 DB tests passed; Semgrep reported zero findings/errors. Scanner warnings and remaining coverage are explicitly documented.
 - Human/security changes: no human code edits reported. The agent edited the shell load wrapper while it was still executing, which caused a trailing parse error after k6 finished and saved complete passing metrics. This caveat is retained; the corrected wrapper uses `exec docker run` and passes syntax checks. The benchmark is not represented as a clean wrapper exit. Credentials, raw reports and backups remain private, and the existing local stack/untracked security scripts are preserved. No live deployment, final security acceptance, or new residual-risk approval is claimed.
->>>>>>> main
+
+### Commit docs: finalize OWASP defense-in-depth verification
+
+#### Jonathan's Agent
+
+- Assisted in reviewing the completed manual security testing and Slice 7 verification results against the documented OWASP Defense in Depth principle.
+- Assisted in revising the verification paragraph and supporting evidence references in `docs/owasp-design-principles.md`.
+- Assisted in maintaining accurate verification scope and distinguishing completed testing from comprehensive security assurance.
+- The human developer reviewed the documentation changes against the recorded verification results and supporting evidence.
