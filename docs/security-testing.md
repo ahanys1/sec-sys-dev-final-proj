@@ -4,7 +4,7 @@ Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#9-acceptance-criteria)
 
-Status: Draft — SAST, DAST, manual testing, and verification results pending.
+Status: Local SAST, DAST, and integrated verification results are documented in the [Slice 7 report](evidence/slice7/README.md) and its sanitized `results.json` (PR #63). Independent manual security testing results are documented in Section 3 (PR #65). The results apply to their respective tested application revisions and documented testing scopes. Live scans and final release acceptance are not claimed.
 
 ## 1. Static Application Security Testing (SAST)
 
