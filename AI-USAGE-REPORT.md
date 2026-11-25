@@ -529,6 +529,15 @@
 - Recorded the redeploy of `main` and the live denial-logging check in `docs/deployment.md`, marked ASVS V16.3.2 verified on the live host and slice 6 Done in `docs/plan.md`, and replaced an out-of-date "create the first admin" message at the end of `scripts/live-up.sh`.
 - Human/security changes: the developer ran the redeploy and the denial test on the instance and pasted the log lines; the agent confirmed they carry a user ID and request ID and no cookie, password or incident text before recording the result.
 
+### Commit `docs: reconcile OWASP Security by Design principles with implementation`
+#### Jonathan's Agent
+
+- Assisted with reviewing and updating all ten OWASP Security by Design principles in `docs/owasp-design-principles.md` to reflect the delivered application rather than planned implementation.
+- Helped reconcile each principle with implemented security controls, relevant assignment requirements, threat mitigations, and supporting code and test evidence.
+- Assisted with incorporating evidence from Slices #4 and #5, including server-side RBAC, input validation, transactional audit logging, append-only database protections, and manual security verification.
+- Helped incorporate subsequent security remediation and deployment evidence, including object-level authorization corrections, bounded pagination, identifier validation, atomic temporary-password consumption, and consistent error handling.
+- Assisted with distinguishing implemented and verified security controls from remaining verification activities and known limitations to avoid overstating security compliance.
+- Human validation: reviewed and adjusted the documentation, reconciled explanations with the application's implementation and previously collected verification evidence, and executed TypeScript, ESLint, and PostgreSQL-backed integration tests against the latest integrated application. All 125 database-backed integration tests passed.
 ### Commit `docs: claim local integration fixes (SR-4, SR-7, SR-16)`
 #### Team #13's Agent
 - Claimed remediation of the eight local integration findings on a branch from main; checked open PRs to keep fixes separate from SAST/DAST (#56) and release documentation (#55).
