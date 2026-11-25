@@ -1,3 +1,6 @@
+import { IncidentPagination } from "@/components/IncidentPagination";
+import { incidentPage, type PageParams } from "@/src/lib/incidents/pagination";
+import { incidentPageQuery } from "@/src/lib/incidents/page";
 
 import Link from "next/link";
 import { AppHeader } from "@/components/AppHeader";
@@ -7,9 +10,10 @@ import { listReporterIncidents } from "@/src/lib/incidents/incidents";
 
 // EP-19: Reporters can view only their own incidents.
 // Descriptions are intentionally excluded from this list.
-export default async function MyIncidentsPage() {
+export default async function MyIncidentsPage({ searchParams }: { searchParams: Promise<PageParams> }) {
   const user = await requirePageUser({ roles: ["user"] });
-  const incidents = await listReporterIncidents(getDb(), user.id);
+  const page = incidentPageQuery(await searchParams);
+  const { incidents, pagination } = incidentPage(await listReporterIncidents(getDb(), user.id, page), page);
 
   return (
     <>
@@ -42,6 +46,7 @@ export default async function MyIncidentsPage() {
             ))}
           </ul>
         )}
+        <IncidentPagination path="/incidents" page={page} hasNext={pagination.hasNext} />
       </main>
     </>
   );

@@ -19,3 +19,13 @@ export const POST = route("admin.users.password-reset", async (requestId, reques
 });
 
 export const OPTIONS = () => methodNotAllowed(["POST"]);
+
+export const GET = () => methodNotAllowed(["POST"]);
+
+export const HEAD = () => methodNotAllowed(["POST"]);
+
+export const PUT = () => methodNotAllowed(["POST"]);
+
+export const PATCH = () => methodNotAllowed(["POST"]);
+
+export const DELETE = () => methodNotAllowed(["POST"]);

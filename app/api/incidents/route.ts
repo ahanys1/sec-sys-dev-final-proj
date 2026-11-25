@@ -1,3 +1,4 @@
+import { incidentPage, parseIncidentPage } from "@/src/lib/incidents/pagination";
 import { authenticate } from "@/src/lib/auth/guard";
 import { getDb } from "@/src/lib/db";
 import { jsonResponse, methodNotAllowed, route } from "@/src/lib/http";
@@ -9,9 +10,11 @@ import { parseWrite } from "@/src/lib/request";
 export const GET = route("incident.list", async (_requestId, request) => {
   const { user } = await authenticate(request, { roles: ["user"] });
 
-  const incidents = await listReporterIncidents(getDb(), user.id);
+  const page = parseIncidentPage(new URL(request.url).searchParams);
+  const { incidents, pagination } = incidentPage(await listReporterIncidents(getDb(), user.id, page), page);
 
   return jsonResponse({
+    pagination,
     incidents: incidents.map((incident) => ({
       ...incident,
       createdAt: incident.createdAt.toISOString(),
@@ -41,6 +44,7 @@ export const POST = route("incident.create", async (_requestId, request) => {
   );
 });
 
-export const PUT = () => methodNotAllowed(["GET", "POST"]);
-export const PATCH = () => methodNotAllowed(["GET", "POST"]);
-export const DELETE = () => methodNotAllowed(["GET", "POST"]);
+export const PUT = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+export const PATCH = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+export const DELETE = () => methodNotAllowed(["GET", "HEAD", "POST"]);
+export const OPTIONS = () => methodNotAllowed(["GET", "HEAD", "POST"]);

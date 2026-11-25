@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { buildCsp, newNonce, STATIC_HEADERS } from "@/src/lib/security-headers";
 
 describe("security headers (C-7, SR-16; V3.4.1 to V3.4.6)", () => {
+  it("keeps Caddy's edge rejection headers aligned with the app", () => {
+    const caddy = readFileSync("Caddyfile", "utf8");
+    for (const [name, value] of Object.entries(STATIC_HEADERS)) expect(caddy).toContain(`${name} "${value}"`);
+    expect(caddy).toContain("default-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+    expect(caddy).toContain('Cache-Control "no-store"');
+  });
   it("builds a nonce-based CSP that forbids framing and inline script", () => {
     const csp = buildCsp("abc", false);
     expect(csp).toContain("script-src 'self' 'nonce-abc' 'strict-dynamic'");

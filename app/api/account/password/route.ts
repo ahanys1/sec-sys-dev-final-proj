@@ -43,7 +43,7 @@ export const POST = route("account.password", async (requestId, request) => {
     async (tx) => {
       await tx.user.update({
         where: { id: user.id },
-        data: { passwordHash, mustChangePassword: false, tempPasswordExpiresAt: null },
+        data: { passwordHash, mustChangePassword: false, tempPasswordExpiresAt: null, tempPasswordUsedAt: null },
       });
       if (body.endOtherSessions) await destroyUserSessions(tx, user.id, sessionId);
     },
@@ -54,3 +54,13 @@ export const POST = route("account.password", async (requestId, request) => {
 });
 
 export const OPTIONS = () => methodNotAllowed(["POST"]);
+
+export const GET = () => methodNotAllowed(["POST"]);
+
+export const HEAD = () => methodNotAllowed(["POST"]);
+
+export const PUT = () => methodNotAllowed(["POST"]);
+
+export const PATCH = () => methodNotAllowed(["POST"]);
+
+export const DELETE = () => methodNotAllowed(["POST"]);

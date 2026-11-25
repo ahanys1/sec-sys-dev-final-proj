@@ -82,3 +82,9 @@ Incident response plan and `SECURITY.md` (SDL #14), final security review (SDL #
 
 ## If time runs short
 Keep slices 4 and 6 and the audit trail. Cut settings polish, k6 tuning, and extra admin screens first. All High threats and the release gate in `docs/sdl.md` stay mandatory.
+
+### Local regression remediation (#61)
+
+Reconciled EP-08/09/19 with the built routes; enforced summary-only user access, malformed-ID rejection and closed-incident privacy; bounded incident queries and page navigation; consumed temporary credentials atomically; standardized method errors and edge rejection headers. Regression evidence: `tests/db/auth.test.ts`, `tests/db/incidents.test.ts`, `tests/incidents-pagination.test.ts`, `tests/api-methods.test.ts`, `tests/proxy.test.ts`, `tests/security-headers.test.ts`. Verification of these fixes does not complete slice 7 or the release gate.
+
+Validation for #61 (2026-11-24): lint, TypeScript, CI guards, 104 unit tests, 131 PostgreSQL tests, Docker production build, and production dependency audit (0 vulnerabilities) passed. Local HTTPS rechecks verified the targeted controls and all three roles' browser pagination. Native `make check` stops at Turbopack's local worker port-binding permission error even outside the sandbox; the Docker production build passes. No live deployment, full fuzz/load run, or release acceptance is claimed.

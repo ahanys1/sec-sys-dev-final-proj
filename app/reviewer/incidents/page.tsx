@@ -1,3 +1,6 @@
+import { IncidentPagination } from "@/components/IncidentPagination";
+import { incidentPage, type PageParams } from "@/src/lib/incidents/pagination";
+import { incidentPageQuery } from "@/src/lib/incidents/page";
 
 import { AppHeader } from "@/components/AppHeader";
 import { requirePageUser } from "@/src/lib/auth/page";
@@ -7,9 +10,10 @@ import Link from "next/link";
 
 // EP-08: Reviewers see only open and under-review incidents.
 // Descriptions are excluded from the queue.
-export default async function ReviewerIncidentsPage() {
+export default async function ReviewerIncidentsPage({ searchParams }: { searchParams: Promise<PageParams> }) {
   const user = await requirePageUser({ roles: ["reviewer"] });
-  const incidents = await listReviewerIncidents(getDb());
+  const page = incidentPageQuery(await searchParams);
+  const { incidents, pagination } = incidentPage(await listReviewerIncidents(getDb(), page), page);
 
   return (
     <>
@@ -44,6 +48,7 @@ export default async function ReviewerIncidentsPage() {
             ))}
           </ul>
         )}
+        <IncidentPagination path="/reviewer/incidents" page={page} hasNext={pagination.hasNext} />
       </main>
     </>
   );

@@ -1,6 +1,8 @@
 import type { Prisma, PrismaClient, Role } from "@/src/generated/prisma/client";
 import { runAudited } from "../audit";
 import { ApiError } from "../http";
+import { idSchema } from "../admin/schemas";
+import { DEFAULT_INCIDENT_PAGE, type IncidentPage, pageWindow } from "./pagination";
 import type { CreateIncidentInput, CreateCommentInput, UpdateIncidentStatusInput, UpdateIncidentCategoryInput } from "./schemas";
 
 export async function createIncident(
@@ -43,8 +45,10 @@ export async function createIncident(
 export async function listReporterIncidents(
   db: PrismaClient,
   reporterId: string,
+  page: IncidentPage = DEFAULT_INCIDENT_PAGE,
 ) {
   return db.incident.findMany({
+    ...pageWindow(page),
     where: { reporterId },
     select: {
       id: true,
@@ -63,8 +67,9 @@ export async function listReporterIncidents(
 
 // EP-08: Reviewers can list open and under-review incidents
 // from all reporters. Descriptions are excluded from list results.
-export async function listReviewerIncidents(db: PrismaClient) {
+export async function listReviewerIncidents(db: PrismaClient, page: IncidentPage = DEFAULT_INCIDENT_PAGE) {
   return db.incident.findMany({
+    ...pageWindow(page),
     where: {
       status: {
         in: ["open", "under_review"],
@@ -87,8 +92,9 @@ export async function listReviewerIncidents(db: PrismaClient) {
 }
 // EP-08: Administrators may view incidents in all statuses.
 // List responses exclude descriptions and other sensitive details.
-export async function listAdminIncidents(db: PrismaClient) {
+export async function listAdminIncidents(db: PrismaClient, page: IncidentPage = DEFAULT_INCIDENT_PAGE) {
   return db.incident.findMany({
+    ...pageWindow(page),
     select: {
       id: true,
       title: true,
@@ -111,12 +117,10 @@ export async function getIncidentDetail(
   incidentId: string,
   user: { id: string; role: Role },
 ) {
+  // SR-4/5/7, ASVS V8.2.1/V8.2.2: R-14 permits user summaries only, even for their own reports.
+  if (user.role === "user" || !idSchema.safeParse(incidentId).success) throw new ApiError("not_found");
   const access: Prisma.IncidentWhereInput =
-    user.role === "admin"
-      ? {}
-      : user.role === "reviewer"
-        ? { status: { in: ["open", "under_review"]} }
-        : { reporterId: user.id };
+    user.role === "admin" ? {} : { status: { in: ["open", "under_review"] } };
 
   const incident = await db.incident.findFirst({
     where: {
@@ -152,6 +156,9 @@ export async function createIncidentComment(
   if (author.role === "user") {
     throw new ApiError("forbidden");
   }
+
+  // SR-7, ASVS V2.2.1: validate path IDs before PostgreSQL UUID conversion.
+  if (!idSchema.safeParse(incidentId).success) throw new ApiError("not_found");
 
   return runAudited(
     db,
@@ -208,6 +215,8 @@ export async function updateIncidentStatus(
     throw new ApiError("forbidden");
   }
 
+  if (!idSchema.safeParse(incidentId).success) throw new ApiError("not_found");
+
   const expectedStatus =
     input.status === "under_review" ? "open" : "under_review";
 
@@ -227,10 +236,11 @@ export async function updateIncidentStatus(
       if (result.count !== 1) {
         const incident = await tx.incident.findUnique({
           where: { id: incidentId },
-          select: { id: true },
+          select: { id: true, status: true },
         });
 
-        if (!incident) {
+        // SR-4/5, ASVS V8.2.2, T-25: closed and missing IDs have the same response.
+        if (!incident || incident.status === "closed") {
           throw new ApiError("not_found");
         }
 
@@ -265,6 +275,8 @@ export async function updateIncidentCategory(
   if (reviewer.role !== "reviewer") {
     throw new ApiError("forbidden");
   }
+
+  if (!idSchema.safeParse(incidentId).success) throw new ApiError("not_found");
 
   return runAudited(
     db,

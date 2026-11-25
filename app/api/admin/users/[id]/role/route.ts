@@ -19,3 +19,13 @@ export const PATCH = route("admin.users.role", async (requestId, request, contex
 });
 
 export const OPTIONS = () => methodNotAllowed(["PATCH"]);
+
+export const GET = () => methodNotAllowed(["PATCH"]);
+
+export const HEAD = () => methodNotAllowed(["PATCH"]);
+
+export const POST = () => methodNotAllowed(["PATCH"]);
+
+export const PUT = () => methodNotAllowed(["PATCH"]);
+
+export const DELETE = () => methodNotAllowed(["PATCH"]);

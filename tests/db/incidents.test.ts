@@ -618,29 +618,12 @@ it("rejects reporter listing requests from reviewers and admins", async () => {
     expect(body).not.toHaveProperty("incidents");
   }
 });
-it("allows a reporter to view their own incident details", async () => {
-  const description = "Detailed incident information for the reporter.";
-
-  const created = await postIncident({
-    title: "Reporter detail access test",
-    description,
-    categoryId,
-  });
-
-  expect(created.status).toBe(201);
-
-  const { incident: createdIncident } = await created.json();
-
-  const response = await getIncident(createdIncident.id);
-
-  expect(response.status).toBe(200);
-
-  const { incident } = await response.json();
-
-  expect(incident.id).toBe(createdIncident.id);
-  expect(incident.title).toBe("Reporter detail access test");
-  expect(incident.description).toBe(description);
-  expect(incident.reporterId).toBe(reporterId);
+it("denies users their own incident details under the summary-only policy (R-14, SR-4/5)", async () => {
+  const created = await postIncident({ title: "Summary-only access", description: "Synthetic private detail", categoryId });
+  const { incident } = await created.json();
+  const response = await getIncident(incident.id);
+  expect(response.status).toBe(404);
+  expect(JSON.stringify(await response.json())).not.toContain("Synthetic private detail");
 });
 it("returns 404 when a reporter requests another reporter's incident", async () => {
   const otherReporter = await signInAs("reviewer");
@@ -711,7 +694,7 @@ it("rejects unauthenticated incident detail requests", async () => {
   expect(body.error.code).toBe("unauthenticated");
   expect(body).not.toHaveProperty("incident");
 });
-it("restricts closed incident details to the reporter and admin", async () => {
+it("restricts closed incident details to admins (R-14)", async () => {
   const created = await postIncident({
     title: "Closed incident access test",
     description: "Confidential closed incident details.",
@@ -751,10 +734,10 @@ it("restricts closed incident details to the reporter and admin", async () => {
     "Confidential closed incident details.",
   );
 
-  // Reporters retain access to their own incident history.
+  // Users retain only summary access through EP-19.
   const reporterResponse = await getIncident(incident.id);
-  expect(reporterResponse.status).toBe(200);
-  expect((await reporterResponse.json()).incident.id).toBe(incident.id);
+  expect(reporterResponse.status).toBe(404);
+  expect(await reporterResponse.json()).not.toHaveProperty("incident");
 });
 it("rejects unauthenticated reviewer queue requests", async () => {
   const response = await getReviewerQueue("");
@@ -2854,5 +2837,71 @@ it("rejects unexpected fields in category updates (EP-23)", async () => {
 
   expect(audits).toBe(0);
 });
+
+  it("returns 404 for malformed path IDs without business or audit writes (SR-7)", async () => {
+    const reviewer = await signInAs("reviewer");
+    const admin = await signInAs("admin");
+    const before = await db.auditLog.count();
+    const responses = [
+      await postComment("not-a-uuid", { body: "Synthetic comment" }, reviewer.sessionCookie),
+      await patchStatus("not-a-uuid", { status: "under_review" }, reviewer.sessionCookie),
+      await updateCategory("not-a-uuid", { categoryId }, reviewer.sessionCookie),
+      await updateAdminCategory("not-a-uuid", { active: false }, admin.sessionCookie),
+    ];
+    for (const response of responses) {
+      expect(response.status).toBe(404);
+      expect((await response.json()).error.code).toBe("not_found");
+    }
+    expect(await db.auditLog.count()).toBe(before);
+  });
+
+  it("does not distinguish closed from missing IDs on status writes (T-25, SR-4/5)", async () => {
+    const reviewer = await signInAs("reviewer");
+    const incident = await db.incident.create({ data: {
+      title: "Synthetic closed privacy", description: "Synthetic detail", reporterId, categoryId, status: "closed",
+    } });
+    const before = await db.auditLog.count();
+    for (const status of ["under_review", "closed"]) {
+      const closed = await patchStatus(incident.id, { status }, reviewer.sessionCookie);
+      const missing = await patchStatus(randomUUID(), { status }, reviewer.sessionCookie);
+      expect(closed.status).toBe(404);
+      expect(missing.status).toBe(404);
+      const a = (await closed.json()).error;
+      const b = (await missing.json()).error;
+      expect(a.code).toBe(b.code);
+      expect(a.message).toBe(b.message);
+    }
+    expect(await db.auditLog.count()).toBe(before);
+  });
+
+  it("bounds and separates user and reviewer pages without descriptions (T-32, SR-7)", async () => {
+    const reviewer = await signInAs("reviewer");
+    await db.incident.createMany({ data: Array.from({ length: 27 }, (_, i) => ({
+      title: `Synthetic pagination ${i}`, description: "Synthetic pagination detail", reporterId, categoryId,
+    })) });
+    for (const [handler, path, session] of [
+      [list, "/api/incidents", cookie],
+      [reviewerQueue, "/api/reviewer/incidents", reviewer.sessionCookie],
+    ] as const) {
+      const get = (query: string) => handler(new Request(`https://app.test${path}?${query}`, { headers: { cookie: session } }));
+      const first = await get("page=1&limit=10");
+      const second = await get("page=2&limit=10");
+      expect(first.status).toBe(200);
+      expect(second.status).toBe(200);
+      const a = await first.json();
+      const b = await second.json();
+      expect(a.incidents).toHaveLength(10);
+      expect(b.incidents).toHaveLength(10);
+      expect(a.pagination).toMatchObject({ page: 1, limit: 10, hasNext: true });
+      expect(a.incidents.some((x: { id: string }) => b.incidents.some((y: { id: string }) => x.id === y.id))).toBe(false);
+      expect(JSON.stringify(a)).not.toContain("description");
+      for (const query of ["page=0", "limit=101", "page=1&page=2", "page=no"]) expect((await get(query)).status).toBe(400);
+      const denied = await handler(new Request(`https://app.test${path}?limit=10`));
+      expect(denied.status).toBe(401);
+    }
+    const { incidentPage } = await import("@/src/lib/incidents/pagination");
+    const { listAdminIncidents } = await import("@/src/lib/incidents/incidents");
+    expect(incidentPage(await listAdminIncidents(db, { page: 1, limit: 10 }), { page: 1, limit: 10 }).incidents).toHaveLength(10);
+  });
 
 });
