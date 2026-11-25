@@ -24,8 +24,8 @@ ASVS 5.0.0, Level 1 and 2 requirements. Status: `TODO` / `Done` / `N/A: reason`.
 |---|---|---|---|---|
 | V2.3.1 | 1 | Verify that the application will only process business logic flows for the same user in the expected sequential step order and without skipping steps. | TODO | |
 | V2.3.2 | 2 | Verify that business logic limits are implemented per the application's documentation to avoid business logic flaws being exploited. | TODO | |
-| V2.3.3 | 2 | Verify that transactions are being used at the business logic level such that either a business logic operation succeeds in its entirety or it is rolled back to the previous correct state. | TODO | |
-| V2.3.4 | 2 | Verify that business logic level locking mechanisms are used to ensure that limited quantity resources (such as theater seats or delivery slots) cannot be double-booked by manipulating the application's logic. | TODO | |
+| V2.3.3 | 2 | Verify that transactions are being used at the business logic level such that either a business logic operation succeeds in its entirety or it is rolled back to the previous correct state. | Done | `tests/db/audit.test.ts`, `tests/db/incidents.test.ts`, `tests/db/admin-users.test.ts`, `tests/tx.test.ts`; final 50-user run has zero failed actions and no missing incident audits/orphan comments; `docs/evidence/slice7/`. |
+| V2.3.4 | 2 | Verify that business logic level locking mechanisms are used to ensure that limited quantity resources (such as theater seats or delivery slots) cannot be double-booked by manipulating the application's logic. | Done | `tests/db/audit.test.ts`, `tests/db/incidents.test.ts`, `tests/db/admin-users.test.ts`, `tests/tx.test.ts`; final 50-user run has zero failed actions and no missing incident audits/orphan comments; `docs/evidence/slice7/`. |
 
 ## V2.4 Anti-automation
 

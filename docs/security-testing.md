@@ -4,7 +4,7 @@ Team #13
 
 Spec: [ASSIGNMENT.md](../ASSIGNMENT.md#9-acceptance-criteria)
 
-Status: Draft — SAST, DAST, manual testing, and verification results pending.
+Status: Fresh local verification in PR #63, restarted independently of #56 at developer direction. Executed evidence and scoped limitations are in [the Slice 7 report](evidence/slice7/README.md) and its sanitized `results.json`. The original methodology below is retained as the broader verification plan; statements saying execution is pending are superseded only for the specific local checks recorded in that report. Live scans and final release acceptance are not claimed.
 
 ## 1. Static Application Security Testing (SAST)
 

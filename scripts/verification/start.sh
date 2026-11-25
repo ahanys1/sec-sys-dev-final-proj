@@ -20,4 +20,9 @@ scripts/verification/compose.sh run --rm create-admin npx tsx scripts/verificati
 scripts/verification/compose.sh up -d app caddy
 
 # Trust the isolated Caddy issuer explicitly in Python verification clients.
-docker cp team13-slice7-caddy-1:/data/caddy/pki/authorities/local/root.crt /tmp/team13-slice7/local-ca.crt
+for attempt in $(seq 1 30); do
+  if docker cp team13-slice7-caddy-1:/data/caddy/pki/authorities/local/root.crt /tmp/team13-slice7/local-ca.crt 2>/dev/null; then exit 0; fi
+  sleep 1
+done
+echo 'Local Caddy CA was not ready after 30 seconds.' >&2
+exit 1

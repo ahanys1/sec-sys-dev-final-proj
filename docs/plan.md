@@ -28,7 +28,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 4 | Incidents and comments | 2 | Done (#54) | #7, #8 |
 | 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; demo script in `docs/user-manual.md` (#55) | #12, #21 |
-| 7 | Verification | 3, 4, 5 | In progress: fresh local verification on `codex/slice7-local-verification`; replaces the #56 approach at developer direction | #13, #14, #16, #17 |
+| 7 | Verification | 3, 4, 5 | In review (#63): fresh local SAST/ZAP, 151 HTTP checks, 50-user performance and encrypted restore/outage evidence; full release/live verification remains separate | #13, #14, #16, #17 |
 | 8 | Release | 7 | In progress: #20 manual/source packaging in review (#55), refreshed for integrated workflows and live deployment; final release blocked on verification | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
@@ -88,3 +88,9 @@ Keep slices 4 and 6 and the audit trail. Cut settings polish, k6 tuning, and ext
 Reconciled EP-08/09/19 with the built routes; enforced summary-only user access, malformed-ID rejection and closed-incident privacy; bounded incident queries and page navigation; consumed temporary credentials atomically; standardized method errors and edge rejection headers. Regression evidence: `tests/db/auth.test.ts`, `tests/db/incidents.test.ts`, `tests/incidents-pagination.test.ts`, `tests/api-methods.test.ts`, `tests/proxy.test.ts`, `tests/security-headers.test.ts`. Verification of these fixes does not complete slice 7 or the release gate.
 
 Validation for #61 (2026-11-24): lint, TypeScript, CI guards, 104 unit tests, 131 PostgreSQL tests, Docker production build, and production dependency audit (0 vulnerabilities) passed. Local HTTPS rechecks verified the targeted controls and all three roles' browser pagination. Native `make check` stops at Turbopack's local worker port-binding permission error even outside the sandbox; the Docker production build passes. No live deployment, full fuzz/load run, or release acceptance is claimed.
+
+### Fresh local verification (#63)
+
+Restarted independently of #56 at developer direction. See `docs/evidence/slice7/README.md` and sanitized `results.json`: 110 unit and 131 DB tests; 151 HTTP checks; local Semgrep clean; ZAP public/per-role passive scans with triage; 50 VUs, 7,960 actions, zero errors, read/write/login p95 12.91/16.52/75.20 ms; identical restore fingerprints and successful DB-outage recovery. Fixed native GET form fallback and adapter transaction-conflict retry. Native wrapper-edit caveat and all scope limits are retained in the evidence.
+
+Still outside this completed local run: live-host scans, broad active scanning, a fresh interactive-browser execution of every use/misuse case, exhaustive fuzzing, independently enumerated CodeQL alerts, production backup scheduling/key custody, and final security/release approval. Audit pagination over 25 records is now exercised over HTTP; this does not claim a new manual browser pagination session.

@@ -1,0 +1,2356 @@
+{
+  "http-results": {
+    "checks": [
+      {
+        "name": "create incident",
+        "status": 201,
+        "expected": [
+          201
+        ],
+        "pass": true
+      },
+      {
+        "name": "anonymous list",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "user admin API",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "reviewer admin API",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "user own detail denied",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "foreign detail denied",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin reviewer transition denied",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "self role denied",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "reviewer transition",
+        "status": 200,
+        "expected": [
+          200
+        ],
+        "pass": true
+      },
+      {
+        "name": "user comments denied",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "reviewer comment",
+        "status": 201,
+        "expected": [
+          201
+        ],
+        "pass": true
+      },
+      {
+        "name": "foreign origin",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "missing origin",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "null origin",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "simple form content type",
+        "status": 415,
+        "expected": [
+          415
+        ],
+        "pass": true
+      },
+      {
+        "name": "middleware bypass",
+        "status": 400,
+        "expected": [
+          400
+        ],
+        "pass": true
+      },
+      {
+        "name": "stored text server escaping",
+        "status": 200,
+        "expected": [
+          200
+        ],
+        "pass": true
+      },
+      {
+        "name": "stored script escaped in HTML",
+        "pass": true
+      },
+      {
+        "name": "query fuzz /api/incidents?page=-1",
+        "status": 400,
+        "expected": [
+          400
+        ],
+        "pass": true
+      },
+      {
+        "name": "query fuzz /api/incidents?limit=100000",
+        "status": 400,
+        "expected": [
+          400
+        ],
+        "pass": true
+      },
+      {
+        "name": "query fuzz /api/incidents?page=NaN",
+        "status": 400,
+        "expected": [
+          400
+        ],
+        "pass": true
+      },
+      {
+        "name": "query fuzz /api/incidents?page=1&page=2",
+        "status": 400,
+        "expected": [
+          400
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/users",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/users",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/users",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/users",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/users",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/users",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/audit",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/audit",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/audit",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/settings",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/settings",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/settings",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/settings",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/settings",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/settings",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/categories",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/categories",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix GET /api/admin/categories",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/categories",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/categories",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/categories",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/password-reset",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/password-reset",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "admin matrix POST /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/password-reset",
+        "status": 403,
+        "expected": [
+          403
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/users",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/users",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/audit",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/audit",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/settings",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/settings",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/categories",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/categories",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/incidents",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "page role denial /admin/incidents",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "oversize JSON body",
+        "status": 413,
+        "expected": [
+          413
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/comments",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/comments",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/comments",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/comments",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/comments",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/category",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/category",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/category",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/category",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed/category",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/settings",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/settings",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/settings",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/settings",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/settings",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/users",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/users",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/users",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/users",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/users",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/role",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/users/75037f79-30fa-4b57-8249-b8f17761faf1/status",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/categories",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/categories",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/categories",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/categories",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/admin/categories",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz PATCH /api/admin/categories/01a9523b-ddfd-464c-b185-61998d550b3b",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/account/password",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/account/password",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/account/password",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/account/password",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/account/password",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/auth/login",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/auth/login",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/auth/login",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/auth/login",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "body fuzz POST /api/auth/login",
+        "status": 400,
+        "expected": [
+          400,
+          401,
+          403,
+          404,
+          405,
+          429
+        ],
+        "pass": true
+      },
+      {
+        "name": "SQL injection login remains denied",
+        "status": 401,
+        "expected": [
+          400,
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "mass assignment role rejected",
+        "status": 400,
+        "expected": [
+          400
+        ],
+        "pass": true
+      },
+      {
+        "name": "logout",
+        "status": 200,
+        "expected": [
+          200
+        ],
+        "pass": true
+      },
+      {
+        "name": "replay after logout",
+        "status": 401,
+        "expected": [
+          401
+        ],
+        "pass": true
+      },
+      {
+        "name": "secret path /.env",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "secret path /.env.keys",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "secret path /.git/config",
+        "status": 404,
+        "expected": [
+          404
+        ],
+        "pass": true
+      },
+      {
+        "name": "persist administrator setting",
+        "status": 200,
+        "expected": [
+          200
+        ],
+        "pass": true
+      },
+      {
+        "name": "audit page one",
+        "status": 200,
+        "expected": [
+          200
+        ],
+        "pass": true
+      },
+      {
+        "name": "audit page two",
+        "status": 200,
+        "expected": [
+          200
+        ],
+        "pass": true
+      },
+      {
+        "name": "audit pagination beyond 25 records",
+        "pass": true
+      },
+      {
+        "name": "native POST fallback /login",
+        "pass": true
+      },
+      {
+        "name": "native POST fallback /account/password",
+        "pass": true
+      },
+      {
+        "name": "native POST fallback /incidents/new",
+        "pass": true
+      },
+      {
+        "name": "native POST fallback /admin/users",
+        "pass": true
+      },
+      {
+        "name": "native POST fallback /admin/settings",
+        "pass": true
+      },
+      {
+        "name": "native POST fallback /reviewer/incidents/853af7e8-c5db-4c7e-b422-c88ad04b12ed",
+        "pass": true
+      }
+    ],
+    "passed": 151,
+    "total": 151
+  },
+  "recovery-results": {
+    "integrity": {
+      "missing_incident_audits": 0,
+      "orphan_comments": 0
+    },
+    "backup_bytes": 364464,
+    "source_equals_restore": true,
+    "tables": {
+      "users": {
+        "rows": 52,
+        "sha256": "bd2c90f8a8c73772445f11d026a5331d6374ce5950b8b5781e4f0a6ecb0c3da7"
+      },
+      "categories": {
+        "rows": 1,
+        "sha256": "9d6a67f1f5e0ada94132221748c8e86097a3a3ef41576a41959778367b338548"
+      },
+      "incidents": {
+        "rows": 5124,
+        "sha256": "5722c350ab3aab746d4ef14c90bbda67d1c2c1aa74de9add5b46b3f9efa1c137"
+      },
+      "comments": {
+        "rows": 3,
+        "sha256": "9aabd1ff927b4feb2f9d2a14beb7375bc364673b9a32ee01b6517a9631742665"
+      },
+      "audit_log": {
+        "rows": 4131,
+        "sha256": "baedf00b938bcea396b7f991854d28a5592b4aedb6c6021cf67bdc5dc0b34744"
+      },
+      "settings": {
+        "rows": 1,
+        "sha256": "4a370e08a5df518d82339ce290bcb27906a84340c69c0739c2b586ee53af17da"
+      },
+      "sessions": {
+        "rows": 226,
+        "sha256": "04ee27d3da01fabcb9c49cd4bf42f5195ebc51e3884f455de5765ef5a0ba102c"
+      },
+      "login_attempts": {
+        "rows": 104,
+        "sha256": "9f1b7bfe0b8b45a2e11aec87dc98ccc6302a1baba8341c4a29bb8f9317a60a76"
+      }
+    },
+    "restore_seconds": 1.0242922910256311,
+    "restore_under_one_hour": true,
+    "restored_audit_mutations_denied": true,
+    "outage_status": 500,
+    "outage_generic": true,
+    "recovered": true,
+    "outage_recovery_seconds": 6.413674583978718
+  },
+  "log-results": {
+    "unhandled_login_errors": 0,
+    "checked_sentinels": 108,
+    "secret_matches": 0,
+    "description_matches": 0,
+    "unexpected_error_logged": true
+  },
+  "surface-results": {
+    "routes": [
+      {
+        "route": "/api/health",
+        "inventoried": true,
+        "guard": true,
+        "public": true
+      },
+      {
+        "route": "/api/incidents",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/reviewer/incidents",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/auth/logout",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/auth/login",
+        "inventoried": true,
+        "guard": true,
+        "public": true
+      },
+      {
+        "route": "/api/admin/settings",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/audit",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/users",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/categories",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/users/[id]",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/users/[id]/role",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/users/[id]/status",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/users/[id]/password-reset",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/admin/categories/[id]",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/account/password",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/incidents/[id]",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/incidents/[id]/comments",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/incidents/[id]/category",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      },
+      {
+        "route": "/api/incidents/[id]/status",
+        "inventoried": true,
+        "guard": true,
+        "public": false
+      }
+    ],
+    "pages": [
+      {
+        "page": "/",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/login",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/incidents",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/reviewer/incidents",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/reviewer/incidents/[id]",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/admin/settings",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/admin/audit",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/admin/users",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/admin/categories",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/admin/incidents",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/admin/incidents/[id]",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/account/password",
+        "inventoried": true,
+        "guard": true
+      },
+      {
+        "page": "/incidents/new",
+        "inventoried": true,
+        "guard": true
+      }
+    ]
+  },
+  "k6-summary": {
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 7960
+      }
+    },
+    "action_errors": {
+      "values": {
+        "rate": 0,
+        "passes": 0,
+        "fails": 7960
+      },
+      "thresholds": {
+        "rate<0.01": {
+          "ok": true
+        }
+      },
+      "type": "rate",
+      "contains": "default"
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 9,
+        "min": 1,
+        "max": 50
+      }
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 7960,
+        "rate": 21.934247741725116
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 7960,
+        "rate": 21.934247741725116
+      }
+    },
+    "vus_max": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 50,
+        "min": 50,
+        "max": 50
+      }
+    },
+    "write_ms": {
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 74.713208,
+        "p(90)": 14.5681338,
+        "p(95)": 16.523625,
+        "avg": 9.57587888130184,
+        "min": 3.7155,
+        "med": 8.455583
+      }
+    },
+    "login_ms": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 43.505729804657186,
+        "min": 26.356375,
+        "med": 39.324417,
+        "max": 204.892583,
+        "p(90)": 54.0445336,
+        "p(95)": 75.2012666
+      },
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      }
+    },
+    "read_ms": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "med": 5.765167,
+        "max": 310.669333,
+        "p(90)": 10.7990461,
+        "p(95)": 12.908590999999998,
+        "avg": 7.011163404982212,
+        "min": 2.678916
+      },
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      }
+    }
+  },
+  "k6-single-ip-summary": {
+    "action_errors": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "passes": 429,
+        "fails": 4489,
+        "rate": 0.08723058153721025
+      },
+      "thresholds": {
+        "rate<0.01": {
+          "ok": false
+        }
+      }
+    },
+    "read_ms": {
+      "contains": "time",
+      "values": {
+        "min": 2.8985,
+        "med": 8.540833,
+        "max": 225.985041,
+        "p(90)": 17.549875,
+        "p(95)": 21.233447499999997,
+        "avg": 10.374881388157911
+      },
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      },
+      "type": "trend"
+    },
+    "vus": {
+      "type": "gauge",
+      "contains": "default",
+      "values": {
+        "value": 50,
+        "min": 1,
+        "max": 50
+      }
+    },
+    "iterations": {
+      "contains": "default",
+      "values": {
+        "count": 4868,
+        "rate": 21.460951325361936
+      },
+      "type": "counter"
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 4918,
+        "rate": 21.681380159845933
+      }
+    },
+    "login_ms": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "avg": 12.595683104477613,
+        "min": 2.76825,
+        "med": 8.315709,
+        "max": 67.42025,
+        "p(90)": 27.51108320000001,
+        "p(95)": 42.24893339999998
+      },
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.08723058153721025,
+        "passes": 429,
+        "fails": 4489
+      }
+    },
+    "vus_max": {
+      "values": {
+        "value": 50,
+        "min": 50,
+        "max": 50
+      },
+      "type": "gauge",
+      "contains": "default"
+    },
+    "rate_limited": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 429,
+        "rate": 1.8912793998726933
+      }
+    },
+    "write_ms": {
+      "contains": "time",
+      "values": {
+        "max": 240.203084,
+        "p(90)": 19.757075,
+        "p(95)": 24.167541399999987,
+        "avg": 12.552974464847846,
+        "min": 4.079375,
+        "med": 10.39475
+      },
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      },
+      "type": "trend"
+    }
+  },
+  "k6-before-retry-summary": {
+    "vus": {
+      "contains": "default",
+      "values": {
+        "value": 14,
+        "min": 1,
+        "max": 50
+      },
+      "type": "gauge"
+    },
+    "read_ms": {
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "p(95)": 20.770566349999978,
+        "avg": 9.102795496380574,
+        "min": 2.457333,
+        "med": 6.5394165,
+        "max": 328.498834,
+        "p(90)": 15.338246100000001
+      },
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      }
+    },
+    "login_ms": {
+      "values": {
+        "avg": 50.91893953199493,
+        "min": 24.8575,
+        "med": 43.390708,
+        "max": 243.890626,
+        "p(90)": 72.88504180000002,
+        "p(95)": 92.98446699999997
+      },
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time"
+    },
+    "vus_max": {
+      "contains": "default",
+      "values": {
+        "value": 50,
+        "min": 50,
+        "max": 50
+      },
+      "type": "gauge"
+    },
+    "action_errors": {
+      "contains": "default",
+      "values": {
+        "rate": 0.007306380905991232,
+        "passes": 60,
+        "fails": 8152
+      },
+      "thresholds": {
+        "rate<0.01": {
+          "ok": true
+        }
+      },
+      "type": "rate"
+    },
+    "iterations": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 8212,
+        "rate": 22.62354456354874
+      }
+    },
+    "write_ms": {
+      "thresholds": {
+        "p(95)<=2000": {
+          "ok": true
+        }
+      },
+      "type": "trend",
+      "contains": "time",
+      "values": {
+        "max": 122.617584,
+        "p(90)": 21.54295,
+        "p(95)": 26.7282332,
+        "avg": 12.948535578425279,
+        "min": 2.255416,
+        "med": 10.066333
+      }
+    },
+    "http_req_failed": {
+      "type": "rate",
+      "contains": "default",
+      "values": {
+        "rate": 0.007306380905991232,
+        "passes": 60,
+        "fails": 8152
+      }
+    },
+    "http_reqs": {
+      "type": "counter",
+      "contains": "default",
+      "values": {
+        "count": 8212,
+        "rate": 22.62354456354874
+      }
+    }
+  },
+  "semgrep": {
+    "version": "1.185.0",
+    "scanned_files": 171,
+    "findings": 0,
+    "errors": 0
+  },
+  "zap-admin": {
+    "version": "2.17.0",
+    "alerts": [
+      {
+        "id": "10202",
+        "name": "Absence of Anti-CSRF Tokens",
+        "risk": "Medium (Low)",
+        "count": "5"
+      },
+      {
+        "id": "90004",
+        "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "risk": "Low (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10109",
+        "name": "Modern Web Application",
+        "risk": "Informational (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10049",
+        "name": "Non-Storable Content",
+        "risk": "Informational (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10015",
+        "name": "Re-examine Cache-control Directives",
+        "risk": "Informational (Low)",
+        "count": "5"
+      },
+      {
+        "id": "10049",
+        "name": "Storable and Cacheable Content",
+        "risk": "Informational (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10049",
+        "name": "Storable but Non-Cacheable Content",
+        "risk": "Informational (Medium)",
+        "count": "1"
+      },
+      {
+        "id": "10031",
+        "name": "User Controllable HTML Element Attribute (Potential XSS)",
+        "risk": "Informational (Low)",
+        "count": "1"
+      }
+    ]
+  },
+  "zap-public-final": {
+    "version": "2.17.0",
+    "alerts": [
+      {
+        "id": "10202",
+        "name": "Absence of Anti-CSRF Tokens",
+        "risk": "Medium (Low)",
+        "count": "3"
+      },
+      {
+        "id": "10044",
+        "name": "Big Redirect Detected (Potential Sensitive Information Leak)",
+        "risk": "Low (Medium)",
+        "count": "1"
+      },
+      {
+        "id": "90004",
+        "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "risk": "Low (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10111",
+        "name": "Authentication Request Identified",
+        "risk": "Informational (High)",
+        "count": "1"
+      },
+      {
+        "id": "10109",
+        "name": "Modern Web Application",
+        "risk": "Informational (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10049",
+        "name": "Non-Storable Content",
+        "risk": "Informational (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10015",
+        "name": "Re-examine Cache-control Directives",
+        "risk": "Informational (Low)",
+        "count": "2"
+      },
+      {
+        "id": "10049",
+        "name": "Storable and Cacheable Content",
+        "risk": "Informational (Medium)",
+        "count": "5"
+      }
+    ]
+  },
+  "zap-baseline": {
+    "version": "2.17.0",
+    "alerts": [
+      {
+        "id": "10044",
+        "name": "Big Redirect Detected (Potential Sensitive Information Leak)",
+        "risk": "Low (Medium)",
+        "count": "1"
+      },
+      {
+        "id": "90004",
+        "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "risk": "Low (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10111",
+        "name": "Authentication Request Identified",
+        "risk": "Informational (High)",
+        "count": "1"
+      },
+      {
+        "id": "10024",
+        "name": "Information Disclosure - Sensitive Information in URL",
+        "risk": "Informational (Medium)",
+        "count": "2"
+      },
+      {
+        "id": "10109",
+        "name": "Modern Web Application",
+        "risk": "Informational (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10049",
+        "name": "Non-Storable Content",
+        "risk": "Informational (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10015",
+        "name": "Re-examine Cache-control Directives",
+        "risk": "Informational (Low)",
+        "count": "3"
+      },
+      {
+        "id": "10049",
+        "name": "Storable and Cacheable Content",
+        "risk": "Informational (Medium)",
+        "count": "5"
+      }
+    ]
+  },
+  "zap-user": {
+    "version": "2.17.0",
+    "alerts": [
+      {
+        "id": "10202",
+        "name": "Absence of Anti-CSRF Tokens",
+        "risk": "Medium (Low)",
+        "count": "4"
+      },
+      {
+        "id": "90004",
+        "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "risk": "Low (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10109",
+        "name": "Modern Web Application",
+        "risk": "Informational (Medium)",
+        "count": "2"
+      },
+      {
+        "id": "10049",
+        "name": "Non-Storable Content",
+        "risk": "Informational (Medium)",
+        "count": "4"
+      },
+      {
+        "id": "10015",
+        "name": "Re-examine Cache-control Directives",
+        "risk": "Informational (Low)",
+        "count": "5"
+      },
+      {
+        "id": "10049",
+        "name": "Storable and Cacheable Content",
+        "risk": "Informational (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10031",
+        "name": "User Controllable HTML Element Attribute (Potential XSS)",
+        "risk": "Informational (Low)",
+        "count": "1"
+      }
+    ]
+  },
+  "zap-reviewer": {
+    "version": "2.17.0",
+    "alerts": [
+      {
+        "id": "10202",
+        "name": "Absence of Anti-CSRF Tokens",
+        "risk": "Medium (Low)",
+        "count": "5"
+      },
+      {
+        "id": "90004",
+        "name": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "risk": "Low (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10109",
+        "name": "Modern Web Application",
+        "risk": "Informational (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10049",
+        "name": "Non-Storable Content",
+        "risk": "Informational (Medium)",
+        "count": "5"
+      },
+      {
+        "id": "10015",
+        "name": "Re-examine Cache-control Directives",
+        "risk": "Informational (Low)",
+        "count": "5"
+      },
+      {
+        "id": "10049",
+        "name": "Storable and Cacheable Content",
+        "risk": "Informational (Medium)",
+        "count": "3"
+      },
+      {
+        "id": "10049",
+        "name": "Storable but Non-Cacheable Content",
+        "risk": "Informational (Medium)",
+        "count": "1"
+      }
+    ]
+  },
+  "production_audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0,
+    "total": 0
+  }
+}

@@ -28,6 +28,9 @@ test('reviewer transition','PATCH',f'/api/incidents/{incident}/status',[200],{'s
 test('user comments denied','POST',f'/api/incidents/{incident}/comments',[403],{'body':'synthetic'},u)
 test('reviewer comment','POST',f'/api/incidents/{incident}/comments',[201],{'body':'<script>window.synthetic=1</script>'},reviewer)
 test('foreign origin','POST','/api/incidents',[403],{},u,{'Origin':'https://invalid.example'})
+test('missing origin','POST','/api/incidents',[403],{},u,{'Origin':''})
+test('null origin','POST','/api/incidents',[403],{},u,{'Origin':'null'})
+test('simple form content type','POST','/api/incidents',[415],{},u,{'Content-Type':'application/x-www-form-urlencoded'})
 test('middleware bypass','GET','/api/admin/users',[400],headers={'x-middleware-subrequest':'middleware:middleware:middleware:middleware:middleware'})
 page=test('stored text server escaping','GET',f'/reviewer/incidents/{incident}',[200],account=reviewer)
 results.append({'name':'stored script escaped in HTML','pass':'<script>window.synthetic=1</script>' not in page and '&lt;script&gt;' in page})
@@ -53,6 +56,10 @@ test('logout','POST','/api/auth/logout',[200],{},users[49])
 test('replay after logout','GET','/api/incidents',[401],account=users[49])
 for path in ['/.env','/.env.keys','/.git/config']:
  test('secret path '+path,'GET',path,[404])
+test('persist administrator setting','PATCH','/api/admin/settings',[200],{'statusMessage':'Synthetic verification status'},admin)
+first=json.loads(test('audit page one','GET','/api/admin/audit?page=1&limit=25',[200],account=admin))
+second=json.loads(test('audit page two','GET','/api/admin/audit?page=2&limit=25',[200],account=admin))
+results.append({'name':'audit pagination beyond 25 records','pass':len(first.get('records',[]))==25 and len(second.get('records',[]))==25 and not ({r['id'] for r in first['records']} & {r['id'] for r in second['records']})})
 # Inspect rendered native fallback methods, which must not serialize sensitive fields into GET URLs.
 import re
 for path,a in [('/login',None),('/account/password',admin),('/incidents/new',u),('/admin/users',admin),('/admin/settings',admin),(f'/reviewer/incidents/{incident}',reviewer)]:
