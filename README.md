@@ -76,6 +76,8 @@ Passwords are set in the database on its **first start**. Editing `.env.local` d
 
 ## Contributing
 
+- Found a vulnerability? Report it privately: see [SECURITY.md](SECURITY.md).
+
 - Work on a feature branch and open a PR. Never push to `main`.
 - Read [AGENTS.md](AGENTS.md) before writing security-relevant code, and cite requirement IDs (FR, NFR, SR) in commits.
 - New routes or pages go in the entry point inventory in [docs/threat-model.md](docs/threat-model.md) §1.4.

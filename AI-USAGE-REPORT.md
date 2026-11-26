@@ -609,3 +609,8 @@
 - Updated the slice 6, 7, and 8 rows in `docs/plan.md`, set the SDL phase to Release, and added a dated release gate snapshot to `docs/sdl.md` after checking each gate item against the repo, `npm audit`, and CI.
 - Human/security change: replaced a team member's handle in the slice 6 text of `docs/plan.md` with "one team member" (team names appear only on the cover page). Did not change any ASVS or assignment status: the snapshot reports the gaps (SR-7 TODO, non-standard statuses, no `SECURITY.md`) for the team to decide.
 - Not verified: the AI checked statuses and file presence, not the substance of the scan evidence in `docs/evidence/slice7/`.
+
+### Commit docs: add SECURITY.md and the incident response plan (SDL #14)
+#### Liam's Agent
+- Added `SECURITY.md` and replaced the incident response outline in `docs/sdl.md` with a concrete plan using the app's existing controls (EP-15 deactivation, EP-17 reset, session purge, `scripts/live-run.sh`, encrypted `pg_dump`, `docs/deployment.md` redeploy); set SDL #14 to Done.
+- Human decision: reports go privately through the course Canvas group or the instructor, not GitHub private vulnerability reporting, and no team member is named. Added the step to save logs before any restart, because `make down` removes the containers and their logs.

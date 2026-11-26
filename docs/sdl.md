@@ -31,7 +31,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 11 | Verification | Dynamic Program Analysis | DAST against the running Docker app over TLS (AC-3; D-7). | In progress: #63 local public/per-role ZAP passive scans, 151 HTTP checks and triage; broad active/live/browser coverage remains pending | `tests/db/auth.test.ts`, `tests/db/incidents.test.ts`; [Planned misuse cases](use-misuse-cases.md#misuse-cases), `docs/security-testing.md` |
 | 12 | Verification | Fuzz Testing | Fuzz the inputs in scope from #4 question 5. | In progress: deterministic malformed-body/query corpus executed locally | `scripts/verification/probes.py`; `docs/evidence/slice7/` |
 | 13 | Verification | Threat Model and Attack Surface Review | Compare built routes and pages with the threat-model §1.4 inventory; update STRIDE for any change. | In progress: #63 reconciled 19 API files and 13 pages, with guard checks and native-form remediation; final release review pending | `docs/threat-model.md` local remediation review; paging and role regression tests |
-| 14 | Release | Incident Response Plan | Short plan for a vulnerability or breach in this app. | TODO | [Outline below](#incident-response-plan-practice-14) |
+| 14 | Release | Incident Response Plan | Short plan for a vulnerability or breach in this app. | Done | `SECURITY.md`; [Plan below](#incident-response-plan-practice-14) |
 | 15 | Release | Final Security Review | Team-internal review against the #3 gates before submission. | TODO | [Checklist below](#final-security-review-practice-15) |
 | 16 | Release | Release / Archive | Tagged release and archived submission. | In progress: manual refreshed for integrated roles, categories and live deployment; source export prepared; final release pending | `docs/user-manual.md`; `docs/source-packaging.md`; `make package-source` (#55); [Plan below](#release-and-archive-practice-16) |
 | 17 | Response | Execute the Incident Response Plan | Only if an incident happens after release. | N/A: no production release in the course. Applies if the app is deployed to AWS later. | |
@@ -141,17 +141,24 @@ Data sensitivity levels come from `ASSIGNMENT.md` §6.2 and are applied per data
 
 ## Incident response plan (Practice #14)
 
-**Outline; to complete before release.**
+For a vulnerability report (see [SECURITY.md](../SECURITY.md)) or a suspected breach of the app or the live host. Live-host commands run in an SSM session from `~/sec-sys-dev-final-proj`; `scripts/live-run.sh` supplies the dotenvx key from Secrets Manager (`docs/deployment.md`). Set `SECRET_ID=incident-app/dotenvx-key` first.
 
-- **Reporting:** a `SECURITY.md` in the repo saying how to report a vulnerability, and who on the team receives it.
-- **Triage:** rate it with the #3 bug bar.
-- **Containment:**
-  - End affected sessions: one user through EP-15, or all users with a session-table purge.
-  - Deactivate compromised accounts.
-  - Rotate database credentials (secrets store, D-4).
-- **Investigation:** the audit log (who, what, when, target) and application logs.
-- **Recovery:** fix on a branch, run the #3 release gate again, redeploy, and restore the database from backup if data was changed.
-- **Lessons learned:** update the threat model and add a test for the issue.
+1. **Lead:** the team member who receives the report leads and tells the rest of the team. The others help with containment and the fix.
+2. **Triage:** rate it with the bug bar (Practice #3). Any authentication bypass, privilege escalation, SQL injection, or audit log tampering is High. High means contain now; Medium and Low go through a normal fix PR.
+3. **Preserve evidence**, before any restart (`make down` removes the containers and their logs):
+   - App logs: `scripts/live-run.sh docker compose logs --no-color app > ~/incident-app.log` (look for `access.denied`, `auth.login.failed`).
+   - Audit log: `/admin/audit`, or `scripts/live-run.sh docker compose exec db psql -U app_owner -d incidents -c "select * from audit_log order by id desc limit 200"`.
+   - Database: an encrypted `pg_dump -Fc`, as in `scripts/verification/recovery.py`.
+4. **Contain:**
+   - One account: deactivate it on the Users page (EP-15 ends all its sessions) or reset its password (EP-17).
+   - Every session: `scripts/live-run.sh docker compose exec db psql -U app_owner -d incidents -c "DELETE FROM sessions"`.
+   - Take the site offline: `scripts/live-run.sh make down` (keeps the database), or stop the instance.
+   - Secrets: change the database role passwords (`ALTER ROLE ... PASSWORD`), store the new values with `npx dotenvx set -f .env`, and replace the key in Secrets Manager (`docs/deployment.md` 1b).
+5. **Investigate:** use the audit log (actor, time, action, target) and the app logs to find what was touched and when.
+6. **Recover:** fix on a branch, pass the release gate (Practice #3) again, and redeploy (`docs/deployment.md` §6). If data was changed, restore the dump into a new database first and compare.
+7. **Learn:** update the threat model, add a regression test for the issue, and record the AI-assisted fix in `AI-USAGE-REPORT.md`.
+
+After grading, tear the host down (`docs/deployment.md` §7).
 
 ## Post-merge integration verification (2026-11-23)
 
@@ -231,7 +238,7 @@ A check of the repo and CI by the team's AI agent. It is a snapshot, **not** the
 | 6. Every AI-assisted change is in `AI-USAGE-REPORT.md` | Needs team check | Nine non-merge commits since Nov 9 changed no report entry in the same commit (Dependabot, plan status edits, and one `feat(incidents)` commit). Confirm each PR has an entry. |
 | 7. Gitleaks clean; CI rejects Server Actions and a published database port | Met | `gitleaks` job and `scripts/ci-guards.mjs` run in CI and passed at `3b2925c`. |
 
-Also open: no `SECURITY.md` exists yet (#14), no `v1.0.0` tag (#16).
+Also open: no `v1.0.0` tag (#16). `SECURITY.md` and the incident response plan (#14) were added after this snapshot.
 
 ## Release and archive (Practice #16)
 
@@ -263,3 +270,4 @@ Also open: no `SECURITY.md` exists yet (#14), no `v1.0.0` tag (#16).
 
 `docs/evidence/slice7/README.md` and `results.json` record fresh local SAST/DAST, bounded malformed-input probes, 50-user load, encrypted backup/restore, and isolated database-outage recovery. The final workload completed 7,960 actions with zero errors after fixing the adapter conflict retry. All restored table fingerprints matched; audit protections survived restore. New `make verify-*` targets reproduce the scoped runs. SDL #10–13 advance with executed evidence, but broad active/live/browser coverage, independent CodeQL alert review, final requirement acceptance, and release sign-off remain pending. No production deployment or new accepted-risk decision is made here.
 | 2026-11-25 | Phase moved to Release; recorded the release gate status snapshot under Practice #15. |
+| 2026-11-25 | #14 Done: `SECURITY.md` and the incident response plan. |
