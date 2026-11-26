@@ -631,3 +631,8 @@
 #### Liam's Agent
 - Recorded the outcome in `docs/sdl.md`, ticked the checklist, listed the three exceptions, set the gate snapshot to team-confirmed, and set Practice #15 to Done.
 - Human decision: the team reviewed the gate and decided "Pass with exceptions", confirming all gate items including the AI usage report (item 6). The AI proposed the exception wording; the team accepted it.
+
+### Commit docs: record the v1.0.0 release
+#### Liam's Agent
+- Tagged `v1.0.0` (annotated) on `38a12ba` after CI and SAST passed there, and recorded the release, versions, and live URL in `docs/sdl.md` (#16 Done) and slices 7 and 8 as Done in `docs/plan.md`.
+- Human direction: the developer approved tagging after the team's Pass-with-exceptions review. Slice 7's open items are now worded as the exceptions the team accepted, not as unfinished work. The report archive itself is part of the course submission, outside the repo.
