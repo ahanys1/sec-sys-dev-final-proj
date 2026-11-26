@@ -306,3 +306,41 @@ Results will be classified as:
 The team will record the tested application version or commit, environment, test procedure, expected result, observed result, and evidence location. Confirmed vulnerabilities will include remediation references and subsequent retest results.
 
 The traceability matrix will be reviewed against the finalized STRIDE analysis, use/misuse cases, and implemented application before submission. All High-risk threats must have an appropriate verification activity, including threats addressed through dependency scanning or deployment configuration checks rather than application-level SAST or DAST.
+## 5. Findings register and High-threat verification (2026-11-25)
+
+Every finding from the executed SAST, DAST, load, and manual testing, with its disposition. Severity uses the bug bar in `docs/sdl.md` (Practice #3). Raw results: `docs/evidence/slice7/README.md` and `results.json`. Compiled by the team's AI agent from the recorded evidence; the team confirms it in the final security review (Practice #15).
+
+### 5.1 Findings
+
+| ID | Source | Finding | Severity | Disposition | Evidence |
+|---|---|---|---|---|---|
+| F-01 | ZAP spider | Forms fell back to GET, so the login put credentials in the URL (ZAP 10024) | Medium | **Fixed**: all six forms declare POST; 10024 is absent from the final public scan | Evidence README F-01; `zap-public-final` |
+| F-03 | k6 load test | Adapter write conflicts were not retried, so 0.73% of actions failed | Medium | **Fixed** in `f53b465` (`src/lib/tx.ts`); final run had zero errors | `tests/tx.test.ts`; `k6-summary` |
+| F-02 | k6 diagnostic | 50 users behind one IP hit the 20-logins-per-15-minutes limit | Low | **Accepted**: the limit is a control (T-04); shared-NAT users can hit it | Evidence README F-02 |
+| F-04 | Semgrep | Four unverified TLS contexts in Python test clients (not app code) | Low | **Fixed**: verified against the test CA; final Semgrep run has 0 findings | `semgrep` in `results.json` |
+| Z-10202 | ZAP, all roles | Absence of anti-CSRF tokens | Medium (ZAP rating) | **False positive**: writes require a same-origin `Origin`, JSON content type, and a `SameSite=Strict` cookie (ASVS V3.5.1) | `tests/request.test.ts`; cross-origin test in `tests/db/admin-users.test.ts`; HTTP corpus |
+| Z-90004 | ZAP, all roles | Cross-Origin-Embedder-Policy header missing | Low | **Recorded, not fixed**: the app uses no cross-origin-isolated features | Evidence README |
+| Z-10044 | ZAP public | Big redirect body on `/` | Low | **No action**: on the live site the anonymous 307 to `/login` carries only the generic app shell (title and meta description), sent `no-store` | `curl https://107-23-118-127.sslip.io/`, 2026-11-25 |
+| Z-10031 | ZAP user, admin | User-controllable HTML attribute (`categoryId`, `role`) | Informational | **No action**: React-escaped; the server validates UUID and enum values | HTTP corpus escaped-script probes; MAN-07 |
+| Z-info | ZAP | 10109, 10049, 10015, 10111 (app type, caching, auth request) | Informational | **No action**: protected responses are `no-store` by design; static assets are cacheable | `tests/security-headers.test.ts` |
+
+No-finding results on the same date: Semgrep 1.185.0, 0 findings in 171 files; GitHub code scanning (CodeQL), 0 alerts (none open, dismissed, or fixed); `npm audit --omit=dev`, 0; HTTP corpus, 151 of 151 pass; manual tests MAN-01 to MAN-13, all PASS.
+
+**Open High or Critical findings: none. Open Medium findings: none** (two fixed, one false positive).
+
+Limits: ZAP ran passive and spider scans locally, not an active scan and not against the live site. The live site was checked with port, TLS, header, and role tests (`docs/deployment.md` Results).
+
+### 5.2 High threats and their tests
+
+| Threat | Mitigation | Passing tests or checks |
+|---|---|---|
+| T-01 brute force on login | Per-account lockout, per-IP limit, argon2id | `tests/db/auth.test.ts` ("locks an account after repeated failures…", "limits attempts per IP before hashing") |
+| T-19 vertical privilege escalation | Role checked in every handler and page | `tests/db/admin-users.test.ts` (401/403 on every admin route), `tests/db/incidents.test.ts` (role rejections), HTTP corpus role matrix; MAN-01, MAN-05, MAN-10 |
+| T-24 IDOR on incidents | Object-level checks in the query; same 404 for missing and forbidden | `tests/db/incidents.test.ts` ("does not expose another reporter's incidents", "returns 404 when a reporter requests another reporter's incident"); MAN-02 |
+| T-29 stored XSS | React escaping, `dangerouslySetInnerHTML` banned, CSP with nonce | `tests/lint-bans.test.ts`, `tests/security-headers.test.ts`, HTTP corpus escaped-script probes; MAN-07 |
+| T-38 SQL injection | ORM and tagged templates only; raw unsafe APIs banned; UUID and enum schemas | `tests/lint-bans.test.ts`, schema tests in `tests/admin/users.test.ts`, HTTP malformed-input corpus, Semgrep 0; MAN-09 |
+| T-44 framework vulnerability | Pinned versions, Dependabot, `npm audit` gate | `npm audit --omit=dev` 0 in `make check`; Dependabot config (`.github/dependabot.yml`) |
+| T-52 database exposed | No `ports:` on the database; only 80 and 443 open on the host | `tests/ci-guards.test.ts`; live port scans in `docs/deployment.md` Results; MAN-11 |
+| T-53 plaintext credentials | dotenvx-encrypted `.env`, key in Secrets Manager, gitleaks | `gitleaks` CI job; `scripts/live-up.sh` key checks; on-host key checks in `docs/deployment.md` Results; MAN-12 |
+
+All eight High threats have a mitigation and at least one passing test or recorded check.
