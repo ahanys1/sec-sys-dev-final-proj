@@ -28,8 +28,8 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 4 | Incidents and comments | 2 | Done (#54) | #7, #8 |
 | 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; demo script in `docs/user-manual.md` (#55); redeployed 2026-11-25 at `3b2925c` with migration 0003 (#66) | #12, #21 |
-| 7 | Verification | 3, 4, 5 | In progress: local verification done (#63, #65): SAST, per-role ZAP, 151 HTTP checks, 50-user performance, encrypted restore and outage drill, manual MAN tests. Findings register and High-threat test map in `docs/security-testing.md` §5; CodeQL has 0 alerts. Not done: ZAP scan of the live site, application-log tamper test | #13, #14, #16, #17 |
-| 8 | Release | 7 | In progress: manual and source packaging done (#55), OWASP principles document merged (#62). `SECURITY.md` and incident response plan done (SDL #14). Final security review done: Pass with exceptions (SDL #15). Not done: `v1.0.0` tag. Gate status: `docs/sdl.md` | #18 to #20, #22 |
+| 7 | Verification | 3, 4, 5 | Done: local verification (#63, #65): SAST, per-role ZAP, 151 HTTP checks, 50-user performance, encrypted restore and outage drill, manual MAN tests. Findings register and High-threat test map in `docs/security-testing.md` §5; CodeQL has 0 alerts. Accepted as exceptions in the final review: no ZAP scan of the live site; app logs alterable by a host operator (AR-1) | #13, #14, #16, #17 |
+| 8 | Release | 7 | Done: `v1.0.0` tagged on `38a12ba`. Manual and packaging (#55), OWASP principles (#62), `SECURITY.md` and incident response (#68), findings register (#69), final security review Pass with exceptions (#71) | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
 
