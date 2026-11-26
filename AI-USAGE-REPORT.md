@@ -620,3 +620,9 @@
 - Added `docs/security-testing.md` §5: every SAST, DAST, load, and manual finding with severity and disposition, and each High threat mapped to passing tests. Updated release gate items 2 and 5 in `docs/sdl.md` to "Met, pending team confirmation".
 - Checks the agent ran rather than copied: listed GitHub code-scanning alerts (0 open, dismissed, or fixed), and fetched the live site's anonymous redirect to close ZAP 10044 (generic app shell only). Test names in §5.2 were confirmed by searching the test files.
 - Left for the team: confirming the register in the final review (#15). Severities for F-01 and F-03 are the agent's ratings under the bug bar.
+
+### Commit docs: set the remaining assignment rows to Done with evidence
+#### Liam's Agent
+- Set SR-7, SR-10, SR-11, SR-16, FR-11, and FR-12 to Done in `docs/asvs/assignment-mapping.md` with file and test evidence, and updated release gate item 1 in `docs/sdl.md`.
+- Human decision: the developer approved marking these Done after reviewing the evidence. SR-11 and SR-16 keep their limits in the row (app logs alterable by a host operator, AR-1; no live-site ZAP scan).
+- Fix to the AI's first draft: it cited the threat model and OWASP document for the operator limit, but neither states it; the row now cites AR-1 in `docs/stride.md`. Every cited file path was checked to exist.

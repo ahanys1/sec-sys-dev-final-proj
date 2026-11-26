@@ -230,7 +230,7 @@ A check of the repo and CI by the team's AI agent. It is a snapshot, **not** the
 
 | Gate (#3) | Status | Evidence or gap |
 |---|---|---|
-| 1. Every `assignment-mapping.md` row is Done with evidence | Not met | SR-7 is TODO (broader injection testing pending). SR-10, SR-11, FR-12 say "Verified", FR-11 "Implemented", SR-16 "In progress"; their evidence exists, but the status is not "Done" and SR-11 (application-log tamper protection) and SR-16 (live scans) name open work. |
+| 1. Every `assignment-mapping.md` row is Done with evidence | Met, pending team confirmation | All rows Done with evidence (2026-11-25); SR-11 and SR-16 record their limits in the row. |
 | 2. No open High or Critical findings; Mediums fixed or accepted by Nov 24 | Met, pending team confirmation | Findings register in `docs/security-testing.md` §5.1: no open High, Critical, or Medium. CodeQL: 0 code-scanning alerts. |
 | 3. `npm audit` clean for production dependencies | Met | 0 vulnerabilities on 2026-11-25. |
 | 4. Lint, type check, and tests pass in CI on `main` | Met | CI and SAST green at `3b2925c`. |
@@ -272,3 +272,4 @@ Also open: no `v1.0.0` tag (#16). `SECURITY.md` and the incident response plan (
 | 2026-11-25 | Phase moved to Release; recorded the release gate status snapshot under Practice #15. |
 | 2026-11-25 | #14 Done: `SECURITY.md` and the incident response plan. |
 | 2026-11-25 | Findings register and High-threat test map added (`docs/security-testing.md` §5); gate items 2 and 5 updated. |
+| 2026-11-25 | SR-7, SR-10, SR-11, SR-16, FR-11, FR-12 set to Done with evidence; gate item 1 updated. |
