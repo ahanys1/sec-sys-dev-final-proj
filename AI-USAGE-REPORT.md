@@ -599,3 +599,7 @@
 - Assisted in revising the verification paragraph and supporting evidence references in `docs/owasp-design-principles.md`.
 - Assisted in maintaining accurate verification scope and distinguishing completed testing from comprehensive security assurance.
 - The human developer reviewed the documentation changes against the recorded verification results and supporting evidence.
+### Commit docs: record the 2026-11-25 live deploy
+#### Liam's Agent
+- Added one row to the Results table in `docs/deployment.md` for the redeploy of `main` at `3b2925c`, including migration 0003.
+- Human verification: the operator ran the deploy on the host and the `curl` checks, and logged in as each grader account. The row records that as "reported by the operator"; the AI did not access the host.
