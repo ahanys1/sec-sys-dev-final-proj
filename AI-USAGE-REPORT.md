@@ -636,3 +636,8 @@
 #### Liam's Agent
 - Tagged `v1.0.0` (annotated) on `38a12ba` after CI and SAST passed there, and recorded the release, versions, and live URL in `docs/sdl.md` (#16 Done) and slices 7 and 8 as Done in `docs/plan.md`.
 - Human direction: the developer approved tagging after the team's Pass-with-exceptions review. Slice 7's open items are now worded as the exceptions the team accepted, not as unfinished work. The report archive itself is part of the course submission, outside the repo.
+
+### Commit docs: list all team members on the cover page
+#### Liam's Agent
+- Rebuilt the cover page table with all three members, school emails, and responsibilities drafted from each member's merged PRs; fixed the duplicated separator row and trailing newline from #73. Corrected ZAP 10024's reported risk in `docs/security-testing.md` (ZAP said Informational; Medium is the bug-bar rating for F-01).
+- Human input: the developer supplied their school email. The agent did not guess the remaining member's school email or use addresses from commit metadata; it is left as TODO for the team.
