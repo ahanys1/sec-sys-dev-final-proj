@@ -27,9 +27,9 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 3 | Admin accounts | 2 | Done (#51) | #6, #5 |
 | 4 | Incidents and comments | 2 | Done (#54) | #7, #8 |
 | 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
-| 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; demo script in `docs/user-manual.md` (#55) | #12, #21 |
-| 7 | Verification | 3, 4, 5 | In review (#63): fresh local SAST/ZAP, 151 HTTP checks, 50-user performance and encrypted restore/outage evidence; full release/live verification remains separate | #13, #14, #16, #17 |
-| 8 | Release | 7 | In progress: #20 manual/source packaging in review (#55), refreshed for integrated workflows and live deployment; final release blocked on verification | #18 to #20, #22 |
+| 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; demo script in `docs/user-manual.md` (#55); redeployed 2026-11-25 at `3b2925c` with migration 0003 (#66) | #12, #21 |
+| 7 | Verification | 3, 4, 5 | In progress: local verification done (#63, #65): SAST, per-role ZAP, 151 HTTP checks, 50-user performance, encrypted restore and outage drill, manual MAN tests. Not done: ZAP scan of the live site, independent CodeQL alert review, application-log tamper test | #13, #14, #16, #17 |
+| 8 | Release | 7 | In progress: manual and source packaging done (#55), OWASP principles document merged (#62). Not done: `SECURITY.md` and incident response plan (SDL #14), final security review (SDL #15), `v1.0.0` tag. Gate status: `docs/sdl.md` | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
 
@@ -47,7 +47,7 @@ Admin-only audit view with filters and paging, never showing descriptions or sec
 **Verification:** All 56 database tests passed across six test files, and all seven GitHub Actions checks passed. Browser testing confirmed settings persistence, audit history filtering, invalid date-range handling, and non-admin access restrictions (404 for admin pages and 403 for admin APIs). Pagination is implemented but has not yet been manually exercised with more than 25 records.
 
 ### Slice 6: Live deployment (no new entry points)
-Threat-model PR first (re-rate T-06, T-51, T-52, T-63; add an accepted risk scoped to the grading window). One small host running the same compose stack, only 80 and 443 open, no SSH. Grader accounts made with `make create-admin` and the admin screens, credentials shared privately. Demo script in `docs/user-manual.md`. Decided: AWS EC2 (SSM, no SSH), lwiles generates and holds the dotenvx key (Secrets Manager on the host). Open: the domain (default `<elastic-ip>.sslip.io`).
+Threat-model PR first (re-rate T-06, T-51, T-52, T-63; add an accepted risk scoped to the grading window). One small host running the same compose stack, only 80 and 443 open, no SSH. Grader accounts made with `make create-admin` and the admin screens, credentials shared privately. Demo script in `docs/user-manual.md`. Decided: AWS EC2 (SSM, no SSH); one team member generated the dotenvx key, held in Secrets Manager; domain is `<elastic-ip>.sslip.io`. Live and redeployed; see `docs/deployment.md`.
 
 ### Slice 7: Verification
 Run the use and misuse cases, ZAP (baseline and per role, local and live), the MAN-01 to MAN-13 tests, fuzzing of the write endpoints (SDL #12), k6 at 50 users, one backup and restore drill, and the attack-surface review against the built routes (SDL #13). Record results in `docs/security-testing.md`.

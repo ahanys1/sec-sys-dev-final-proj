@@ -603,3 +603,9 @@
 #### Liam's Agent
 - Added one row to the Results table in `docs/deployment.md` for the redeploy of `main` at `3b2925c`, including migration 0003.
 - Human verification: the operator ran the deploy on the host and the `curl` checks, and logged in as each grader account. The row records that as "reported by the operator"; the AI did not access the host.
+
+### Commit docs: update the plan table and record the release gate status
+#### Liam's Agent
+- Updated the slice 6, 7, and 8 rows in `docs/plan.md`, set the SDL phase to Release, and added a dated release gate snapshot to `docs/sdl.md` after checking each gate item against the repo, `npm audit`, and CI.
+- Human/security change: replaced a team member's handle in the slice 6 text of `docs/plan.md` with "one team member" (team names appear only on the cover page). Did not change any ASVS or assignment status: the snapshot reports the gaps (SR-7 TODO, non-standard statuses, no `SECURITY.md`) for the team to decide.
+- Not verified: the AI checked statuses and file presence, not the substance of the scan evidence in `docs/evidence/slice7/`.
