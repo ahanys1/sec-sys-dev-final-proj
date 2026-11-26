@@ -641,4 +641,4 @@
 #### Liam's Agent
 - Rebuilt the cover page table with all three members, school emails, and responsibilities drafted from each member's merged PRs; fixed the duplicated separator row and trailing newline from #73. Corrected ZAP 10024's reported risk in `docs/security-testing.md` (ZAP said Informational; Medium is the bug-bar rating for F-01).
 - Replaced "Documents submitted: TODO" with a table linking each deliverable in the assignment's submission list, at the developer's suggestion; the live site is listed in place of the video.
-- Human input: the developer supplied their school email. The agent did not guess the remaining member's school email or use addresses from commit metadata; it is left as TODO for the team.
+- Human input: the developer supplied their school email. The agent did not guess the remaining member's school email or use addresses from commit metadata; the developer then supplied it.
