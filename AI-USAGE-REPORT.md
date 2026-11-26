@@ -626,3 +626,8 @@
 - Set SR-7, SR-10, SR-11, SR-16, FR-11, and FR-12 to Done in `docs/asvs/assignment-mapping.md` with file and test evidence, and updated release gate item 1 in `docs/sdl.md`.
 - Human decision: the developer approved marking these Done after reviewing the evidence. SR-11 and SR-16 keep their limits in the row (app logs alterable by a host operator, AR-1; no live-site ZAP scan).
 - Fix to the AI's first draft: it cited the threat model and OWASP document for the operator limit, but neither states it; the row now cites AR-1 in `docs/stride.md`. Every cited file path was checked to exist.
+
+### Commit docs: record the final security review (SDL #15)
+#### Liam's Agent
+- Recorded the outcome in `docs/sdl.md`, ticked the checklist, listed the three exceptions, set the gate snapshot to team-confirmed, and set Practice #15 to Done.
+- Human decision: the team reviewed the gate and decided "Pass with exceptions", confirming all gate items including the AI usage report (item 6). The AI proposed the exception wording; the team accepted it.

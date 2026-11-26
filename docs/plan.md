@@ -29,7 +29,7 @@ Status values: Done, In review, In progress, Next, Blocked. "Acceptance criteria
 | 5 | Audit view and settings | 2 | Done (PR #53 merged) | #9, #10 |
 | 6 | Live deployment | 3, 4 (grader accounts need all three roles) | Done (#57, #59 deployed): live at the sslip.io host, checks in `docs/deployment.md`; demo script in `docs/user-manual.md` (#55); redeployed 2026-11-25 at `3b2925c` with migration 0003 (#66) | #12, #21 |
 | 7 | Verification | 3, 4, 5 | In progress: local verification done (#63, #65): SAST, per-role ZAP, 151 HTTP checks, 50-user performance, encrypted restore and outage drill, manual MAN tests. Findings register and High-threat test map in `docs/security-testing.md` §5; CodeQL has 0 alerts. Not done: ZAP scan of the live site, application-log tamper test | #13, #14, #16, #17 |
-| 8 | Release | 7 | In progress: manual and source packaging done (#55), OWASP principles document merged (#62). `SECURITY.md` and incident response plan done (SDL #14). Not done: final security review (SDL #15), `v1.0.0` tag. Gate status: `docs/sdl.md` | #18 to #20, #22 |
+| 8 | Release | 7 | In progress: manual and source packaging done (#55), OWASP principles document merged (#62). `SECURITY.md` and incident response plan done (SDL #14). Final security review done: Pass with exceptions (SDL #15). Not done: `v1.0.0` tag. Gate status: `docs/sdl.md` | #18 to #20, #22 |
 
 Slices 3, 4, and 5 are independent once slice 2 merges and can run in parallel. Everything is due Nov 25.
 

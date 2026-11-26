@@ -32,7 +32,7 @@ Status values: `Done` · `In review` (PR open) · `In progress` · `Next` · `TO
 | 12 | Verification | Fuzz Testing | Fuzz the inputs in scope from #4 question 5. | In progress: deterministic malformed-body/query corpus executed locally | `scripts/verification/probes.py`; `docs/evidence/slice7/` |
 | 13 | Verification | Threat Model and Attack Surface Review | Compare built routes and pages with the threat-model §1.4 inventory; update STRIDE for any change. | In progress: #63 reconciled 19 API files and 13 pages, with guard checks and native-form remediation; final release review pending | `docs/threat-model.md` local remediation review; paging and role regression tests |
 | 14 | Release | Incident Response Plan | Short plan for a vulnerability or breach in this app. | Done | `SECURITY.md`; [Plan below](#incident-response-plan-practice-14) |
-| 15 | Release | Final Security Review | Team-internal review against the #3 gates before submission. | TODO | [Checklist below](#final-security-review-practice-15) |
+| 15 | Release | Final Security Review | Team-internal review against the #3 gates before submission. | Done: Pass with exceptions (2026-11-25) | [Outcome and exceptions below](#final-security-review-practice-15) |
 | 16 | Release | Release / Archive | Tagged release and archived submission. | In progress: manual refreshed for integrated roles, categories and live deployment; source export prepared; final release pending | `docs/user-manual.md`; `docs/source-packaging.md`; `make package-source` (#55); [Plan below](#release-and-archive-practice-16) |
 | 17 | Response | Execute the Incident Response Plan | Only if an incident happens after release. | N/A: no production release in the course. Applies if the app is deployed to AWS later. | |
 
@@ -216,26 +216,31 @@ They do not constitute completion of the full release gate.
 
 ## Final security review (Practice #15)
 
-Before submission, the team checks and records the outcome here (Pass / Pass with exceptions / Fail):
+**Outcome (2026-11-25): Pass with exceptions.** The team confirmed every release gate item.
 
-- [ ] Release gate (#3) met
-- [ ] Threat model and attack surface reviewed against the built system (#13)
-- [ ] SAST, DAST, fuzz, and manual results documented (#10 to #12)
-- [ ] All deliverables present; team names only on the cover page
-- [ ] AI usage report complete
+- [x] Release gate (#3) met
+- [x] Threat model and attack surface reviewed against the built system (#13)
+- [x] SAST, DAST, fuzz, and manual results documented (#10 to #12)
+- [x] All deliverables present; team names only on the cover page
+- [x] AI usage report complete
+
+Exceptions, accepted for release:
+1. Application logs are container logs that an operator with host access could alter (AR-1, SR-11).
+2. ZAP ran passive and spider scans locally only; the live site was not scanned with ZAP. It was checked with port, TLS, header, and role tests (`docs/deployment.md` Results).
+3. Manual tests cover 9 of 13 misuse cases (69%); the other four are covered by automated tests (`docs/security-testing.md` §4 and §5.2).
 
 ### Release gate status (2026-11-25)
 
-A check of the repo and CI by the team's AI agent. It is a snapshot, **not** the team's sign-off; the checklist above stays open until the team records its decision.
+Compiled by the team's AI agent from the repo and CI, then confirmed by the team in the final review above.
 
 | Gate (#3) | Status | Evidence or gap |
 |---|---|---|
-| 1. Every `assignment-mapping.md` row is Done with evidence | Met, pending team confirmation | All rows Done with evidence (2026-11-25); SR-11 and SR-16 record their limits in the row. |
-| 2. No open High or Critical findings; Mediums fixed or accepted by Nov 24 | Met, pending team confirmation | Findings register in `docs/security-testing.md` §5.1: no open High, Critical, or Medium. CodeQL: 0 code-scanning alerts. |
+| 1. Every `assignment-mapping.md` row is Done with evidence | Met (team confirmed) | All rows Done with evidence (2026-11-25); SR-11 and SR-16 record their limits in the row. |
+| 2. No open High or Critical findings; Mediums fixed or accepted by Nov 24 | Met (team confirmed) | Findings register in `docs/security-testing.md` §5.1: no open High, Critical, or Medium. CodeQL: 0 code-scanning alerts. |
 | 3. `npm audit` clean for production dependencies | Met | 0 vulnerabilities on 2026-11-25. |
 | 4. Lint, type check, and tests pass in CI on `main` | Met | CI and SAST green at `3b2925c`. |
-| 5. Every threat at or above the bug bar is mitigated with a passing test | Met, pending team confirmation | All eight High threats mapped to passing tests or checks in `docs/security-testing.md` §5.2. |
-| 6. Every AI-assisted change is in `AI-USAGE-REPORT.md` | Needs team check | Nine non-merge commits since Nov 9 changed no report entry in the same commit (Dependabot, plan status edits, and one `feat(incidents)` commit). Confirm each PR has an entry. |
+| 5. Every threat at or above the bug bar is mitigated with a passing test | Met (team confirmed) | All eight High threats mapped to passing tests or checks in `docs/security-testing.md` §5.2. |
+| 6. Every AI-assisted change is in `AI-USAGE-REPORT.md` | Met (team confirmed) | Nine non-merge commits since Nov 9 changed no report entry in the same commit (Dependabot, plan status edits, and one `feat(incidents)` commit). Confirm each PR has an entry. |
 | 7. Gitleaks clean; CI rejects Server Actions and a published database port | Met | `gitleaks` job and `scripts/ci-guards.mjs` run in CI and passed at `3b2925c`. |
 
 Also open: no `v1.0.0` tag (#16). `SECURITY.md` and the incident response plan (#14) were added after this snapshot.
@@ -273,3 +278,4 @@ Also open: no `v1.0.0` tag (#16). `SECURITY.md` and the incident response plan (
 | 2026-11-25 | #14 Done: `SECURITY.md` and the incident response plan. |
 | 2026-11-25 | Findings register and High-threat test map added (`docs/security-testing.md` §5); gate items 2 and 5 updated. |
 | 2026-11-25 | SR-7, SR-10, SR-11, SR-16, FR-11, FR-12 set to Done with evidence; gate item 1 updated. |
+| 2026-11-25 | #15 Done: final security review recorded as Pass with exceptions; the team confirmed all release gate items. |
