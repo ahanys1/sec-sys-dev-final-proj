@@ -10,25 +10,45 @@ Status: Local SAST, DAST, and integrated verification results are documented in 
 
 ### 1.1 Objective
 
-Static Application Security Testing (SAST) will be performed to identify potentially insecure coding patterns in the incident-reporting application's Next.js and TypeScript source code. The analysis will focus on vulnerabilities identified in the STRIDE threat model, particularly injection, cross-site scripting, improper authorization, sensitive information exposure, and security weaknesses introduced through AI-assisted development.
+Static Application Security Testing (SAST) was performed to identify potentially insecure coding patterns in the incident-reporting application's Next.js and TypeScript source code. The analysis will focus on vulnerabilities identified in the STRIDE threat model, particularly injection, cross-site scripting, improper authorization, sensitive information exposure, and security weaknesses introduced through AI-assisted development.
 
 The purpose of SAST is to identify potential vulnerabilities early, review whether the implementation follows the team's documented security design, and provide evidence for remediation and verification.
 
 ### 1.2 Tools and Methodology
 
-Semgrep is proposed as the primary security-focused static analysis tool. ESLint and TypeScript checks will supplement the analysis, while dependency vulnerability scanning (`npm audit`) and secret scanning will be recorded as separate activities.
+Semgrep was used as the primary security-focused static
+analysis tool, supplemented by GitHub CodeQL analysis,
+ESLint, and TypeScript checks. Dependency vulnerability
+scanning (`npm audit`) and secret scanning were treated
+as separate verification activities.
 
-The team will:
+Local static analysis was performed using Semgrep 1.185.0
+with the following rulesets:
 
-1. Run Semgrep against the application source code using applicable TypeScript, JavaScript, and security rules.
-2. Review findings against the STRIDE threat model and the security requirements.
-3. Inspect relevant source code to distinguish actionable findings from false positives.
-4. Record the affected file, threat reference, severity, remediation, and verification result.
-5. Repeat analysis after remediation and against the integrated application before final submission.
+- `p/typescript`
+- `p/nextjs`
+- `p/owasp-top-ten`
+
+The verification methodology included:
+
+1. Scanning the application source code and supporting
+   verification scripts using applicable security rules.
+2. Reviewing reported findings through source-code
+   inspection.
+3. Identifying actionable findings and determining
+   appropriate remediation.
+4. Repeating static analysis following remediation.
+5. Executing supplementary linting, TypeScript checks,
+   and automated tests.
+6. Reviewing GitHub CI and SAST workflow execution results.
+
+Static analysis results and remediation evidence were
+documented as part of the local Slice 7 verification
+activities (PR #63).
 
 ### 1.3 Threat-Based Analysis Priorities
 
-The following threats will guide source-code inspection:
+The following threats guided the static analysis priorities and source-code inspection:
 
 - **T-29 — Stored XSS:** Identify unsafe HTML rendering and violations of the plain-text rendering design.
 - **T-38 — SQL Injection:** Identify dynamically constructed SQL statements and prohibited unsafe query methods.
@@ -38,44 +58,122 @@ The following threats will guide source-code inspection:
 - **T-53 — Secrets Exposure:** Inspect source and configuration for hardcoded credentials or improperly stored secrets.
 - **T-60 — AI-Generated Code Vulnerabilities:** Review generated code for insecure patterns, omitted controls, and deviations from established design decisions.
 
-Where a required control cannot be reliably verified through static analysis, the corresponding threat will be assigned to automated integration, DAST, or manual security testing.
+Controls that could not be reliably verified through static analysis were addressed through complementary automated integration, DAST, manual security testing, or deployment verification activities where applicable.
 
 ### 1.4 Results and Evidence
 
-*Pending SAST execution.*
+Static application security testing was completed on
+November 25, 2026, as part of the local Slice 7
+verification activities.
 
-The team will record the scanner version, ruleset, scanned commit, findings, false positives, remediation decisions, and subsequent verification results.
+The final verification results correspond to application
+commit `f53b465e1438be8e0381f8ea2904dbe3121c8f17`.
 
+| Verification Activity | Result |
+|---|---|
+| Semgrep version | 1.185.0 |
+| Files scanned | 171 |
+| Final Semgrep findings | 0 |
+| Semgrep execution errors | 0 |
+| CodeQL version | 2.27.5 |
+| CodeQL workflow execution | PASS |
+| ESLint | PASS |
+| TypeScript compilation checks | PASS |
+| Unit tests | 110 passing |
+| PostgreSQL integration tests | 131 passing |
+| Production dependency vulnerabilities | 0 |
+
+Initial Semgrep analysis identified four unverified TLS
+contexts in Python verification clients. These findings
+were associated with the supporting test infrastructure
+rather than the application runtime.
+
+The affected clients were updated to verify TLS
+connections against the isolated Caddy certificate
+authority. Subsequent Semgrep analysis reported zero
+findings and zero execution errors.
+
+GitHub CodeQL analysis was executed successfully through
+SAST workflow run 108 against the tested application
+revision.
+
+Detailed findings, remediation decisions, and threat
+verification references are provided in Section 5.
+
+**Supporting Evidence:**
+
+- [Slice 7 Verification Report](evidence/slice7/README.md)
+- [Sanitized Verification Results](evidence/slice7/results.json)
+- [GitHub CI Run 108](https://github.com/ahanys1/sec-sys-dev-final-proj/actions/runs/45663427395)
+- [GitHub SAST Run 108](https://github.com/ahanys1/sec-sys-dev-final-proj/actions/runs/45663427675)
+- PR #63
+- Section 5.1, Finding F-04
 ### 1.5 Limitations
 
-SAST cannot demonstrate that the application correctly enforces every security requirement at runtime. Missing authorization checks, improper role permissions, session behavior, and database access restrictions may require additional testing. SAST findings will therefore be evaluated alongside DAST, manual security testing, and the final threat model review.
+SAST cannot demonstrate that the application correctly
+enforces every security requirement at runtime. Missing
+authorization checks, improper role permissions, session
+behavior, and database access restrictions may require
+additional verification.
+
+Static analysis coverage is dependent on the selected
+rulesets, scanner capabilities, and tested application
+revision. A scan reporting zero findings does not
+establish the absence of all security vulnerabilities.
+
+CodeQL was executed through GitHub CI because the
+CodeQL CLI was unavailable in the local verification
+environment.
+
+SAST results were therefore evaluated alongside DAST,
+automated integration tests, manual security testing,
+deployment verification, and the STRIDE threat model.
 
 ## 2. Dynamic Application Security Testing (DAST)
 
 ### 2.1 Objective
 
-Dynamic Application Security Testing (DAST) will be performed against the running incident-reporting application to identify security vulnerabilities observable through HTTP requests and responses. Unlike SAST, which examines source code, DAST evaluates the application's behavior from an external perspective.
+Dynamic Application Security Testing (DAST) was performed against the running incident-reporting application to identify security vulnerabilities observable through HTTP requests and responses. Unlike SAST, which examines source code, DAST evaluates the application's behavior from an external perspective.
 
-Testing will focus on the authentication and session mechanisms, access restrictions, input handling, security headers, and API endpoints identified in the STRIDE threat model. DAST will help determine whether the implemented application enforces the security controls specified during the design phase.
+Testing focused on authentication and session mechanisms, access restrictions, input handling, security headers, and API endpoints identified in the STRIDE threat model. DAST provided supporting evidence for evaluating whether the implemented application enforces the security controls specified during the design phase.
 
 ### 2.2 Tools and Methodology
 
-OWASP ZAP is proposed as the primary DAST tool for assessing the running Next.js application. Testing will be performed against an isolated local or staging environment using non-production accounts and test data.
+OWASP ZAP 2.17.0 was used as the primary DAST tool for
+assessing the running Next.js application. Testing was
+conducted against an isolated local Docker deployment
+using synthetic accounts and incident data.
 
-The team will:
+The verification methodology included:
 
-1. Start the application in a controlled testing environment and record the tested version or commit.
-2. Configure ZAP to target only the authorized application address and discover accessible pages and API endpoints.
-3. Perform an initial passive or baseline scan to identify potential information disclosure, insecure HTTP headers, cookie configuration issues, and other observable weaknesses.
-4. Configure authenticated testing for the User, Reviewer, and Admin roles, where supported, to examine protected application functionality.
-5. Perform targeted active scans against appropriate endpoints to investigate injection, cross-site scripting, and other relevant vulnerabilities.
-6. Review findings to distinguish confirmed vulnerabilities from false positives, document remediation, and repeat relevant tests after corrections.
+1. Building and deploying the application in an isolated
+   local testing environment.
+2. Performing public, unauthenticated passive and spider
+   scans against the application.
+3. Performing authenticated passive and spider scans using
+   provisioned sessions for the User, Reviewer, and Admin
+   roles.
+4. Reviewing scanner-generated alerts through source-code
+   inspection and complementary security testing.
+5. Executing deterministic HTTP security probes to evaluate
+   authorization, session invalidation, cross-origin request
+   restrictions, malformed inputs, safe rendering, and
+   native form submission behavior.
+6. Remediating confirmed vulnerabilities and repeating
+   relevant scans and verification activities.
 
-Active scanning will be restricted to the controlled testing environment because automated requests may create, modify, or delete application data.
+Automated HTTP security probes supplemented ZAP scanning
+to evaluate application-specific security controls that
+could not be reliably assessed through passive scanning
+alone.
+
+Testing was restricted to the authorized local verification
+environment. Broad active vulnerability scanning and
+live-host DAST were not performed.
 
 ### 2.3 Threat-Based Testing Priorities
 
-DAST activities will be guided by the STRIDE analysis and its identified entry points:
+DAST and complementary HTTP security testing were guided by the STRIDE analysis and its identified entry points:
 
 - **T-01 — Brute Force:** Evaluate login rate limiting and account lockout behavior using controlled requests.
 - **T-08/T-09 — Session Replay and CSRF:** Examine session invalidation and protection against unauthorized cross-origin state-changing requests.
@@ -87,21 +185,105 @@ DAST activities will be guided by the STRIDE analysis and its identified entry p
 - **T-43 — Middleware Authorization Bypass:** Verify that crafted requests cannot bypass authentication or authorization controls.
 - **T-49 — Security Headers:** Inspect security headers across application pages, API responses, and error responses.
 
-Authorization, session management, and business-logic tests requiring precise role or application-state knowledge will be supplemented by manual and automated integration testing.
+Authorization, session management, and business-logic controls requiring precise role or application-state knowledge were evaluated through complementary HTTP security probes, automated integration tests, and manual security testing where applicable.
 
 ### 2.4 Results and Evidence
 
-*Pending execution of DAST.*
+Dynamic application security testing was completed on
+November 25, 2026, as part of the local Slice 7 verification
+activities.
 
-The team will record the ZAP version, scan configuration, target environment, tested commit, authentication context, identified findings, and verification results. Findings will be cross-referenced with applicable security requirements and STRIDE threat identifiers.
+The final verification results correspond to application
+commit `f53b465e1438be8e0381f8ea2904dbe3121c8f17`.
 
-Evidence will include relevant HTTP requests and responses, scanner reports, remediation references, and repeat-test results where applicable. Sensitive information will be excluded or redacted from submitted evidence.
+| Verification Activity | Result |
+|---|---|
+| OWASP ZAP version | 2.17.0 |
+| Unauthenticated passive/spider scan | Completed |
+| Authenticated User scan | Completed |
+| Authenticated Reviewer scan | Completed |
+| Authenticated Admin scan | Completed |
+| Deterministic HTTP security checks | 151/151 passed |
+| Confirmed native GET fallback vulnerability | Remediated and retested |
+| Broad active scanning | Not performed |
+| Live-host DAST | Not performed |
+
+Initial ZAP scanning identified a native form submission
+weakness in which form fields, including login credentials,
+could be serialized into URL query parameters when
+JavaScript did not intercept the submission.
+
+The affected forms were updated to explicitly declare
+the POST method. Subsequent rendered-HTML verification
+and repeat scans validated the remediation.
+
+Additional scanner-generated alerts were reviewed against
+the implemented security controls and complementary
+verification results.
+
+| ZAP Alert | Reported Risk | Disposition |
+|---|---|---|
+| 10024 - Sensitive information in URL | Medium | Fixed and retested |
+| 10202 - Absence of anti-CSRF tokens | Medium | False positive within the verified JSON API design |
+| 90004 - Missing or invalid COEP header | Low | Recorded; not remediated |
+| 10044 - Big redirect detected | Low | Reviewed; no sensitive disclosure identified |
+| 10031 - User-controllable HTML element attribute | Informational | Reviewed against rendering and server-side validation controls |
+
+The anti-CSRF token alerts were evaluated against the
+application's same-origin request validation, JSON
+content-type enforcement, and SameSite=Strict session
+cookie configuration. Complementary HTTP security probes
+confirmed rejection of foreign, missing, and null origins,
+as well as unsupported form content types.
+
+All 151 deterministic HTTP security checks passed within
+their defined verification scope.
+
+Detailed findings, remediation decisions, and threat
+verification references are provided in Section 5.
+
+**Supporting Evidence:**
+
+- [Slice 7 Verification Report](evidence/slice7/README.md)
+- [Sanitized Verification Results](evidence/slice7/results.json)
+- PR #63
+- Section 5.1, Finding F-01 and ZAP alert dispositions
+- Section 5.2, High-threat verification
+- Section 3.6, Manual Security Testing Results Matrix
 
 ### 2.5 Limitations
 
-DAST evaluates application behavior through exposed interfaces and may not identify vulnerabilities in code paths or components that are not exercised during testing. Automated scanners may also fail to recognize application-specific authorization requirements, business-logic weaknesses, or database-level permission issues.
+DAST evaluates application behavior through exposed
+interfaces and may not identify vulnerabilities in code
+paths or components that are not exercised during testing.
 
-Therefore, DAST results will be supplemented with SAST, automated integration tests, and manual security testing. A scan reporting no vulnerabilities will not be interpreted as proof that the application is secure.
+The following limitations apply to the executed dynamic
+security testing activities:
+
+- ZAP testing was limited to passive and spider scans
+  against an isolated local deployment.
+- Broad active vulnerability scanning was not performed.
+- Authenticated scans relied on explicitly provisioned
+  sessions rather than automated login discovery.
+- Passive spider discovery did not exercise every
+  JavaScript-driven application workflow.
+- Deterministic malformed-input testing was limited to
+  selected inputs and did not constitute exhaustive fuzzing.
+- HTTP security probes did not constitute comprehensive
+  interactive browser testing.
+- Live-host DAST was not performed.
+
+Automated scanners may also fail to recognize
+application-specific authorization requirements,
+business-logic weaknesses, or database-level permission
+issues.
+
+DAST results were therefore evaluated alongside SAST,
+automated integration tests, manual security testing,
+deployment verification, and the STRIDE threat model.
+
+Successful verification of the tested controls does not
+establish the absence of all security vulnerabilities.
 
 ## 3. Manual Security Testing
 
@@ -186,7 +368,7 @@ matrix in Section 3.6.
 
 All 13 test cases passed within their defined testing scope.
 No successful security bypass or unauthorized modification
-was observed during testing.1
+was observed during testing.
 
 ### 3.5 Limitations
 
