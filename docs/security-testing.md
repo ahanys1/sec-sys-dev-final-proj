@@ -224,7 +224,7 @@ verification results.
 
 | ZAP Alert | Reported Risk | Disposition |
 |---|---|---|
-| 10024 - Sensitive information in URL | Medium | Fixed and retested |
+| 10024 - Sensitive information in URL | Informational (rated Medium under the bug bar as F-01) | Fixed and retested |
 | 10202 - Absence of anti-CSRF tokens | Medium | False positive within the verified JSON API design |
 | 90004 - Missing or invalid COEP header | Low | Recorded; not remediated |
 | 10044 - Big redirect detected | Low | Reviewed; no sensitive disclosure identified |
