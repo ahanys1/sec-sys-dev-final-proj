@@ -614,3 +614,9 @@
 #### Liam's Agent
 - Added `SECURITY.md` and replaced the incident response outline in `docs/sdl.md` with a concrete plan using the app's existing controls (EP-15 deactivation, EP-17 reset, session purge, `scripts/live-run.sh`, encrypted `pg_dump`, `docs/deployment.md` redeploy); set SDL #14 to Done.
 - Human decision: reports go privately through the course Canvas group or the instructor, not GitHub private vulnerability reporting, and no team member is named. Added the step to save logs before any restart, because `make down` removes the containers and their logs.
+
+### Commit docs: add the findings register and High-threat test map
+#### Liam's Agent
+- Added `docs/security-testing.md` §5: every SAST, DAST, load, and manual finding with severity and disposition, and each High threat mapped to passing tests. Updated release gate items 2 and 5 in `docs/sdl.md` to "Met, pending team confirmation".
+- Checks the agent ran rather than copied: listed GitHub code-scanning alerts (0 open, dismissed, or fixed), and fetched the live site's anonymous redirect to close ZAP 10044 (generic app shell only). Test names in §5.2 were confirmed by searching the test files.
+- Left for the team: confirming the register in the final review (#15). Severities for F-01 and F-03 are the agent's ratings under the bug bar.

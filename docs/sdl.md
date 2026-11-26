@@ -231,10 +231,10 @@ A check of the repo and CI by the team's AI agent. It is a snapshot, **not** the
 | Gate (#3) | Status | Evidence or gap |
 |---|---|---|
 | 1. Every `assignment-mapping.md` row is Done with evidence | Not met | SR-7 is TODO (broader injection testing pending). SR-10, SR-11, FR-12 say "Verified", FR-11 "Implemented", SR-16 "In progress"; their evidence exists, but the status is not "Done" and SR-11 (application-log tamper protection) and SR-16 (live scans) name open work. |
-| 2. No open High or Critical findings; Mediums fixed or accepted by Nov 24 | Not confirmed | Raw results are in `docs/evidence/slice7/`, but no findings list shows each finding's disposition. CodeQL alert review is pending (#10). |
+| 2. No open High or Critical findings; Mediums fixed or accepted by Nov 24 | Met, pending team confirmation | Findings register in `docs/security-testing.md` §5.1: no open High, Critical, or Medium. CodeQL: 0 code-scanning alerts. |
 | 3. `npm audit` clean for production dependencies | Met | 0 vulnerabilities on 2026-11-25. |
 | 4. Lint, type check, and tests pass in CI on `main` | Met | CI and SAST green at `3b2925c`. |
-| 5. Every threat at or above the bug bar is mitigated with a passing test | Not confirmed | The register marks all High threats mitigated; the threat-to-test traceability in `docs/security-testing.md` is still marked for review before submission. |
+| 5. Every threat at or above the bug bar is mitigated with a passing test | Met, pending team confirmation | All eight High threats mapped to passing tests or checks in `docs/security-testing.md` §5.2. |
 | 6. Every AI-assisted change is in `AI-USAGE-REPORT.md` | Needs team check | Nine non-merge commits since Nov 9 changed no report entry in the same commit (Dependabot, plan status edits, and one `feat(incidents)` commit). Confirm each PR has an entry. |
 | 7. Gitleaks clean; CI rejects Server Actions and a published database port | Met | `gitleaks` job and `scripts/ci-guards.mjs` run in CI and passed at `3b2925c`. |
 
@@ -271,3 +271,4 @@ Also open: no `v1.0.0` tag (#16). `SECURITY.md` and the incident response plan (
 `docs/evidence/slice7/README.md` and `results.json` record fresh local SAST/DAST, bounded malformed-input probes, 50-user load, encrypted backup/restore, and isolated database-outage recovery. The final workload completed 7,960 actions with zero errors after fixing the adapter conflict retry. All restored table fingerprints matched; audit protections survived restore. New `make verify-*` targets reproduce the scoped runs. SDL #10–13 advance with executed evidence, but broad active/live/browser coverage, independent CodeQL alert review, final requirement acceptance, and release sign-off remain pending. No production deployment or new accepted-risk decision is made here.
 | 2026-11-25 | Phase moved to Release; recorded the release gate status snapshot under Practice #15. |
 | 2026-11-25 | #14 Done: `SECURITY.md` and the incident response plan. |
+| 2026-11-25 | Findings register and High-threat test map added (`docs/security-testing.md` §5); gate items 2 and 5 updated. |
